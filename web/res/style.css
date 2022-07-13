@@ -1,0 +1,82 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Noto Sans";
+  font-size: 16pt;
+}
+
+/* Style for the page. */
+.page-header {
+  background: #ffcdd2;
+  top: 0;
+  /* Fixed position - sit on top of the page */
+  position: sticky;
+}
+
+.page-footer {
+  background: #ffcdd2;
+  position: sticky;
+  left: 0;
+  bottom: 0;
+}
+
+/*
+   Style for the dashboard containing all the panels,
+   but also the left and right sidebars.
+*/
+.dashboard {
+  display: flex;
+  flex-direction: column;
+}
+.dashboard-main {
+  background: #dcedc8;
+  /* Take the remaining height */
+  flex-grow: 1;
+  /* Layout the left sidebar, main content and right sidebar */
+  display: flex;
+  flex-direction: row;
+}
+.dashboard-left {
+  width: 25%;
+  background: #e1bee7;
+}
+.dashboard-right {
+  width: 20%;
+  background: #e1bee7;
+}
+.dashboard-middle {
+  /* Take the remaining width */
+  flex-grow: 1;
+}
+
+/*
+   Style for the panels inside the dashboard.
+*/
+p.panel-error {
+  font-size: 80%;
+}
+
+/*
+   Style for the tickers.
+*/
+p.panel-ticker {
+  font-size: 80%;
+}
+
+/*
+   Style for a panel displaying raw text.
+*/
+p.panel-text {
+  font-size: 80%;
+}
+
+/*
+   Style for a panel displaying HTML text.
+*/
+p.panel-html {
+  font-size: 80%;
+}
+

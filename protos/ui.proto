@@ -1,0 +1,55 @@
+// Protocol buffer to stream scientific data.
+syntax = "proto3";
+
+package multiscope;
+
+import "tree.proto";
+
+option go_package = "multiscope/protos/ui_go_proto";
+
+// Worker acknowledgement.
+message WorkerAck {}
+
+// Message to connect to the httpgrpc server.
+message Connect {
+  string scheme = 1;
+  string host = 2;
+}
+
+// Message to pull data from the server.
+message Pull { repeated uint32 actives = 1; }
+
+// Panel registers a panel in the puller webworker.
+message Panel {
+  uint32 id = 1;
+  repeated multiscope.NodePath paths = 2;
+  repeated uint32 transferables = 3;
+  string renderer = 4;
+}
+
+// StyleChange is sent to the workers to change the theme.
+message StyleChange {
+  string theme = 1;
+  string fontFamily = 2;
+  double fontSize = 3;
+}
+
+// ToPuller is the message sent to the puller webworker.
+message ToPuller {
+  oneof query {
+    Pull pull = 1;
+    Panel registerPanel = 2;
+    StyleChange style = 3;
+  }
+}
+
+// Data for a panel.
+message PanelData {
+  repeated multiscope.NodeData nodes = 1;
+}
+
+// Message storing the data to be displayed by the main thread.
+message DisplayData {
+  string err = 1;
+  map<uint32, PanelData> data = 2;
+}

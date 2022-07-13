@@ -1,0 +1,27 @@
+// Protocol buffer to stream scientific data.
+syntax = "proto3";
+
+package multiscope.root;
+
+import "tree.proto";
+
+option go_package = "multiscope/protos/root_go_proto";
+
+// Multiscope metadata (e.g. UI layout).
+message RootInfo { Layout layout = 1; }
+
+// Message to store layout data such as node path to display.
+message Layout {
+  // Paths to be displayed.
+  repeated multiscope.NodePath displayed = 2;
+}
+
+// Sets the layout to display.
+message SetLayoutRequest { Layout layout = 1; }
+
+message SetLayoutResponse {}
+
+service Root {
+  // Set the layout of the UI.
+  rpc SetLayout(SetLayoutRequest) returns (SetLayoutResponse) {}
+}

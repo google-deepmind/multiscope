@@ -1,0 +1,56 @@
+package remote
+
+import (
+	"sync"
+)
+
+// Node is a node in the Multiscope tree.
+type Node interface {
+	// Client returns a client connected to the server owning the node.
+	Client() *Client
+	// Path returns the path of the node in the tree.
+	Path() Path
+}
+
+// ClientNode is a structure with a reference to a path and a client.
+type ClientNode struct {
+	mut         sync.Mutex
+	client      *Client
+	path        Path
+	shouldWrite bool
+}
+
+// NewClientNode returns a new instance of ClientNode which can be used to implement the Node interface.
+func NewClientNode(client *Client, path Path) *ClientNode {
+	node := &ClientNode{client: client, path: path}
+	client.Active().Register(path, node.activeCallback)
+	return node
+}
+
+func (c *ClientNode) activeCallback(path Path, status bool) {
+	c.mut.Lock()
+	defer c.mut.Unlock()
+	c.shouldWrite = status
+}
+
+// ShouldWrite if the data written to this is node is expected somewhere.
+func (c *ClientNode) ShouldWrite() bool {
+	c.mut.Lock()
+	defer c.mut.Unlock()
+	return c.shouldWrite
+}
+
+// Client to which this node is linked to.
+func (c *ClientNode) Client() *Client {
+	return c.client
+}
+
+// Path of the ticker in the tree.
+func (c *ClientNode) Path() Path {
+	return c.path
+}
+
+// WithShouldWrite is a writer with a ShouldWrite method.
+type WithShouldWrite interface {
+	ShouldWrite() bool
+}

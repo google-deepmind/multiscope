@@ -1,0 +1,19 @@
+// Protocol buffer to stream scientific data.
+syntax = "proto3";
+
+package multiscope.table;
+
+option go_package = "multiscope/protos/table_go_proto";
+
+message Point {
+  double x = 1;
+  double y = 2;
+}
+
+message Serie {
+  repeated Point points = 2;
+}
+
+message Series {
+  map<string, Serie> label_to_serie = 1;
+}
