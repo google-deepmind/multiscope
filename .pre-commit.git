@@ -1,0 +1,57 @@
+#!/bin/zsh
+
+GOIMPORTS=`which goimports`
+
+if [[ ! -x "$GOIMPORTS" ]]; then
+  printf "\t\033[41mPlease install goimports\033[0m"
+  exit 1
+fi
+
+find . \( -name "*.go" ! -name "*.pb.go" \) -exec $GOIMPORTS -w {} \;
+
+GOLINTER=`which golangci-lint`
+
+if [[ ! -x "$GOLINTER" ]]; then
+  printf "\t\033[41mPlease install golangci-lint\033[0m"
+  exit 1
+fi
+
+
+FOLDERS=`find . -type f -name "*.go" -exec dirname "{}" \; | awk -F "/" '{print $2}' | awk 'NF' | sort -u`
+
+PASS=true
+
+for FOLDER in $(echo $FOLDERS)
+do
+  ENV="GOOS= GOARCH="
+  if [[ $FOLDER == 'wasm' ]]; then
+	  ENV="GOOS=js GOARCH=wasm"
+  fi
+  CMD="$ENV $GOLINTER run --disable structcheck $FOLDER/..."
+  echo $CMD
+  zsh -c "$CMD"
+  if [[ $? == 0 ]]; then
+    printf "\033[32m$GOLINTER $FOLDER\033[0m \033[0;30m\033[42mpass\033[0m\n"
+  else
+    printf "\033[31m$GOLINTER $FOLDER\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+    PASS=false
+  fi
+  CMD="$ENV go test -vet=all ./$FOLDER/..."
+  echo $CMD
+  zsh -c "$CMD"
+  if [[ $? == 0 ]]; then
+    printf "\033[32mTests $FOLDER\033[0m \033[0;30m\033[42mpass\033[0m\n"
+  else
+    printf "\033[31mTests $FOLDER\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+    PASS=false
+  fi
+done
+
+if ! $PASS; then
+  printf "\033[0;30m\033[41mPRE-COMMIT HOOK FAILED\033[0m\n"
+  exit 1
+else
+  printf "\033[0;30m\033[42mPRE-COMMIT HOOK SUCCEEDED\033[0m\n"
+fi
+
+exit 0
