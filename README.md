@@ -7,7 +7,7 @@
 Open a terminal on the desktop and navigate to the directory where the
 multiscope directory should be created. Clone the git repository:
 ```
-git clone sso://deepmind/multiscope
+git clone -b main sso://deepmind/multiscope
 ```
 
 ### Getting the Tools for Building and Running
@@ -55,5 +55,30 @@ Open the right port on the desktop in chrome to see the UI of multiscope. It
 will look like this:
 <img alt="double" src="doc/double.png" width="400" />
 
+## Development
+
+Please setup a pre-commit hook to catch errors before they are submitted:
+```
+cd .git/hooks
+rm pre-commit.sample
+chmod a+x ../../.pre-commit.git
+ln -s ../../.pre-commit.git pre-commit
+```
+
+You will need to install the following executables for the pre-commit hook to
+work:
+```
+go install golang.org/x/tools/cmd/goimports@latest
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.46.2
+```
+You can test the pre-commit hook by running:
+```
+zsh .pre-commit.git
+```
+from multiscope top folder.
 
 
+To push commits to the main repository:
+```
+git push sso://deepmind/_direct/multiscope
+```

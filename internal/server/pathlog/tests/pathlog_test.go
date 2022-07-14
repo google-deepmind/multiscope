@@ -57,8 +57,9 @@ const activeThreshold = 2 * time.Second
 // Build the tree:
 // |-A
 // |-B
-//   |-C
-//   |-D
+//
+//	|-C
+//	|-D
 func buildTree() core.Root {
 	root := base.NewRoot()
 	root.AddChild("A", base.NewRawWriter(""))

@@ -14,11 +14,12 @@ import (
 
 // EventQueueSize is the maximum number of events that EventQueue will hold.
 // This value is chosen as follows:
-// 1. For gamepad and mouse events, we want a small queue size (close to 1)
-//    since buffering indicates that readers can't keep up with writers.
-// 2. For keyboard events, we want a queue size that is able to keep up with
-//    human typing speed. At 10 characters per second this will keep up with
-//    5 seconds of unprocessed typing.
+//  1. For gamepad and mouse events, we want a small queue size (close to 1)
+//     since buffering indicates that readers can't keep up with writers.
+//  2. For keyboard events, we want a queue size that is able to keep up with
+//     human typing speed. At 10 characters per second this will keep up with
+//     5 seconds of unprocessed typing.
+//
 // In the future we may want separate queue sizes for different cases.
 var EventQueueSize = 50
 
