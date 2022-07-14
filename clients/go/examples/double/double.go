@@ -10,7 +10,7 @@ import (
 
 var (
 	httpPort = flag.Int("http_port", scope.DefaultPort, "http port")
-	local    = flag.Bool("local", false, "open the port to local connection only")
+	local    = flag.Bool("local", true, "open the port to local connection only")
 )
 
 func main() {
