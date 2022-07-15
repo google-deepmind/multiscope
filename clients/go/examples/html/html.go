@@ -13,6 +13,7 @@ var (
 )
 
 func main() {
+	flag.Parse()
 	if err := scope.Start(*httpPort, *local); err != nil {
 		log.Fatal(err)
 	}
