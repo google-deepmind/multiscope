@@ -13,20 +13,26 @@ func init() {
 }
 
 type html struct {
-	el *dom.HTMLParagraphElement
+	el    *dom.HTMLParagraphElement
+	style *dom.HTMLStyleElement
 }
 
 func newHTML(dbd *Dashboard, node *treepb.Node) (*Panel, error) {
 	dsp := &html{}
+	div := dbd.Owner().CreateElement("div").(*dom.HTMLDivElement)
+	div.Class().Add("panel-html")
+	dsp.style = dbd.Owner().CreateElement("style").(*dom.HTMLStyleElement)
+	dsp.style.SetAttribute("scoped", "")
+	div.AppendChild(dsp.style)
 	dsp.el = dbd.Owner().CreateElement("p").(*dom.HTMLParagraphElement)
-	dsp.el.Class().Add("panel-html")
+	div.AppendChild(dsp.el)
 	htmlPath := &treepb.NodePath{
 		Path: append(append([]string{}, node.Path.Path...), mime.NodeNameHTML),
 	}
 	cssPath := &treepb.NodePath{
 		Path: append(append([]string{}, node.Path.Path...), mime.NodeNameCSS),
 	}
-	desc := NewDescriptor(dsp, dsp.el, nil, node.Path, htmlPath, cssPath)
+	desc := NewDescriptor(dsp, div, nil, node.Path, htmlPath, cssPath)
 	return dbd.NewPanel(filepath.Join(node.Path.Path...), desc)
 }
 
@@ -37,7 +43,7 @@ func (dsp *html) Display(data *treepb.NodeData) error {
 	case mime.HTMLText:
 		dsp.el.SetInnerHTML(raw)
 	case mime.CSSText:
-		dsp.el.Style().Set("cssText", raw)
+		dsp.style.SetTextContent(raw)
 	}
 	return nil
 }
