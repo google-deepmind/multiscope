@@ -57,6 +57,13 @@ Open the right port on the desktop in chrome to see the UI of multiscope. It
 will look like this:
 <img alt="double" src="doc/double.png" width="400" />
 
+### Clients
+
+Multiscope provides clients in multiple languages. Current Go, C++ and Python are
+under development. See the appropriate directories under `clients/` for more,
+language specific details.
+
+
 ## Development
 
 Please setup a pre-commit hook to catch errors before they are submitted:

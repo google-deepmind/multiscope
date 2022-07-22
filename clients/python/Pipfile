@@ -1,0 +1,14 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+multiscope-client = {editable = true, path = "."}
+
+[dev-packages]
+black = "*"
+pipenv-setup = {extras = ["black"], version = "*"}
+
+[requires]
+python_version = "3.8"
