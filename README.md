@@ -26,13 +26,15 @@ Mac OS:
 brew install protobuf
 ```
 
-Get the go plugins for the protobuf compiler and update the PATH so they can be found.
+Get the Go plugins for the protobuf compiler and update the PATH so they can be found.
 
 ```
 go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 export PATH="$PATH:$(go env GOPATH)/bin"
 ```
+
+Note that the last line only adds Go to the PATH in the current terminal session. To add it permanently, add the same line to your terminal program's configuration file.
 
 ### Compile the the web assembly code
 
@@ -63,7 +65,6 @@ Multiscope provides clients in multiple languages. Current Go, C++ and Python ar
 under development. See the appropriate directories under `clients/` for more,
 language specific details.
 
-
 ## Development
 
 Please setup a pre-commit hook to catch errors before they are submitted:
@@ -91,3 +92,9 @@ To push commits to the main repository:
 ```
 git push origin HEAD:refs/for/main
 ```
+
+### Troubleshooting
+
+Encountered problems and their solutions:
+
+1. goimports not found, or "Please install goimports" message: you likely don't have Go in your PATH. See above how to set it.
