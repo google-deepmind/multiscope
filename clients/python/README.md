@@ -45,6 +45,19 @@ locally so that import paths are resolved correctly.
 Use absolute imports only. See the source for examples.
 
 
+### Protobufs
+
+The proto files are declared outside of the client directory, in
+`multiscope/protos/`. Python code is generated from these protos into
+the `multiscope/clients/python/multiscope/protos/` directory; when the protos
+change this code needs to be regenerated.
+
+The `multiscope/generate_python_protos.sh` script takes care of this.
+
+protoc version >= 3.19.0 is required. See
+https://grpc.io/docs/protoc-installation/ for installing or updating it.
+
+
 ### Troubleshooting:
 
 Some common sources of problems and what to do with them.

@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 multiscope-client = {editable = true, path = "."}
+protobuf = "*"
 
 [dev-packages]
 black = "*"
