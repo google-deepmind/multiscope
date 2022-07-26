@@ -2,6 +2,8 @@
 
 ## Installation
 
+Instructions to install Multiscope from git.
+
 ### Getting the code
 
 Open a terminal on the desktop and navigate to the directory where the
