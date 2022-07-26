@@ -2,14 +2,14 @@
 
 ## Installation
 
-Instructions to install Multiscope from git.
+Instructions to install Multiscope from git-on-borg and gerrit.
 
 ### Getting the code
 
 Open a terminal on the desktop and navigate to the directory where the
 multiscope directory should be created. Clone the git repository:
 ```
-git clone -b main sso://deepmind/multiscope
+git clone sso://deepmind/multiscope && (cd multiscope && f=`git rev-parse --git-dir`/hooks/commit-msg ; mkdir -p $(dirname $f) ; curl -Lo $f https://gerrit-review.googlesource.com/tools/hooks/commit-msg ; chmod +x $f)
 ```
 
 ### Getting the Tools for Building and Running
