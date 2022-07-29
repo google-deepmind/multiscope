@@ -35,10 +35,11 @@ func main() {
 		log.Fatalf("cannot start http server: %v", err)
 	}
 
-	grpcAddr := toAddr(*grpcPort)
-	if _, err := scope.RunGRPC(srv, &wg, grpcAddr); err != nil {
+	grpcAddr, err := scope.RunGRPC(srv, &wg, toAddr(*grpcPort))
+	if err != nil {
 		log.Fatalf("cannot start gRPC server: %v", err)
 	}
+	fmt.Printf("Running gRPC server on %q\n", grpcAddr.String())
 
 	wg.Wait()
 }

@@ -11,10 +11,10 @@ import (
 )
 
 // RunGRPC starts a server given a root node and an event registry.
-func RunGRPC(srv *treeservice.TreeServer, wg *sync.WaitGroup, addr string) (int, error) {
+func RunGRPC(srv *treeservice.TreeServer, wg *sync.WaitGroup, addr string) (*net.TCPAddr, error) {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		return -1, fmt.Errorf("cannot start testing server: %w", err)
+		return nil, fmt.Errorf("cannot start testing server: %w", err)
 	}
 	serv := grpc.NewServer()
 	srv.RegisterServices(serv)
@@ -25,6 +25,5 @@ func RunGRPC(srv *treeservice.TreeServer, wg *sync.WaitGroup, addr string) (int,
 			log.Fatalf("cannot run GRPC server: %v", err)
 		}
 	}()
-	port := listener.Addr().(*net.TCPAddr).Port
-	return port, nil
+	return listener.Addr().(*net.TCPAddr), nil
 }
