@@ -82,5 +82,5 @@ from multiscope top folder.
 
 To push commits to the main repository:
 ```
-git push sso://deepmind/_direct/multiscope
+git push origin HEAD:refs/for/main
 ```
