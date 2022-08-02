@@ -25,11 +25,11 @@ func StartServer(httpAddr string) (string, error) {
 		return "", err
 	}
 	// Start the GRPC server on a random port.
-	grpcPort, err := scope.RunGRPC(srv, &wg, "localhost:0")
+	addr, err := scope.RunGRPC(srv, &wg, "localhost:0")
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("localhost:%d", grpcPort), nil
+	return fmt.Sprintf("localhost:%d", addr.Port), nil
 }
 
 // Client is a Multiscope client writing data to a Multiscope server.

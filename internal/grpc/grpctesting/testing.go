@@ -45,11 +45,11 @@ func SetupTest(state treeservice.State, services ...treeservice.RegisterServiceC
 	}
 	srv := treeservice.New(registry, state)
 	wg := sync.WaitGroup{}
-	port, err := scope.RunGRPC(srv, &wg, "localhost:0")
+	addr, err := scope.RunGRPC(srv, &wg, "localhost:0")
 	if err != nil {
 		return nil, nil, err
 	}
-	conn, err := client.Connect(fmt.Sprintf("localhost:%d", port))
+	conn, err := client.Connect(fmt.Sprintf("localhost:%d", addr.Port))
 	if err != nil {
 		return nil, nil, err
 	}

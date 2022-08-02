@@ -17,13 +17,13 @@ import (
 func Start() (*remote.Client, error) {
 	srv := scope.NewServer()
 	wg := sync.WaitGroup{}
-	grpcPort, err := scope.RunGRPC(srv, &wg, "localhost:0")
+	addr, err := scope.RunGRPC(srv, &wg, "localhost:0")
 	if err != nil {
 		return nil, err
 	}
 	ctx := context.Background()
 	// Connect the client.
-	return remote.Connect(ctx, fmt.Sprintf("localhost:%d", grpcPort))
+	return remote.Connect(ctx, fmt.Sprintf("localhost:%d", addr.Port))
 }
 
 // ForceActive forces a path and its children to be active by requesting data from them.
