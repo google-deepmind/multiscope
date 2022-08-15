@@ -56,7 +56,9 @@ func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 	conn := httpgrpc.Connect(ui.addr.Scheme, ui.addr.Host)
 	ui.treeClient = treepb.NewTreeClient(conn)
 	ui.puller = newPuller(ui, puller)
-	ui.dbd = newDashboard(ui)
+	if ui.dbd, err = newDashboard(ui); err != nil {
+		ui.DisplayErr(err)
+	}
 	if err := ui.puller.registerPanel(ui.dbd.descriptor()); err != nil {
 		ui.DisplayErr(err)
 	}

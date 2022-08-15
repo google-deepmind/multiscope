@@ -7,6 +7,7 @@ import (
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
 
+	"github.com/pkg/errors"
 	"honnef.co/go/js/dom/v2"
 )
 
@@ -18,14 +19,17 @@ type Dashboard struct {
 	root   dom.Node
 }
 
-func newDashboard(ui *UI) *Dashboard {
-	dbd := &Dashboard{
+func newDashboard(ui *UI) (*Dashboard, error) {
+	const dashboardClass = "container__middle"
+	elements := ui.Owner().GetElementsByClassName(dashboardClass)
+	if len(elements) != 1 {
+		return nil, errors.Errorf("wrong number of elements of class %q: got %d but want 1", dashboardClass, len(elements))
+	}
+	return &Dashboard{
 		ui:     ui,
 		panels: make(map[PanelID]*Panel),
-		root:   ui.Owner().CreateElement("div"),
-	}
-	ui.Owner().Body().AppendChild(dbd.root)
-	return dbd
+		root:   elements[0],
+	}, nil
 }
 
 func (dbd *Dashboard) descriptor() *Descriptor {
@@ -60,10 +64,6 @@ func (dbd *Dashboard) updateLayout(layout *rootpb.Layout) error {
 }
 
 func (dbd *Dashboard) refresh(data *treepb.NodeData) error {
-	if len(dbd.root.ChildNodes()) > 0 {
-		return nil
-	}
-
 	pb := data.GetPb()
 	if pb == nil {
 		return nil

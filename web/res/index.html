@@ -2,8 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <link href='https://fonts.googleapis.com/css?family=Noto Sans' rel='stylesheet'>
-    <link rel="stylesheet" href="res/style.css">
+    <link
+      href="https://fonts.googleapis.com/css?family=Noto Sans"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="res/style.css" />
+    <link rel="stylesheet" href="res/layout.css" />
     <script src="res/wasm_exec.js"></script>
     <script>
       const go = new Go();
@@ -15,4 +19,20 @@
       });
     </script>
   </head>
+  <body>
+    <div class="container">
+      <header></header>
+      <main class="container__main">
+        <!-- Left sidebar -->
+        <aside class="container__left"></aside>
+
+        <!-- Main content -->
+        <div class="container__middle"></div>
+
+        <!-- Right sidebar -->
+        <nav class="container__right"></nav>
+      </main>
+      <footer></footer>
+    </div>
+  </body>
 </html>
