@@ -91,4 +91,5 @@ p.panel-html {
   padding: 0px 0px;
   line-height: 0.5em;
   font-size: 140%;
+  user-select: none;
 }

@@ -154,3 +154,8 @@ func (ui *UI) MainLoop() {
 	ui.window.RequestAnimationFrame(ui.animationFrame)
 	<-make(chan bool)
 }
+
+// TreeClient returns the connection to the server.
+func (ui *UI) TreeClient() treepb.TreeClient {
+	return ui.treeClient
+}

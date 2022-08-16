@@ -1,6 +1,8 @@
 package uimain
 
 import (
+	"multiscope/wasm/tree"
+
 	"github.com/pkg/errors"
 	"honnef.co/go/js/dom/v2"
 )
@@ -8,6 +10,7 @@ import (
 type LeftBar struct {
 	ui   *UI
 	root dom.HTMLElement
+	tree *tree.Updater
 }
 
 const (
@@ -25,6 +28,11 @@ func newLeftBar(ui *UI) (*LeftBar, error) {
 		ui:   ui,
 		root: elements[0].(dom.HTMLElement),
 	}
+	var err error
+	if l.tree, err = tree.NewUpdater(ui); err != nil {
+		return l, err
+	}
+	l.root.AppendChild(l.tree.Root())
 	if l.isVisible() {
 		l.show()
 	} else {

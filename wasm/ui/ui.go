@@ -21,6 +21,9 @@ type (
 
 		// Settings returns the global settings.
 		Settings() *settings.Settings
+
+		// TreeClient returns the connection to the server.
+		TreeClient() treepb.TreeClient
 	}
 
 	// Dashboard displaying all the panels.

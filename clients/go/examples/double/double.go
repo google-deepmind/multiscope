@@ -23,11 +23,11 @@ func main() {
 		log.Fatal(err)
 	}
 	// Create two writers. Each writer will have its own plot.
-	wSin, err := scope.NewScalarWriter("Sin", nil)
+	wSin, err := scope.NewScalarWriter("sin", ticker.Path())
 	if err != nil {
 		log.Fatal(err)
 	}
-	wCos, err := scope.NewScalarWriter("Cos", nil)
+	wCos, err := scope.NewScalarWriter("cos", ticker.Path())
 	if err != nil {
 		log.Fatal(err)
 	}
