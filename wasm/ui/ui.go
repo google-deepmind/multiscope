@@ -29,7 +29,7 @@ type UI struct {
 	style      *style.Style
 	settings   *settings.Settings
 	puller     *puller
-	dbd        *Dashboard
+	layout     *Layout
 
 	lastError string
 }
@@ -45,6 +45,7 @@ func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 	ui.style, err = ui.newDefaultStyle()
 	if err != nil {
 		ui.DisplayErr(err)
+		return ui
 	}
 
 	injector.Run(ui)
@@ -56,11 +57,13 @@ func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 	conn := httpgrpc.Connect(ui.addr.Scheme, ui.addr.Host)
 	ui.treeClient = treepb.NewTreeClient(conn)
 	ui.puller = newPuller(ui, puller)
-	if ui.dbd, err = newDashboard(ui); err != nil {
+	if ui.layout, err = newLayout(ui); err != nil {
 		ui.DisplayErr(err)
+		return ui
 	}
-	if err := ui.puller.registerPanel(ui.dbd.descriptor()); err != nil {
+	if err := ui.puller.registerPanel(ui.layout.Dashboard().descriptor()); err != nil {
 		ui.DisplayErr(err)
+		return ui
 	}
 	return ui
 }
@@ -95,11 +98,6 @@ func (ui *UI) newDefaultStyle() (*style.Style, error) {
 	return s, nil
 }
 
-// Dashboard returns the node containing all the panels.
-func (ui *UI) Dashboard() *Dashboard {
-	return ui.dbd
-}
-
 // Owner returns the owner of the DOM tree of the UI.
 func (ui *UI) Owner() dom.HTMLDocument {
 	return ui.window.Document().(dom.HTMLDocument)
@@ -120,6 +118,16 @@ func (ui *UI) Style() *style.Style {
 	return ui.style
 }
 
+// Layout returns the overall page layout.
+func (ui *UI) Layout() *Layout {
+	return ui.layout
+}
+
+// Settings returns Multiscope settings.
+func (ui *UI) Settings() *settings.Settings {
+	return ui.settings
+}
+
 func (ui *UI) renderFrame() error {
 	displayData := ui.puller.lastDisplayData()
 	if displayData == nil {
@@ -128,7 +136,7 @@ func (ui *UI) renderFrame() error {
 	if displayData.Err != "" {
 		return fmt.Errorf("display data error: %v", displayData.Err)
 	}
-	ui.dbd.render(displayData)
+	ui.layout.Dashboard().render(displayData)
 	return nil
 }
 

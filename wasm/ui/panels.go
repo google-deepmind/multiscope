@@ -12,8 +12,6 @@ import (
 	"honnef.co/go/js/dom/v2"
 )
 
-const UnsupportedMIME = "unsupported"
-
 type (
 	// PanelID of a panel for worker communication.
 	PanelID uint64
@@ -107,7 +105,7 @@ func (dsc *Descriptor) Dashboard() *Dashboard {
 func (dbd *Dashboard) buildPanel(node *treepb.Node) (Panel, error) {
 	builder := mimeToDisplay[node.Mime]
 	if builder == nil {
-		builder = mimeToDisplay[UnsupportedMIME]
+		builder = mimeToDisplay[mime.Unsupported]
 	}
 	if builder == nil {
 		return nil, errors.Errorf("MIME type %q not supported", mime.Unsupported)
