@@ -1,14 +1,18 @@
 package ui
 
 import (
+	"multiscope/internal/mime"
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/renderers"
 	"syscall/js"
 
+	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 	"honnef.co/go/js/dom/v2"
 )
+
+const UnsupportedMIME = "unsupported"
 
 type (
 	// PanelID of a panel for worker communication.
@@ -19,21 +23,38 @@ type (
 		AppendChild(dom.Node)
 	}
 
-	// Displayer on the display.
+	// Displayer display the content inside a panel.
+	// A displayer may need to send data to a renderer in a work unit
+	// to process the data to display.
 	Displayer interface {
+		// Display the latest data.
 		Display(*treepb.NodeData) error
-	}
 
-	// DisplayerBuilder builds a display given a node in the tree.
-	DisplayerBuilder func(dbd *Dashboard, node *treepb.Node) (*Panel, error)
+		// Root returns the root element of the display.
+		Root() dom.HTMLElement
+	}
 
 	// Descriptor stores how to get and process data for a panel.
 	Descriptor struct {
+		dbd           *Dashboard
 		pb            uipb.Panel
 		transferables map[string]any
 		disp          Displayer
-		root          dom.HTMLElement
 	}
+
+	// Panel is a display within the dashboard.
+	Panel interface {
+		// Root returns the root node of a panel.
+		// This node is added to the dashboard node when a panel is registered.
+		Root() dom.Node
+		// Desc returns the panel descriptor.
+		Desc() *Descriptor
+		// Display the latest data.
+		Display(node *treepb.NodeData)
+	}
+
+	// DisplayerBuilder builds a display given a node in the tree.
+	DisplayerBuilder func(dbd *Dashboard, node *treepb.Node) (Panel, error)
 )
 
 var (
@@ -60,12 +81,12 @@ func rootDescriptor() *Descriptor {
 }
 
 // NewDescriptor returns a new info descriptor to assign to a panel.
-func NewDescriptor(disp Displayer, root dom.HTMLElement, renderer renderers.Newer, paths ...*treepb.NodePath) *Descriptor {
+func (dbd *Dashboard) NewDescriptor(disp Displayer, renderer renderers.Newer, paths ...*treepb.NodePath) *Descriptor {
 	id := nextID
 	nextID++
 	return &Descriptor{
+		dbd:  dbd,
 		disp: disp,
-		root: root,
 		pb: uipb.Panel{
 			Id:       id,
 			Paths:    paths,
@@ -74,27 +95,40 @@ func NewDescriptor(disp Displayer, root dom.HTMLElement, renderer renderers.Newe
 }
 
 // AddTransferable adds a key,value pair to transfer to the renderer worker.
-func (inf *Descriptor) AddTransferable(name string, v js.Value) {
-	if inf.transferables == nil {
-		inf.transferables = make(map[string]any)
+func (dsc *Descriptor) AddTransferable(name string, v js.Value) {
+	if dsc.transferables == nil {
+		dsc.transferables = make(map[string]any)
 	}
-	inf.transferables[name] = v
+	dsc.transferables[name] = v
 }
 
 // ID returns the ID of the panel.
-func (inf *Descriptor) ID() PanelID {
-	return PanelID(inf.pb.Id)
+func (dsc *Descriptor) ID() PanelID {
+	return PanelID(dsc.pb.Id)
 }
 
 // PanelPB returns the list of path necessary for the panel.
-func (inf *Descriptor) PanelPB() (*uipb.Panel, map[string]any) {
-	return &inf.pb, inf.transferables
+func (dsc *Descriptor) PanelPB() (*uipb.Panel, map[string]any) {
+	return &dsc.pb, dsc.transferables
 }
 
-func (dbd *Dashboard) buildPanel(node *treepb.Node) (*Panel, error) {
+// Dashboard returns the owner of the descriptor.
+func (dsc *Descriptor) Dashboard() *Dashboard {
+	return dsc.dbd
+}
+
+// Displayer returns the displayer owning this descriptor.
+func (dsc *Descriptor) Displayer() Displayer {
+	return dsc.disp
+}
+
+func (dbd *Dashboard) buildPanel(node *treepb.Node) (Panel, error) {
 	builder := mimeToDisplay[node.Mime]
 	if builder == nil {
-		return newUnsupported(dbd, node)
+		builder = mimeToDisplay[UnsupportedMIME]
+	}
+	if builder == nil {
+		return nil, errors.Errorf("MIME type %q not supported", mime.Unsupported)
 	}
 	return builder(dbd, node)
 }

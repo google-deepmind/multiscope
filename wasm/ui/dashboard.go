@@ -15,7 +15,7 @@ import (
 // them in the main UI thread.
 type Dashboard struct {
 	ui     *UI
-	panels map[PanelID]*Panel
+	panels map[PanelID]Panel
 	root   dom.Node
 }
 
@@ -27,7 +27,7 @@ func newDashboard(ui *UI) (*Dashboard, error) {
 	}
 	return &Dashboard{
 		ui:     ui,
-		panels: make(map[PanelID]*Panel),
+		panels: make(map[PanelID]Panel),
 		root:   elements[0],
 	}, nil
 }
@@ -46,6 +46,11 @@ func (dbd *Dashboard) NewErrorElement() dom.HTMLElement {
 // Owner returns the owner of the DOM tree of the UI.
 func (dbd *Dashboard) Owner() dom.HTMLDocument {
 	return dbd.ui.Owner()
+}
+
+// Root returns the root node of the dashboard.
+func (dbd *Dashboard) Root() dom.Node {
+	return dbd.root
 }
 
 func (dbd *Dashboard) updateLayout(layout *rootpb.Layout) error {
@@ -100,4 +105,12 @@ func (dbd *Dashboard) render(displayData *uipb.DisplayData) {
 			panel.Display(node)
 		}
 	}
+}
+
+// RegisterPanel adds a new panel to display to the dashboard.
+func (dbd *Dashboard) RegisterPanel(pnl Panel) error {
+	dbd.Root().AppendChild(pnl.Root())
+	desc := pnl.Desc()
+	dbd.panels[desc.ID()] = pnl
+	return dbd.ui.puller.registerPanel(desc)
 }

@@ -15,6 +15,7 @@ import (
 	"honnef.co/go/js/dom/v2"
 
 	_ "multiscope/wasm/injector/switchtheme"
+	_ "multiscope/wasm/panels"
 )
 
 func grpcAddr() *pb.Connect {
