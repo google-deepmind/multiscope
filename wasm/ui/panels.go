@@ -23,23 +23,11 @@ type (
 		AppendChild(dom.Node)
 	}
 
-	// Displayer display the content inside a panel.
-	// A displayer may need to send data to a renderer in a work unit
-	// to process the data to display.
-	Displayer interface {
-		// Display the latest data.
-		Display(*treepb.NodeData) error
-
-		// Root returns the root element of the display.
-		Root() dom.HTMLElement
-	}
-
 	// Descriptor stores how to get and process data for a panel.
 	Descriptor struct {
 		dbd           *Dashboard
 		pb            uipb.Panel
 		transferables map[string]any
-		disp          Displayer
 	}
 
 	// Panel is a display within the dashboard.
@@ -81,12 +69,11 @@ func rootDescriptor() *Descriptor {
 }
 
 // NewDescriptor returns a new info descriptor to assign to a panel.
-func (dbd *Dashboard) NewDescriptor(disp Displayer, renderer renderers.Newer, paths ...*treepb.NodePath) *Descriptor {
+func (dbd *Dashboard) NewDescriptor(renderer renderers.Newer, paths ...*treepb.NodePath) *Descriptor {
 	id := nextID
 	nextID++
 	return &Descriptor{
-		dbd:  dbd,
-		disp: disp,
+		dbd: dbd,
 		pb: uipb.Panel{
 			Id:       id,
 			Paths:    paths,
@@ -115,11 +102,6 @@ func (dsc *Descriptor) PanelPB() (*uipb.Panel, map[string]any) {
 // Dashboard returns the owner of the descriptor.
 func (dsc *Descriptor) Dashboard() *Dashboard {
 	return dsc.dbd
-}
-
-// Displayer returns the displayer owning this descriptor.
-func (dsc *Descriptor) Displayer() Displayer {
-	return dsc.disp
 }
 
 func (dbd *Dashboard) buildPanel(node *treepb.Node) (Panel, error) {

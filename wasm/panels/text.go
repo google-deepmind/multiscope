@@ -23,8 +23,8 @@ func newText(dbd *ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 		root: dbd.Owner().CreateElement("p").(*dom.HTMLParagraphElement),
 	}
 	dsp.root.Class().Add("panel-text")
-	desc := dbd.NewDescriptor(dsp, nil, node.Path)
-	return NewPanel(filepath.Join(node.Path.Path...), desc)
+	desc := dbd.NewDescriptor(nil, node.Path)
+	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
 }
 
 // Display the latest data.

@@ -8,28 +8,43 @@ import (
 	"honnef.co/go/js/dom/v2"
 )
 
-// Panel is the window containing the display and some additional info.
-// It also manages the interaction with the user.
-type Panel struct {
-	root dom.Element
-	desc *ui.Descriptor
+type (
 
-	// err is a paragraph to display an error.
-	err dom.HTMLElement
+	// Displayer display the content inside a panel.
+	// A displayer may need to send data to a renderer in a work unit
+	// to process the data to display.
+	Displayer interface {
+		// Display the latest data.
+		Display(*treepb.NodeData) error
 
-	lastErr string
-}
+		// Root returns the root element of the display.
+		Root() dom.HTMLElement
+	}
+
+	// Panel is the window containing the display and some additional info.
+	// It also manages the interaction with the user.
+	Panel struct {
+		desc *ui.Descriptor
+		dsp  Displayer
+
+		root dom.Element
+		// err is a paragraph to display an error.
+		err     dom.HTMLElement
+		lastErr string
+	}
+)
 
 // NewPanel returns a new container panel to show a displayer on the UI.
-func NewPanel(title string, desc *ui.Descriptor) (ui.Panel, error) {
+func NewPanel(title string, desc *ui.Descriptor, dsp Displayer) (ui.Panel, error) {
 	dbd := desc.Dashboard()
 	pnl := &Panel{
 		desc: desc,
+		dsp:  dsp,
 		root: dbd.Owner().CreateElement("div"),
 	}
 	pnl.appendTitle(title)
 	pnl.appendErr()
-	pnl.root.AppendChild(desc.Displayer().Root())
+	pnl.root.AppendChild(dsp.Root())
 	pnl.refreshErrorPanel("")
 	return pnl, dbd.RegisterPanel(pnl)
 }
@@ -51,7 +66,7 @@ const errorMessage = `
 `
 
 func (pnl *Panel) refreshErrorPanel(err string) {
-	child := pnl.desc.Displayer().Root()
+	child := pnl.dsp.Root()
 	pnl.lastErr = err
 	if pnl.lastErr == "" {
 		pnl.err.Style().SetProperty("display", "none", "")
@@ -87,7 +102,7 @@ func (pnl *Panel) Display(data *treepb.NodeData) {
 	if pnl.updateError(data.Error) {
 		return
 	}
-	if err := pnl.desc.Displayer().Display(data); err != nil {
+	if err := pnl.dsp.Display(data); err != nil {
 		pnl.updateError(err.Error())
 	}
 }

@@ -29,8 +29,8 @@ func newUnsupported(dbd *ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 		root: dbd.NewErrorElement(),
 	}
 	dsp.root.SetInnerHTML(fmt.Sprintf(unsupportedHTML, node.Mime))
-	desc := dbd.NewDescriptor(dsp, nil, node.Path)
-	return NewPanel(filepath.Join(node.Path.Path...), desc)
+	desc := dbd.NewDescriptor(nil, node.Path)
+	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
 }
 
 // Display the latest data.
