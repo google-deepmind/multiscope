@@ -1,4 +1,4 @@
-package ui
+package uimain
 
 import (
 	"github.com/pkg/errors"

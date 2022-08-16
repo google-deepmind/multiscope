@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	ui.RegisterDisplayPB(&tickerpb.TickerData{}, newTicker)
+	ui.RegisterBuilderPB(&tickerpb.TickerData{}, newTicker)
 }
 
 type ticker struct {
@@ -19,9 +19,9 @@ type ticker struct {
 	root *dom.HTMLParagraphElement
 }
 
-func newTicker(dbd *ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
+func newTicker(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp := &ticker{}
-	dsp.root = dbd.Owner().CreateElement("p").(*dom.HTMLParagraphElement)
+	dsp.root = dbd.UI().Owner().CreateElement("p").(*dom.HTMLParagraphElement)
 	dsp.root.Class().Add("panel-ticker")
 	desc := dbd.NewDescriptor(nil, node.Path)
 	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)

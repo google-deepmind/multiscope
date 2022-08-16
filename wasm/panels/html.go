@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	ui.RegisterDisplay(mime.HTMLParent, newHTML)
+	ui.RegisterBuilder(mime.HTMLParent, newHTML)
 }
 
 type html struct {
@@ -20,15 +20,16 @@ type html struct {
 	style *dom.HTMLStyleElement
 }
 
-func newHTML(dbd *ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
+func newHTML(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
+	owner := dbd.UI().Owner()
 	dsp := &html{
-		root: dbd.Owner().CreateElement("div").(*dom.HTMLDivElement),
+		root: owner.CreateElement("div").(*dom.HTMLDivElement),
 	}
 	dsp.root.Class().Add("panel-html")
-	dsp.style = dbd.Owner().CreateElement("style").(*dom.HTMLStyleElement)
+	dsp.style = owner.CreateElement("style").(*dom.HTMLStyleElement)
 	dsp.style.SetAttribute("scoped", "")
 	dsp.root.AppendChild(dsp.style)
-	dsp.el = dbd.Owner().CreateElement("p").(*dom.HTMLParagraphElement)
+	dsp.el = owner.CreateElement("p").(*dom.HTMLParagraphElement)
 	dsp.root.AppendChild(dsp.el)
 	htmlPath := &treepb.NodePath{
 		Path: append(append([]string{}, node.Path.Path...), mime.NodeNameHTML),

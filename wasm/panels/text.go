@@ -11,16 +11,16 @@ import (
 )
 
 func init() {
-	ui.RegisterDisplay(mime.PlainText, newText)
+	ui.RegisterBuilder(mime.PlainText, newText)
 }
 
 type text struct {
 	root *dom.HTMLParagraphElement
 }
 
-func newText(dbd *ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
+func newText(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp := &text{
-		root: dbd.Owner().CreateElement("p").(*dom.HTMLParagraphElement),
+		root: dbd.UI().Owner().CreateElement("p").(*dom.HTMLParagraphElement),
 	}
 	dsp.root.Class().Add("panel-text")
 	desc := dbd.NewDescriptor(nil, node.Path)

@@ -1,4 +1,4 @@
-package ui
+package uimain
 
 // Layout owns the different components of a page.
 type Layout struct {

@@ -1,11 +1,13 @@
-package ui
+package uimain
 
 import (
 	"context"
 	"fmt"
+	"multiscope/internal/mime"
 	rootpb "multiscope/protos/root_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
+	"multiscope/wasm/ui"
 
 	"github.com/pkg/errors"
 	"honnef.co/go/js/dom/v2"
@@ -15,19 +17,19 @@ import (
 // them in the main UI thread.
 type Dashboard struct {
 	ui     *UI
-	panels map[PanelID]Panel
+	panels map[ui.PanelID]ui.Panel
 	root   dom.Node
 }
 
-func newDashboard(ui *UI) (*Dashboard, error) {
+func newDashboard(main *UI) (*Dashboard, error) {
 	const dashboardClass = "container__middle"
-	elements := ui.Owner().GetElementsByClassName(dashboardClass)
+	elements := main.Owner().GetElementsByClassName(dashboardClass)
 	if len(elements) != 1 {
 		return nil, errors.Errorf("wrong number of elements of class %q: got %d but want 1", dashboardClass, len(elements))
 	}
 	return &Dashboard{
-		ui:     ui,
-		panels: make(map[PanelID]Panel),
+		ui:     main,
+		panels: make(map[ui.PanelID]ui.Panel),
 		root:   elements[0],
 	}, nil
 }
@@ -36,16 +38,9 @@ func (dbd *Dashboard) descriptor() *Descriptor {
 	return rootDescriptor()
 }
 
-// NewErrorElement returns an element to display an error.
-func (dbd *Dashboard) NewErrorElement() dom.HTMLElement {
-	el := dbd.ui.Owner().CreateElement("p").(dom.HTMLElement)
-	el.Class().Add("panel-error")
-	return el
-}
-
-// Owner returns the owner of the DOM tree of the UI.
-func (dbd *Dashboard) Owner() dom.HTMLDocument {
-	return dbd.ui.Owner()
+// UI returns the UI instance owning the dashboard.
+func (dbd *Dashboard) UI() ui.UI {
+	return dbd.ui
 }
 
 // Root returns the root node of the dashboard.
@@ -98,7 +93,7 @@ func (dbd *Dashboard) render(displayData *uipb.DisplayData) {
 				}
 				continue
 			}
-			panel := dbd.panels[PanelID(id)]
+			panel := dbd.panels[ui.PanelID(id)]
 			if panel == nil {
 				continue
 			}
@@ -108,9 +103,20 @@ func (dbd *Dashboard) render(displayData *uipb.DisplayData) {
 }
 
 // RegisterPanel adds a new panel to display to the dashboard.
-func (dbd *Dashboard) RegisterPanel(pnl Panel) error {
+func (dbd *Dashboard) RegisterPanel(pnl ui.Panel) error {
 	dbd.Root().AppendChild(pnl.Root())
-	desc := pnl.Desc()
+	desc := pnl.Desc().(*Descriptor)
 	dbd.panels[desc.ID()] = pnl
 	return dbd.ui.puller.registerPanel(desc)
+}
+
+func (dbd *Dashboard) buildPanel(node *treepb.Node) (ui.Panel, error) {
+	builder := ui.Builder(node.Mime)
+	if builder == nil {
+		builder = ui.Builder(mime.Unsupported)
+	}
+	if builder == nil {
+		return nil, errors.Errorf("MIME type %q not supported", mime.Unsupported)
+	}
+	return builder(dbd, node)
 }

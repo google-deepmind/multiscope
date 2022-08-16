@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	ui.RegisterDisplay(mime.Unsupported, newUnsupported)
+	ui.RegisterBuilder(mime.Unsupported, newUnsupported)
 }
 
 type unsupported struct {
@@ -23,10 +23,10 @@ const unsupportedHTML = `
 no panel to display %q data
 `
 
-func newUnsupported(dbd *ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
+func newUnsupported(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp := &unsupported{
 		node: node,
-		root: dbd.NewErrorElement(),
+		root: NewErrorElement(dbd.UI().Owner()),
 	}
 	dsp.root.SetInnerHTML(fmt.Sprintf(unsupportedHTML, node.Mime))
 	desc := dbd.NewDescriptor(nil, node.Path)

@@ -24,7 +24,7 @@ type (
 	// Panel is the window containing the display and some additional info.
 	// It also manages the interaction with the user.
 	Panel struct {
-		desc *ui.Descriptor
+		desc ui.Descriptor
 		dsp  Displayer
 
 		root dom.Element
@@ -35,12 +35,12 @@ type (
 )
 
 // NewPanel returns a new container panel to show a displayer on the UI.
-func NewPanel(title string, desc *ui.Descriptor, dsp Displayer) (ui.Panel, error) {
+func NewPanel(title string, desc ui.Descriptor, dsp Displayer) (ui.Panel, error) {
 	dbd := desc.Dashboard()
 	pnl := &Panel{
 		desc: desc,
 		dsp:  dsp,
-		root: dbd.Owner().CreateElement("div"),
+		root: dbd.UI().Owner().CreateElement("div"),
 	}
 	pnl.appendTitle(title)
 	pnl.appendErr()
@@ -50,13 +50,13 @@ func NewPanel(title string, desc *ui.Descriptor, dsp Displayer) (ui.Panel, error
 }
 
 func (pnl *Panel) appendTitle(title string) {
-	p := pnl.desc.Dashboard().Owner().CreateElement("p")
+	p := pnl.desc.Dashboard().UI().Owner().CreateElement("p")
 	pnl.root.AppendChild(p)
 	p.SetInnerHTML(fmt.Sprintf("<h2>%s</h2>", title))
 }
 
 func (pnl *Panel) appendErr() {
-	pnl.err = pnl.desc.Dashboard().NewErrorElement()
+	pnl.err = NewErrorElement(pnl.desc.Dashboard().UI().Owner())
 	pnl.root.AppendChild(pnl.err)
 }
 
@@ -93,7 +93,7 @@ func (pnl *Panel) Root() dom.Node {
 }
 
 // Desc returns the panel descriptor.
-func (pnl *Panel) Desc() *ui.Descriptor {
+func (pnl *Panel) Desc() ui.Descriptor {
 	return pnl.desc
 }
 
@@ -105,4 +105,11 @@ func (pnl *Panel) Display(data *treepb.NodeData) {
 	if err := pnl.dsp.Display(data); err != nil {
 		pnl.updateError(err.Error())
 	}
+}
+
+// NewErrorElement returns an element to display an error.
+func NewErrorElement(owner dom.HTMLDocument) dom.HTMLElement {
+	el := owner.CreateElement("p").(dom.HTMLElement)
+	el.Class().Add("panel-error")
+	return el
 }

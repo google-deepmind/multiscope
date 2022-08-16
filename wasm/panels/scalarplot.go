@@ -11,16 +11,16 @@ import (
 )
 
 func init() {
-	ui.RegisterDisplayPB(&tablepb.Series{}, newScalarPlot)
+	ui.RegisterBuilderPB(&tablepb.Series{}, newScalarPlot)
 }
 
 type scalarPlot struct {
 	canvas *dom.HTMLCanvasElement
 }
 
-func newScalarPlot(dbd *ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
+func newScalarPlot(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp := &scalarPlot{}
-	dsp.canvas = dbd.Owner().CreateElement("canvas").(*dom.HTMLCanvasElement)
+	dsp.canvas = dbd.UI().Owner().CreateElement("canvas").(*dom.HTMLCanvasElement)
 	dsp.canvas.SetHeight(400)
 	dsp.canvas.SetWidth(800)
 	desc := dbd.NewDescriptor(renderers.NewPlotScalar, node.Path)

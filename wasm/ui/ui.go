@@ -1,155 +1,72 @@
-// Package ui implements the main page seen by the user.
 package ui
 
 import (
-	"fmt"
-	"multiscope/internal/css"
-	"multiscope/internal/httpgrpc"
-	"multiscope/internal/style"
-	"multiscope/internal/wplot"
 	treepb "multiscope/protos/tree_go_proto"
-	uipb "multiscope/protos/ui_go_proto"
-	"multiscope/wasm/injector"
+	"multiscope/wasm/renderers"
 	"multiscope/wasm/settings"
-	"multiscope/wasm/worker"
-	"strconv"
-	"strings"
-	"time"
+	"syscall/js"
 
-	"github.com/pkg/errors"
-	"gonum.org/v1/plot/vg"
+	"google.golang.org/protobuf/proto"
 	"honnef.co/go/js/dom/v2"
 )
 
-// UI is the main page (i.e. user interface) with which the user interacts.
-type UI struct {
-	window     dom.Window
-	addr       *uipb.Connect
-	treeClient treepb.TreeClient
-	style      *style.Style
-	settings   *settings.Settings
-	puller     *puller
-	layout     *Layout
+type (
+	// PanelID of a panel for worker communication.
+	PanelID uint64
 
-	lastError string
-}
+	// UI is top structures owning all the UI elements.
+	UI interface {
+		// Owner of the UI.
+		Owner() dom.HTMLDocument
 
-// NewUI returns a new user interface mananing the main page.
-func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
-	ui := &UI{
-		addr:     c,
-		window:   dom.GetWindow(),
-		settings: &settings.Settings{},
-	}
-	var err error
-	ui.style, err = ui.newDefaultStyle()
-	if err != nil {
-		ui.DisplayErr(err)
-		return ui
+		// Settings returns the global settings.
+		Settings() *settings.Settings
 	}
 
-	injector.Run(ui)
-	ui.style.OnChange(func(s *style.Style) {
-		ui.Owner().Body().Style().SetProperty("background", css.Color(s.Background()), "")
-		ui.Owner().Body().Style().SetProperty("color", css.Color(s.Foreground()), "")
-	})
+	// Dashboard displaying all the panels.
+	Dashboard interface {
+		UI() UI
 
-	conn := httpgrpc.Connect(ui.addr.Scheme, ui.addr.Host)
-	ui.treeClient = treepb.NewTreeClient(conn)
-	ui.puller = newPuller(ui, puller)
-	if ui.layout, err = newLayout(ui); err != nil {
-		ui.DisplayErr(err)
-		return ui
+		NewDescriptor(renderer renderers.Newer, paths ...*treepb.NodePath) Descriptor
+
+		RegisterPanel(pnl Panel) error
 	}
-	if err := ui.puller.registerPanel(ui.layout.Dashboard().descriptor()); err != nil {
-		ui.DisplayErr(err)
-		return ui
+
+	// Descriptor enables the communication between a panel and the web worker to get the data.
+	Descriptor interface {
+		Dashboard() Dashboard
+		AddTransferable(name string, v js.Value)
 	}
-	return ui
-}
 
-func parseFontSize(s string) (size vg.Length, err error) {
-	defer func() {
-		if err != nil {
-			err = fmt.Errorf("cannot parse font size property %q: %s", s, err)
-		}
-	}()
-	if !strings.HasSuffix(s, "px") {
-		return -1, errors.Errorf("size does not have pixel (px) units")
+	// Panel is a display within the dashboard.
+	Panel interface {
+		// Root returns the root node of a panel.
+		// This node is added to the dashboard node when a panel is registered.
+		Root() dom.Node
+		// Desc returns the panel descriptor.
+		Desc() Descriptor
+		// Display the latest data.
+		Display(node *treepb.NodeData)
 	}
-	num := s[:len(s)-len("px")]
-	f, err := strconv.ParseFloat(num, 64)
-	if err != nil {
-		return -1, errors.Errorf("cannot parse float %q: %v", num, err)
-	}
-	return wplot.ToLengthF(f), nil
+
+	// PanelBuilder builds a display given a node in the tree.
+	PanelBuilder func(dbd Dashboard, node *treepb.Node) (Panel, error)
+)
+
+var mimeToDisplay = make(map[string]PanelBuilder)
+
+// RegisterBuilder registers a builder given a mime type.
+func RegisterBuilder(mime string, f PanelBuilder) {
+	mimeToDisplay[mime] = f
 }
 
-func (ui *UI) newDefaultStyle() (*style.Style, error) {
-	s := style.NewStyle(ui.settings)
-	body := ui.Owner().Body()
-	css := dom.GetWindow().GetComputedStyle(body, "")
-	fontSize, err := parseFontSize(css.GetPropertyValue("font-size"))
-	if err != nil {
-		return s, err
-	}
-	fontFamily := css.GetPropertyValue("font-family")
-	s.Set("", fontFamily, fontSize)
-	return s, nil
+// RegisterBuilderPB registers a builder given a protocol buffer type.
+func RegisterBuilderPB(msg proto.Message, f PanelBuilder) {
+	RegisterBuilder("application/x-protobuf;proto="+string(proto.MessageName(msg)), f)
 }
 
-// Owner returns the owner of the DOM tree of the UI.
-func (ui *UI) Owner() dom.HTMLDocument {
-	return ui.window.Document().(dom.HTMLDocument)
-}
-
-// DisplayErr displays an error on the UI.
-func (ui *UI) DisplayErr(err error) {
-	if err.Error() == ui.lastError {
-		return
-	}
-	ui.lastError = err.Error()
-	fmt.Println("ERROR reported to main:")
-	fmt.Println(err)
-}
-
-// Style returns the current style of the UI.
-func (ui *UI) Style() *style.Style {
-	return ui.style
-}
-
-// Layout returns the overall page layout.
-func (ui *UI) Layout() *Layout {
-	return ui.layout
-}
-
-// Settings returns Multiscope settings.
-func (ui *UI) Settings() *settings.Settings {
-	return ui.settings
-}
-
-func (ui *UI) renderFrame() error {
-	displayData := ui.puller.lastDisplayData()
-	if displayData == nil {
-		return nil
-	}
-	if displayData.Err != "" {
-		return fmt.Errorf("display data error: %v", displayData.Err)
-	}
-	ui.layout.Dashboard().render(displayData)
-	return nil
-}
-
-func (ui *UI) animationFrame(period time.Duration) {
-	if err := ui.renderFrame(); err != nil {
-		ui.DisplayErr(err)
-		return
-	}
-	ui.window.RequestAnimationFrame(ui.animationFrame)
-}
-
-// MainLoop runs the user interface main loop. It never returns.
-func (ui *UI) MainLoop() {
-	ui.window.RequestAnimationFrame(ui.animationFrame)
-	<-make(chan bool)
+// Builder returns the registered builder for a given MIME type
+// (or nil if no builder has been registered).
+func Builder(mime string) PanelBuilder {
+	return mimeToDisplay[mime]
 }
