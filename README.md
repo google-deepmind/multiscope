@@ -67,13 +67,7 @@ language specific details.
 
 ## Development
 
-Please setup a pre-commit hook to catch errors before they are submitted:
-```
-cd .git/hooks
-rm pre-commit.sample
-chmod a+x ../../.pre-commit.git
-ln -s ../../.pre-commit.git pre-commit
-```
+### Pre-commit hook
 
 You will need to install the following executables for the pre-commit hook to
 work:
@@ -91,6 +85,12 @@ from multiscope top folder.
 To push commits to the main repository:
 ```
 git push origin HEAD:refs/for/main
+```
+### Generating the protocol buffer in Go
+
+Run the following command from the top:
+```
+go generate protos/generate.go
 ```
 
 ### Troubleshooting
