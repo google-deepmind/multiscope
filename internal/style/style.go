@@ -33,8 +33,8 @@ var googleLight = themes.Theme{
 type (
 	// Settings to store styles.
 	Settings interface {
-		Set(key, val string)
-		Get(key string) (string, bool)
+		Set(key string, val interface{})
+		Get(key string, obj interface{})
 	}
 
 	// Style stores all attributes related to style.
@@ -64,8 +64,9 @@ func NewStyle(settings Settings) *Style {
 }
 
 func (s *Style) loadSetting() {
-	theme, ok := s.settings.Get("style")
-	if !ok {
+	var theme string
+	s.settings.Get("style", &theme)
+	if theme == "" {
 		return
 	}
 	s.SetTheme(theme)

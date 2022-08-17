@@ -38,10 +38,10 @@ type UI struct {
 // NewUI returns a new user interface mananing the main page.
 func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 	ui := &UI{
-		addr:     c,
-		window:   dom.GetWindow(),
-		settings: &settings.Settings{},
+		addr:   c,
+		window: dom.GetWindow(),
 	}
+	ui.settings = settings.NewSettings(ui.DisplayErr)
 	var err error
 	ui.style, err = ui.newDefaultStyle()
 	if err != nil {
@@ -158,4 +158,13 @@ func (ui *UI) MainLoop() {
 // TreeClient returns the connection to the server.
 func (ui *UI) TreeClient() treepb.TreeClient {
 	return ui.treeClient
+}
+
+// Run a function in the background.
+func (ui *UI) Run(f func() error) {
+	go func() {
+		if err := f(); err != nil {
+			ui.DisplayErr(err)
+		}
+	}()
 }

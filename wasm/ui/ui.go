@@ -24,6 +24,14 @@ type (
 
 		// TreeClient returns the connection to the server.
 		TreeClient() treepb.TreeClient
+
+		// DisplayErr displays an error for the user to see.
+		DisplayErr(err error)
+
+		// Run a function in the background.
+		// Use this function to process an event and to avoid a deadlock
+		// when the call includes gRPC calls.
+		Run(func() error)
 	}
 
 	// Dashboard displaying all the panels.

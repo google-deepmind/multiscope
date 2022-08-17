@@ -10,13 +10,10 @@ import (
 type LeftBar struct {
 	ui   *UI
 	root dom.HTMLElement
-	tree *tree.Updater
+	tree *tree.Element
 }
 
-const (
-	settingLeftBar = "leftbar_visible"
-	visibleSetting = "visible"
-)
+const settingLeftBarVisible = "leftbar_visible"
 
 func newLeftBar(ui *UI) (*LeftBar, error) {
 	const leftClass = "container__left"
@@ -29,7 +26,7 @@ func newLeftBar(ui *UI) (*LeftBar, error) {
 		root: elements[0].(dom.HTMLElement),
 	}
 	var err error
-	if l.tree, err = tree.NewUpdater(ui); err != nil {
+	if l.tree, err = tree.NewElement(ui); err != nil {
 		return l, err
 	}
 	l.root.AppendChild(l.tree.Root())
@@ -42,16 +39,17 @@ func newLeftBar(ui *UI) (*LeftBar, error) {
 }
 
 func (l *LeftBar) isVisible() bool {
-	v, _ := l.ui.Settings().Get(settingLeftBar)
-	return v == visibleSetting
+	var visible bool
+	l.ui.Settings().Get(settingLeftBarVisible, &visible)
+	return visible
 }
 
 func (l *LeftBar) show() {
-	l.ui.Settings().Set(settingLeftBar, visibleSetting)
+	l.ui.Settings().Set(settingLeftBarVisible, true)
 	l.root.Style().SetProperty("display", "block", "")
 }
 
 func (l *LeftBar) hide() {
-	l.ui.Settings().Set(settingLeftBar, "")
+	l.ui.Settings().Set(settingLeftBarVisible, false)
 	l.root.Style().SetProperty("display", "none", "")
 }
