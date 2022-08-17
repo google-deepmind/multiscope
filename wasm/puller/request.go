@@ -1,6 +1,7 @@
 package puller
 
 import (
+	"fmt"
 	"multiscope/internal/server/core"
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
@@ -45,6 +46,35 @@ func (r *request) registerPath(panel *panelS, path *treepb.NodePath) {
 		r.request.Reqs = append(r.request.Reqs, pointers.req)
 	}
 	pointers.panels[ui.PanelID(panel.pb.Id)] = panel
+}
+
+func findReqPos(reqs []*treepb.DataRequest, req *treepb.DataRequest) int {
+	for i, reqi := range reqs {
+		if reqi == req {
+			return i
+		}
+	}
+	return -1
+}
+
+func (r *request) unregisterPath(id ui.PanelID, path *treepb.NodePath) error {
+	key := core.ToKey(path.Path)
+	pointers := r.paths[key]
+	if pointers == nil {
+		return nil
+	}
+	delete(pointers.panels, id)
+	if len(pointers.panels) > 0 {
+		return nil
+	}
+	delete(r.paths, key)
+	i := findReqPos(r.request.Reqs, pointers.req)
+	if i < 0 {
+		return fmt.Errorf("unexpected error: could not unregister %q", key)
+	}
+	r.request.Reqs[i] = r.request.Reqs[len(r.request.Reqs)-1]
+	r.request.Reqs = r.request.Reqs[:len(r.request.Reqs)-1]
+	return nil
 }
 
 func (r *request) setLastTick(path *treepb.NodePath, lastTick uint32) {

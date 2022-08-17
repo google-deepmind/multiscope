@@ -41,6 +41,8 @@ type (
 		NewDescriptor(renderer renderers.Newer, paths ...*treepb.NodePath) Descriptor
 
 		RegisterPanel(pnl Panel) error
+
+		ClosePanel(pnl Panel) error
 	}
 
 	// Descriptor enables the communication between a panel and the web worker to get the data.

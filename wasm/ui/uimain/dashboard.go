@@ -43,11 +43,6 @@ func (dbd *Dashboard) UI() ui.UI {
 	return dbd.ui
 }
 
-// Root returns the root node of the dashboard.
-func (dbd *Dashboard) Root() dom.Node {
-	return dbd.root
-}
-
 func (dbd *Dashboard) updateLayout(layout *rootpb.Layout) error {
 	nodes, err := dbd.ui.treeClient.GetNodeStruct(context.Background(), &treepb.NodeStructRequest{
 		Paths: layout.Displayed,
@@ -104,10 +99,18 @@ func (dbd *Dashboard) render(displayData *uipb.DisplayData) {
 
 // RegisterPanel adds a new panel to display to the dashboard.
 func (dbd *Dashboard) RegisterPanel(pnl ui.Panel) error {
-	dbd.Root().AppendChild(pnl.Root())
+	dbd.root.AppendChild(pnl.Root())
 	desc := pnl.Desc().(*Descriptor)
 	dbd.panels[desc.ID()] = pnl
 	return dbd.ui.puller.registerPanel(desc)
+}
+
+func (dbd *Dashboard) ClosePanel(pnl ui.Panel) error {
+	desc := pnl.Desc().(*Descriptor)
+	err := dbd.ui.puller.unregisterPanel(desc)
+	delete(dbd.panels, desc.ID())
+	dbd.root.RemoveChild(pnl.Root())
+	return err
 }
 
 func (dbd *Dashboard) buildPanel(node *treepb.Node) (ui.Panel, error) {

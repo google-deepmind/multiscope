@@ -50,9 +50,18 @@ func NewPanel(title string, desc ui.Descriptor, dsp Displayer) (ui.Panel, error)
 }
 
 func (pnl *Panel) appendTitle(title string) {
-	p := pnl.desc.Dashboard().UI().Owner().CreateElement("p")
-	pnl.root.AppendChild(p)
-	p.SetInnerHTML(fmt.Sprintf("<h2>%s</h2>", title))
+	owner := pnl.desc.Dashboard().UI().Owner()
+	bar := owner.CreateElement("div")
+	bar.Class().Add("panel-title")
+	pnl.root.AppendChild(bar)
+
+	bar.AppendChild(owner.CreateTextNode(title))
+
+	rightSpan := owner.CreateElement("span").(*dom.HTMLSpanElement)
+	rightSpan.Style().SetProperty("float", "right", "")
+	closeButton := ui.NewButton(owner, "Ⓧ", pnl.processCloseEvent)
+	rightSpan.AppendChild(closeButton)
+	bar.AppendChild(rightSpan)
 }
 
 func (pnl *Panel) appendErr() {
@@ -86,6 +95,12 @@ func (pnl *Panel) updateError(err string) bool {
 	return true
 }
 
+func (pnl *Panel) processCloseEvent(ev dom.Event) {
+	if err := pnl.Desc().Dashboard().ClosePanel(pnl); err != nil {
+		pnl.desc.Dashboard().UI().DisplayErr(err)
+	}
+}
+
 // Root returns the root node of a panel.
 // This node is added to the dashboard node when a panel is registered.
 func (pnl *Panel) Root() dom.Node {
@@ -110,6 +125,6 @@ func (pnl *Panel) Display(data *treepb.NodeData) {
 // NewErrorElement returns an element to display an error.
 func NewErrorElement(owner dom.HTMLDocument) dom.HTMLElement {
 	el := owner.CreateElement("p").(dom.HTMLElement)
-	el.Class().Add("panel-error")
+	el.Class().Add("error-content")
 	return el
 }

@@ -47,33 +47,6 @@ body {
   flex-grow: 1;
 }
 
-/*
-   Style for the panels inside the dashboard.
-*/
-p.panel-error {
-  font-size: 80%;
-}
-
-/*
-   Style for the tickers.
-*/
-p.panel-ticker {
-  font-size: 80%;
-}
-
-/*
-   Style for a panel displaying raw text.
-*/
-p.panel-text {
-  font-size: 80%;
-}
-
-/*
-   Style for a panel displaying HTML text.
-*/
-p.panel-html {
-  font-size: 80%;
-}
 
 /* Style for the header */
 .toppage {
@@ -94,8 +67,24 @@ p.panel-html {
   user-select: none;
 }
 
-/* Style for the tree */
+/* Style for the panel */
+.panel-title {
+  display: block;
+  align: left;
+}
 
+.panel-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.panel-title a.icon {
+  cursor: pointer;
+  user-select: none;
+}
+
+
+/* Style for the tree */
 .tree-list {
   list-style-type: none;
   padding-left: .5em;
@@ -108,3 +97,32 @@ p.panel-html {
   cursor: pointer;
   user-select: none;
 }
+
+/*
+   Style for a panel displaying HTML text.
+*/
+p.html-content {
+  font-size: 80%;
+}
+
+/*
+   Style for the panel displaying a ticker.
+*/
+p.ticker-content {
+  font-size: 80%;
+}
+
+/*
+   Style for the panels inside the dashboard.
+*/
+p.error-content {
+  font-size: 80%;
+}
+
+/*
+   Style for a panel displaying raw text.
+*/
+p.text-content {
+  font-size: 80%;
+}
+

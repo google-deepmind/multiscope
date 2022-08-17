@@ -25,7 +25,7 @@ func newHTML(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp := &html{
 		root: owner.CreateElement("div").(*dom.HTMLDivElement),
 	}
-	dsp.root.Class().Add("panel-html")
+	dsp.root.Class().Add("html-content")
 	dsp.style = owner.CreateElement("style").(*dom.HTMLStyleElement)
 	dsp.style.SetAttribute("scoped", "")
 	dsp.root.AppendChild(dsp.style)

@@ -10,6 +10,7 @@ import (
 	treepbgrpc "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/renderers"
+	"multiscope/wasm/ui"
 	"multiscope/wasm/worker"
 	"syscall/js"
 
@@ -95,6 +96,17 @@ func (p *Puller) processRegisterPanel(pbPanel *uipb.Panel, aux js.Value) error {
 	return nil
 }
 
+func (p *Puller) processUnregisterPanel(pbPanel *uipb.Panel, aux js.Value) error {
+	id := ui.PanelID(pbPanel.Id)
+	var gErr error
+	for _, path := range pbPanel.Paths {
+		if err := p.req.unregisterPath(id, path); err != nil {
+			gErr = multierr.Append(gErr, err)
+		}
+	}
+	return gErr
+}
+
 func (p *Puller) processPullQuery(pull *uipb.Pull) error {
 	ctx := context.Background()
 	resp, err := p.treeClient.GetNodeData(ctx, p.req.pb())
@@ -143,6 +155,8 @@ func (p *Puller) Pull() {
 		switch query := q.pb.Query.(type) {
 		case *uipb.ToPuller_RegisterPanel:
 			err = p.processRegisterPanel(query.RegisterPanel, q.aux)
+		case *uipb.ToPuller_UnregisterPanel:
+			err = p.processUnregisterPanel(query.UnregisterPanel, q.aux)
 		case *uipb.ToPuller_Pull:
 			err = p.processPullQuery(query.Pull)
 		case *uipb.ToPuller_Style:

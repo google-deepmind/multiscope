@@ -39,7 +39,8 @@ message ToPuller {
   oneof query {
     Pull pull = 1;
     Panel registerPanel = 2;
-    StyleChange style = 3;
+    Panel unregisterPanel = 3;
+    StyleChange style = 4;
   }
 }
 

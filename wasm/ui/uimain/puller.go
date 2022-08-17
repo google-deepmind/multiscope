@@ -44,6 +44,19 @@ func (p *puller) onPaletteChange(s *style.Style) {
 	}
 }
 
+func (p *puller) unregisterPanel(desc *Descriptor) error {
+	info, _ := desc.PanelPB()
+	toPuller := &uipb.ToPuller{
+		Query: &uipb.ToPuller_UnregisterPanel{
+			UnregisterPanel: info,
+		},
+	}
+	if err := p.wkr.Send(toPuller, nil); err != nil {
+		return fmt.Errorf("cannot unregister panel to pull worker: %w", err)
+	}
+	return nil
+}
+
 func (p *puller) registerPanel(desc *Descriptor) error {
 	info, aux := desc.PanelPB()
 	toPuller := &uipb.ToPuller{
