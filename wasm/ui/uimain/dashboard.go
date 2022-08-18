@@ -1,7 +1,6 @@
 package uimain
 
 import (
-	"context"
 	"fmt"
 	"multiscope/internal/mime"
 	"multiscope/internal/server/core"
@@ -9,6 +8,7 @@ import (
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/ui"
+	"multiscope/wasm/ui/uimain/dblayout"
 
 	"github.com/pkg/errors"
 	"honnef.co/go/js/dom/v2"
@@ -20,6 +20,7 @@ type Dashboard struct {
 	ui       *UI
 	pathToID map[core.Key]ui.PanelID
 	panels   map[ui.PanelID]ui.Panel
+	layout   dblayout.Layout
 	root     dom.Node
 }
 
@@ -29,12 +30,19 @@ func newDashboard(main *UI) (*Dashboard, error) {
 	if len(elements) != 1 {
 		return nil, errors.Errorf("wrong number of elements of class %q: got %d but want 1", dashboardClass, len(elements))
 	}
-	return &Dashboard{
+	dbd := &Dashboard{
 		ui:       main,
 		pathToID: make(map[core.Key]ui.PanelID),
 		panels:   make(map[ui.PanelID]ui.Panel),
 		root:     elements[0],
-	}, nil
+	}
+	var err error
+	dbd.layout, err = dblayout.New(dbd, nil)
+	if err != nil {
+		return dbd, err
+	}
+	dbd.root.AppendChild(dbd.layout.Root())
+	return dbd, nil
 }
 
 func (dbd *Dashboard) descriptor() *Descriptor {
@@ -46,21 +54,6 @@ func (dbd *Dashboard) UI() ui.UI {
 	return dbd.ui
 }
 
-func (dbd *Dashboard) updateLayout(layout *rootpb.Layout) error {
-	nodes, err := dbd.ui.treeClient.GetNodeStruct(context.Background(), &treepb.NodeStructRequest{
-		Paths: layout.Displayed,
-	})
-	if err != nil {
-		return fmt.Errorf("cannot query the tree structure: %v", err)
-	}
-	for _, node := range nodes.Nodes {
-		if err := dbd.OpenPanel(node); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (dbd *Dashboard) refresh(data *treepb.NodeData) error {
 	pb := data.GetPb()
 	if pb == nil {
@@ -70,12 +63,17 @@ func (dbd *Dashboard) refresh(data *treepb.NodeData) error {
 	if err := pb.UnmarshalTo(&root); err != nil {
 		return fmt.Errorf("cannot unmarshal root info: %v", err)
 	}
-	layout := root.Layout
-	if layout == nil {
-		return nil
+	if dbd.layout != nil {
+		dbd.root.RemoveChild(dbd.layout.Root())
+	}
+	var err error
+	dbd.layout, err = dblayout.New(dbd, root.Layout)
+	dbd.root.AppendChild(dbd.layout.Root())
+	if err != nil {
+		return err
 	}
 	go func() {
-		if err := dbd.updateLayout(layout); err != nil {
+		if err := dbd.layout.Load(root.Layout); err != nil {
 			dbd.ui.DisplayErr(err)
 		}
 	}()
@@ -126,7 +124,7 @@ func (dbd *Dashboard) OpenPanel(node *treepb.Node) error {
 }
 
 func (dbd *Dashboard) registerPanel(pnl ui.Panel) error {
-	dbd.root.AppendChild(pnl.Root())
+	dbd.layout.Append(pnl)
 	desc := pnl.Desc().(*Descriptor)
 	path, ok := desc.path()
 	if ok {
@@ -144,6 +142,6 @@ func (dbd *Dashboard) ClosePanel(pnl ui.Panel) error {
 	if ok {
 		delete(dbd.pathToID, path)
 	}
-	dbd.root.RemoveChild(pnl.Root())
+	dbd.layout.Remove(pnl)
 	return err
 }

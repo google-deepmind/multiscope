@@ -31,9 +31,13 @@ func checkDisplayed(clt *remote.Client, want []string) error {
 	}
 	got := []string{}
 	if root.Layout == nil {
-		root.Layout = &pb.Layout{}
+		root.Layout = &pb.Layout{
+			Layout: &pb.Layout_List{
+				List: &pb.LayoutList{},
+			},
+		}
 	}
-	for _, path := range root.Layout.Displayed {
+	for _, path := range root.Layout.GetList().Displayed {
 		got = append(got, strings.Join(path.GetPath(), "/"))
 	}
 	if !cmp.Equal(got, want) {

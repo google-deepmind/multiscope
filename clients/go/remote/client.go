@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"multiscope/internal/grpc/client"
 	"multiscope/internal/server/scope"
-	rootpbgrpc "multiscope/protos/root_go_proto"
 	pb "multiscope/protos/tree_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
 	"net"
@@ -80,15 +79,11 @@ func NewClient(conn grpc.ClientConnInterface) (*Client, error) {
 		return nil, err
 	}
 	c := &Client{
-		conn:   conn,
-		client: clt,
-		events: &Events{clt: clt},
-		display: &Display{
-			clt:                    rootpbgrpc.NewRootClient(conn),
-			globalDisplayByDefault: true,
-			layout:                 &rootpbgrpc.Layout{},
-		},
-		active: active,
+		conn:    conn,
+		client:  clt,
+		events:  &Events{clt: clt},
+		display: newDisplay(conn),
+		active:  active,
 	}
 	return c, nil
 }

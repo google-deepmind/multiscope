@@ -77,7 +77,7 @@ body {
 /* Style for the tree */
 .tree-list {
   list-style-type: none;
-  padding-left: .7em;
+  padding-left: .8em;
 }
 
 .tree-item {

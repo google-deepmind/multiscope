@@ -4,6 +4,8 @@ import (
 	"context"
 	rootpb "multiscope/protos/root_go_proto"
 	rootpbgrpc "multiscope/protos/root_go_proto"
+
+	"google.golang.org/grpc"
 )
 
 // Display is the client to call functions on the server related to display on the dashboard.
@@ -12,7 +14,15 @@ type Display struct {
 	// Decides if new panels are added to the initial layout by default.
 	globalDisplayByDefault bool
 
-	layout *rootpb.Layout
+	list *rootpbgrpc.LayoutList
+}
+
+func newDisplay(conn grpc.ClientConnInterface) *Display {
+	return &Display{
+		clt:                    rootpbgrpc.NewRootClient(conn),
+		globalDisplayByDefault: true,
+		list:                   &rootpbgrpc.LayoutList{},
+	}
 }
 
 // SetGlobalDisplayByDefault sets if new panels should be added to the initial dashboard by default.
@@ -25,9 +35,13 @@ func (d *Display) DisplayIfDefault(path Path) error {
 	if !d.globalDisplayByDefault {
 		return nil
 	}
-	d.layout.Displayed = append(d.layout.Displayed, path.NodePath())
+	d.list.Displayed = append(d.list.Displayed, path.NodePath())
 	_, err := d.clt.SetLayout(context.Background(), &rootpb.SetLayoutRequest{
-		Layout: d.layout,
+		Layout: &rootpbgrpc.Layout{
+			Layout: &rootpbgrpc.Layout_List{
+				List: d.list,
+			},
+		},
 	})
 	return err
 }
