@@ -2,6 +2,7 @@ package tree
 
 import (
 	treepb "multiscope/protos/tree_go_proto"
+	"multiscope/wasm/ui"
 
 	"honnef.co/go/js/dom/v2"
 )
@@ -12,7 +13,7 @@ type Node struct {
 	node *treepb.Node
 
 	item         dom.HTMLElement
-	caret        *dom.HTMLSpanElement
+	caret        *dom.HTMLAnchorElement
 	childrenList *dom.HTMLUListElement
 	children     map[string]*Node
 }
@@ -39,7 +40,12 @@ func (el *Element) newNode(parent *Node, name string) (*Node, error) {
 	n.item = el.ui.Owner().CreateElement("li").(dom.HTMLElement)
 	n.item.Class().Add("tree-list")
 	if node.HasChildren {
-		n.appendExpandButton()
+		n.caret = ui.NewButton(el.ui.Owner(), "▶ ", func(ev dom.Event) {
+			if err := n.expand(); err != nil {
+				el.ui.DisplayErr(err)
+			}
+		})
+		n.item.AppendChild(n.caret)
 	}
 	n.item.AppendChild(el.ui.Owner().CreateTextNode(name))
 
@@ -77,16 +83,6 @@ func (n *Node) expand() error {
 		n.show()
 	}
 	return nil
-}
-
-func (n *Node) appendExpandButton() {
-	n.caret = n.el.ui.Owner().CreateElement("span").(*dom.HTMLSpanElement)
-	n.caret.Class().Add("tree-caret")
-	n.caret.SetInnerHTML("▶ ")
-	n.caret.AddEventListener("click", false, func(ev dom.Event) {
-		n.el.ui.Run(n.expand)
-	})
-	n.item.AppendChild(n.caret)
 }
 
 func (n *Node) hide() {

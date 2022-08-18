@@ -6,6 +6,7 @@ import "honnef.co/go/js/dom/v2"
 func NewButton(owner dom.HTMLDocument, html string, f func(ev dom.Event)) *dom.HTMLAnchorElement {
 	el := owner.CreateElement("a").(*dom.HTMLAnchorElement)
 	el.Class().Add("icon")
+	el.Class().Add("button")
 	el.SetInnerHTML(html)
 	el.AddEventListener("click", true, func(ev dom.Event) {
 		go f(ev)
