@@ -50,8 +50,10 @@ func (lyt *list) Root() dom.Node {
 }
 
 func (lyt *list) store() {
-	lyt.dbd.UI().Settings().Set("layout", map[string]interface{}{
-		"list": lyt.pb,
+	lyt.dbd.UI().Settings().Set(settingKey, &rootpb.Layout{
+		Layout: &rootpb.Layout_List{
+			List: lyt.pb,
+		},
 	})
 }
 

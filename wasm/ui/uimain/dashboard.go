@@ -22,6 +22,8 @@ type Dashboard struct {
 	panels   map[ui.PanelID]ui.Panel
 	layout   dblayout.Layout
 	root     dom.Node
+
+	layoutServer *rootpb.Layout
 }
 
 func newDashboard(main *UI) (*Dashboard, error) {
@@ -64,20 +66,45 @@ func (dbd *Dashboard) refresh(data *treepb.NodeData) error {
 		return fmt.Errorf("cannot unmarshal root info: %v", err)
 	}
 	if dbd.layout != nil {
-		dbd.root.RemoveChild(dbd.layout.Root())
+		dbd.clearLayout()
+	}
+
+	var toLoad *rootpb.Layout
+	if dbd.layoutServer == nil {
+		// This is the first time the server is sending us a layout.
+		// Load the layout from the settings instead.
+		toLoad = dblayout.LoadPB(dbd)
+	}
+	dbd.layoutServer = root.Layout
+	if toLoad == nil {
+		// No layout available in the settings.
+		toLoad = dbd.layoutServer
 	}
 	var err error
-	dbd.layout, err = dblayout.New(dbd, root.Layout)
+	dbd.layout, err = dblayout.New(dbd, toLoad)
 	dbd.root.AppendChild(dbd.layout.Root())
 	if err != nil {
 		return err
 	}
 	go func() {
-		if err := dbd.layout.Load(root.Layout); err != nil {
+		if err := dbd.layout.Load(toLoad); err != nil {
 			dbd.ui.DisplayErr(err)
 		}
 	}()
 	return nil
+}
+
+func (dbd *Dashboard) clearLayout() {
+	panels := []ui.Panel{}
+	for _, pnl := range dbd.panels {
+		panels = append(panels, pnl)
+	}
+	for _, pnl := range panels {
+		if err := dbd.ClosePanel(pnl); err != nil {
+			dbd.ui.DisplayErr(err)
+		}
+	}
+	dbd.root.RemoveChild(dbd.layout.Root())
 }
 
 func (dbd *Dashboard) render(displayData *uipb.DisplayData) {

@@ -34,7 +34,7 @@ type (
 	// Settings to store styles.
 	Settings interface {
 		Set(key string, val interface{})
-		Get(key string, obj interface{})
+		Get(key string, obj interface{}) bool
 	}
 
 	// Style stores all attributes related to style.
@@ -65,8 +65,7 @@ func NewStyle(settings Settings) *Style {
 
 func (s *Style) loadSetting() {
 	var theme string
-	s.settings.Get("style", &theme)
-	if theme == "" {
+	if !s.settings.Get("style", &theme) {
 		return
 	}
 	s.SetTheme(theme)

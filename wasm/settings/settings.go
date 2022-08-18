@@ -2,10 +2,14 @@
 package settings
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"syscall/js"
+
+	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 )
 
 const prefix = "multiscope/"
@@ -50,12 +54,40 @@ func (s *Settings) store(key string, buf []byte) {
 	s.storage.Set(prefix+key, string(buf))
 }
 
-func (s *Settings) load(key string) []byte {
+func (s *Settings) load(key string) string {
 	val := s.storage.Get(prefix + key)
 	if val.IsNull() || val.IsUndefined() {
-		return nil
+		return ""
 	}
-	return []byte(val.String())
+	return val.String()
+}
+
+const (
+	protoPrefix = "proto"
+	jsonPrefix  = "json"
+)
+
+func withPrefix(prefix string, msg []byte) []byte {
+	buf := []byte(prefix + ":")
+	buf = append(buf, msg...)
+	return buf
+}
+
+func marshal(val interface{}) ([]byte, error) {
+	msg, ok := val.(proto.Message)
+	if !ok {
+		jbuf, err := json.Marshal(val)
+		if err != nil {
+			return nil, err
+		}
+		return withPrefix(jsonPrefix, jbuf), nil
+	}
+	buf, err := proto.Marshal(msg)
+	if err != nil {
+		return nil, err
+	}
+	enc := base64.StdEncoding.EncodeToString(buf)
+	return withPrefix(protoPrefix, []byte(enc)), nil
 }
 
 // Set a key,value pair in the settings.
@@ -64,7 +96,7 @@ func (s *Settings) Set(key string, val interface{}) {
 		s.del(key)
 		return
 	}
-	buf, err := json.Marshal(val)
+	buf, err := marshal(val)
 	if err != nil {
 		s.fErr(fmt.Errorf("cannot store key %q: cannot serialize object %T to JSON: %w", key, val, err))
 		return
@@ -72,13 +104,33 @@ func (s *Settings) Set(key string, val interface{}) {
 	s.store(key, buf)
 }
 
+func unmarshal(val string, dst interface{}) error {
+	before, after, found := strings.Cut(val, ":")
+	if !found {
+		return errors.Errorf("cannot find setting separator ':'")
+	}
+	switch before {
+	case jsonPrefix:
+		return json.Unmarshal([]byte(after), dst)
+	case protoPrefix:
+		dec, err := base64.StdEncoding.DecodeString(after)
+		if err != nil {
+			return fmt.Errorf("cannot decode proto buffer: %w", err)
+		}
+		return proto.Unmarshal(dec, dst.(proto.Message))
+	}
+	return errors.Errorf("unknown value prefix: %q", before)
+}
+
 // Get a key,value pair from the setting.
-func (s *Settings) Get(key string, dst interface{}) {
+func (s *Settings) Get(key string, dst interface{}) bool {
 	buf := s.load(key)
-	if buf == nil {
-		return
+	if buf == "" {
+		return false
 	}
-	if err := json.Unmarshal(buf, dst); err != nil {
+	if err := unmarshal(buf, dst); err != nil {
 		s.fErr(fmt.Errorf("cannot get setting %q=%s: %w", key, string(buf), err))
+		return false
 	}
+	return true
 }
