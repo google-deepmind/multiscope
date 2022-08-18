@@ -1,6 +1,7 @@
 package uimain
 
 import (
+	"multiscope/internal/server/core"
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/renderers"
@@ -11,6 +12,7 @@ import (
 // Descriptor stores how to get and process data for a panel.
 type Descriptor struct {
 	dbd           *Dashboard
+	node          *treepb.Node // can be nil
 	pb            uipb.Panel
 	transferables map[string]any
 }
@@ -26,11 +28,12 @@ func rootDescriptor() *Descriptor {
 var nextID = uint32(1)
 
 // NewDescriptor returns a new info descriptor to assign to a panel.
-func (dbd *Dashboard) NewDescriptor(renderer renderers.Newer, paths ...*treepb.NodePath) ui.Descriptor {
+func (dbd *Dashboard) NewDescriptor(node *treepb.Node, renderer renderers.Newer, paths ...*treepb.NodePath) ui.Descriptor {
 	id := nextID
 	nextID++
 	return &Descriptor{
-		dbd: dbd,
+		node: node,
+		dbd:  dbd,
 		pb: uipb.Panel{
 			Id:       id,
 			Paths:    paths,
@@ -46,9 +49,15 @@ func (dsc *Descriptor) AddTransferable(name string, v js.Value) {
 	dsc.transferables[name] = v
 }
 
-// ID returns the ID of the panel.
-func (dsc *Descriptor) ID() ui.PanelID {
+func (dsc *Descriptor) id() ui.PanelID {
 	return ui.PanelID(dsc.pb.Id)
+}
+
+func (dsc *Descriptor) path() (core.Key, bool) {
+	if dsc.node == nil {
+		return "", false
+	}
+	return core.ToKey(dsc.node.Path.Path), true
 }
 
 // PanelPB returns the list of path necessary for the panel.

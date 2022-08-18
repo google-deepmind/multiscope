@@ -23,7 +23,7 @@ func newTicker(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp := &ticker{}
 	dsp.root = dbd.UI().Owner().CreateElement("p").(*dom.HTMLParagraphElement)
 	dsp.root.Class().Add("ticker-content")
-	desc := dbd.NewDescriptor(nil, node.Path)
+	desc := dbd.NewDescriptor(node, nil, node.Path)
 	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
 }
 

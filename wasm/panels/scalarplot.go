@@ -23,7 +23,7 @@ func newScalarPlot(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp.canvas = dbd.UI().Owner().CreateElement("canvas").(*dom.HTMLCanvasElement)
 	dsp.canvas.SetHeight(400)
 	dsp.canvas.SetWidth(800)
-	desc := dbd.NewDescriptor(renderers.NewPlotScalar, node.Path)
+	desc := dbd.NewDescriptor(node, renderers.NewPlotScalar, node.Path)
 	desc.AddTransferable("offscreen", dsp.canvas.Call("transferControlToOffscreen"))
 	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
 }

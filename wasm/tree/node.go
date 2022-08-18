@@ -47,12 +47,23 @@ func (el *Element) newNode(parent *Node, name string) (*Node, error) {
 		})
 		n.item.AppendChild(n.caret)
 	}
-	n.item.AppendChild(el.ui.Owner().CreateTextNode(name))
+	if ui.Builder(n.node.Mime) == nil {
+		n.item.AppendChild(el.ui.Owner().CreateTextNode(name))
+	} else {
+		open := ui.NewButton(n.el.ui.Owner(), name, n.openPanel)
+		n.item.AppendChild(open)
+	}
 
 	if node.HasChildren && el.settings.isVisible(node.Path.Path) {
 		n.el.ui.Run(n.expand)
 	}
 	return n, nil
+}
+
+func (n *Node) openPanel(dom.Event) {
+	if err := n.el.ui.Dashboard().OpenPanel(n.node); err != nil {
+		n.el.ui.DisplayErr(err)
+	}
 }
 
 func (n *Node) expand() error {

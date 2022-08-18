@@ -29,7 +29,7 @@ func newUnsupported(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 		root: NewErrorElement(dbd.UI().Owner()),
 	}
 	dsp.root.SetInnerHTML(fmt.Sprintf(unsupportedHTML, node.Mime))
-	desc := dbd.NewDescriptor(nil, node.Path)
+	desc := dbd.NewDescriptor(node, nil, node.Path)
 	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
 }
 

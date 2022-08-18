@@ -25,6 +25,9 @@ type (
 		// TreeClient returns the connection to the server.
 		TreeClient() treepb.TreeClient
 
+		// Dashboard returns the main dashboard displaying the panels.
+		Dashboard() Dashboard
+
 		// DisplayErr displays an error for the user to see.
 		DisplayErr(err error)
 
@@ -38,7 +41,7 @@ type (
 	Dashboard interface {
 		UI() UI
 
-		NewDescriptor(renderer renderers.Newer, paths ...*treepb.NodePath) Descriptor
+		NewDescriptor(node *treepb.Node, renderer renderers.Newer, paths ...*treepb.NodePath) Descriptor
 
 		OpenPanel(node *treepb.Node) error
 
@@ -55,7 +58,7 @@ type (
 	Panel interface {
 		// Root returns the root node of a panel.
 		// This node is added to the dashboard node when a panel is registered.
-		Root() dom.Node
+		Root() *dom.HTMLDivElement
 		// Desc returns the panel descriptor.
 		Desc() Descriptor
 		// Display the latest data.

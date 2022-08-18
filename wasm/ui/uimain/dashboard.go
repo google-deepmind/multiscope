@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"multiscope/internal/mime"
+	"multiscope/internal/server/core"
 	rootpb "multiscope/protos/root_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
@@ -16,9 +17,10 @@ import (
 // Dashboard gets the data sent by the renderers (from a webworker) and display
 // them in the main UI thread.
 type Dashboard struct {
-	ui     *UI
-	panels map[ui.PanelID]ui.Panel
-	root   dom.Node
+	ui       *UI
+	pathToID map[core.Key]ui.PanelID
+	panels   map[ui.PanelID]ui.Panel
+	root     dom.Node
 }
 
 func newDashboard(main *UI) (*Dashboard, error) {
@@ -28,9 +30,10 @@ func newDashboard(main *UI) (*Dashboard, error) {
 		return nil, errors.Errorf("wrong number of elements of class %q: got %d but want 1", dashboardClass, len(elements))
 	}
 	return &Dashboard{
-		ui:     main,
-		panels: make(map[ui.PanelID]ui.Panel),
-		root:   elements[0],
+		ui:       main,
+		pathToID: make(map[core.Key]ui.PanelID),
+		panels:   make(map[ui.PanelID]ui.Panel),
+		root:     elements[0],
 	}, nil
 }
 
@@ -97,15 +100,7 @@ func (dbd *Dashboard) render(displayData *uipb.DisplayData) {
 	}
 }
 
-func (dbd *Dashboard) registerPanel(pnl ui.Panel) error {
-	dbd.root.AppendChild(pnl.Root())
-	desc := pnl.Desc().(*Descriptor)
-	dbd.panels[desc.ID()] = pnl
-	return dbd.ui.puller.registerPanel(desc)
-}
-
-// OpenPanel opens a panel on the dashboard or focus on it if the panel has already been opened.
-func (dbd *Dashboard) OpenPanel(node *treepb.Node) error {
+func (dbd *Dashboard) createPanel(node *treepb.Node) error {
 	builder := ui.Builder(node.Mime)
 	if builder == nil {
 		builder = ui.Builder(mime.Unsupported)
@@ -120,10 +115,35 @@ func (dbd *Dashboard) OpenPanel(node *treepb.Node) error {
 	return dbd.registerPanel(pnl)
 }
 
+// OpenPanel opens a panel on the dashboard or focus on it if the panel has already been opened.
+func (dbd *Dashboard) OpenPanel(node *treepb.Node) error {
+	id, ok := dbd.pathToID[core.ToKey(node.Path.Path)]
+	if ok {
+		dbd.panels[id].Root().Call("scrollIntoView")
+		return nil
+	}
+	return dbd.createPanel(node)
+}
+
+func (dbd *Dashboard) registerPanel(pnl ui.Panel) error {
+	dbd.root.AppendChild(pnl.Root())
+	desc := pnl.Desc().(*Descriptor)
+	path, ok := desc.path()
+	if ok {
+		dbd.pathToID[path] = desc.id()
+	}
+	dbd.panels[desc.id()] = pnl
+	return dbd.ui.puller.registerPanel(desc)
+}
+
 func (dbd *Dashboard) ClosePanel(pnl ui.Panel) error {
 	desc := pnl.Desc().(*Descriptor)
 	err := dbd.ui.puller.unregisterPanel(desc)
-	delete(dbd.panels, desc.ID())
+	delete(dbd.panels, desc.id())
+	path, ok := desc.path()
+	if ok {
+		delete(dbd.pathToID, path)
+	}
 	dbd.root.RemoveChild(pnl.Root())
 	return err
 }

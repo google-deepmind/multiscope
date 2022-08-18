@@ -27,7 +27,7 @@ type (
 		desc ui.Descriptor
 		dsp  Displayer
 
-		root dom.Element
+		root *dom.HTMLDivElement
 		// err is a paragraph to display an error.
 		err     dom.HTMLElement
 		lastErr string
@@ -40,8 +40,8 @@ func NewPanel(title string, desc ui.Descriptor, dsp Displayer) (ui.Panel, error)
 	pnl := &Panel{
 		desc: desc,
 		dsp:  dsp,
-		root: dbd.UI().Owner().CreateElement("div"),
 	}
+	pnl.root = dbd.UI().Owner().CreateElement("div").(*dom.HTMLDivElement)
 	pnl.appendTitle(title)
 	pnl.appendErr()
 	pnl.root.AppendChild(dsp.Root())
@@ -103,7 +103,7 @@ func (pnl *Panel) processCloseEvent(ev dom.Event) {
 
 // Root returns the root node of a panel.
 // This node is added to the dashboard node when a panel is registered.
-func (pnl *Panel) Root() dom.Node {
+func (pnl *Panel) Root() *dom.HTMLDivElement {
 	return pnl.root
 }
 

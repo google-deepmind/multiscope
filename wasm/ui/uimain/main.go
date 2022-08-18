@@ -12,6 +12,7 @@ import (
 	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/injector"
 	"multiscope/wasm/settings"
+	"multiscope/wasm/ui"
 	"multiscope/wasm/worker"
 	"strconv"
 	"strings"
@@ -102,6 +103,11 @@ func (ui *UI) newDefaultStyle() (*style.Style, error) {
 // Owner returns the owner of the DOM tree of the UI.
 func (ui *UI) Owner() dom.HTMLDocument {
 	return ui.window.Document().(dom.HTMLDocument)
+}
+
+// Dashboard returns the dashboard displaying the panels.
+func (ui *UI) Dashboard() ui.Dashboard {
+	return ui.layout.Dashboard()
 }
 
 // DisplayErr displays an error on the UI.

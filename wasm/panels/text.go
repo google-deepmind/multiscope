@@ -23,7 +23,7 @@ func newText(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 		root: dbd.UI().Owner().CreateElement("p").(*dom.HTMLParagraphElement),
 	}
 	dsp.root.Class().Add("text-content")
-	desc := dbd.NewDescriptor(nil, node.Path)
+	desc := dbd.NewDescriptor(node, nil, node.Path)
 	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
 }
 

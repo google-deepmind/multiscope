@@ -37,7 +37,7 @@ func newHTML(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	cssPath := &treepb.NodePath{
 		Path: append(append([]string{}, node.Path.Path...), mime.NodeNameCSS),
 	}
-	desc := dbd.NewDescriptor(nil, node.Path, htmlPath, cssPath)
+	desc := dbd.NewDescriptor(node, nil, node.Path, htmlPath, cssPath)
 	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
 }
 
