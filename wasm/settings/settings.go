@@ -2,11 +2,13 @@
 package settings
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
+	"syscall/js"
 
 	"honnef.co/go/js/dom/v2"
 )
@@ -22,6 +24,11 @@ func NewSettings(fErr func(error)) *Settings {
 		fErr: fErr,
 		cur:  make(map[string]interface{}),
 	}
+
+	js.Global().Set("multiscopeSettings", js.FuncOf(func(js.Value, []js.Value) interface{} {
+		go s.printSettings()
+		return nil
+	}))
 
 	header := http.Header{}
 	header.Add("Cookie", doc().Cookie())
@@ -40,6 +47,17 @@ func NewSettings(fErr func(error)) *Settings {
 		return s
 	}
 	return s
+}
+
+func (s *Settings) printSettings() {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(s.cur); err != nil {
+		fmt.Println("cannot serialize the settings:", err)
+		return
+	}
+	fmt.Println(buf.String())
 }
 
 func doc() dom.HTMLDocument {

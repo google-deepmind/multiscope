@@ -1,7 +1,6 @@
 package uimain
 
 import (
-	"multiscope/internal/server/core"
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/renderers"
@@ -53,11 +52,13 @@ func (dsc *Descriptor) id() ui.PanelID {
 	return ui.PanelID(dsc.pb.Id)
 }
 
-func (dsc *Descriptor) path() (core.Key, bool) {
+// Path returns the path of the node in the tree.
+// Can return nil.
+func (dsc *Descriptor) Path() *treepb.NodePath {
 	if dsc.node == nil {
-		return "", false
+		return nil
 	}
-	return core.ToKey(dsc.node.Path.Path), true
+	return dsc.node.Path
 }
 
 // PanelPB returns the list of path necessary for the panel.

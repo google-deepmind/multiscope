@@ -50,7 +50,14 @@ type (
 
 	// Descriptor enables the communication between a panel and the web worker to get the data.
 	Descriptor interface {
+		// Path returns the path of the node that the descriptor stores data about.
+		// Returns nil if the descriptor does correspond to a path in the tree.
+		Path() *treepb.NodePath
+
+		// Dashboard returns the owner of the descriptor.
 		Dashboard() Dashboard
+
+		// AddTransferable adds a Javascript to transfer to the renderer of the web-worker.
 		AddTransferable(name string, v js.Value)
 	}
 

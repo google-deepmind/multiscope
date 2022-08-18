@@ -126,9 +126,9 @@ func (dbd *Dashboard) OpenPanel(node *treepb.Node) error {
 func (dbd *Dashboard) registerPanel(pnl ui.Panel) error {
 	dbd.layout.Append(pnl)
 	desc := pnl.Desc().(*Descriptor)
-	path, ok := desc.path()
-	if ok {
-		dbd.pathToID[path] = desc.id()
+	path := desc.Path()
+	if path != nil {
+		dbd.pathToID[core.ToKey(path.Path)] = desc.id()
 	}
 	dbd.panels[desc.id()] = pnl
 	return dbd.ui.puller.registerPanel(desc)
@@ -138,9 +138,9 @@ func (dbd *Dashboard) ClosePanel(pnl ui.Panel) error {
 	desc := pnl.Desc().(*Descriptor)
 	err := dbd.ui.puller.unregisterPanel(desc)
 	delete(dbd.panels, desc.id())
-	path, ok := desc.path()
-	if ok {
-		delete(dbd.pathToID, path)
+	path := desc.Path()
+	if path != nil {
+		delete(dbd.pathToID, core.ToKey(path.Path))
 	}
 	dbd.layout.Remove(pnl)
 	return err
