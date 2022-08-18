@@ -40,7 +40,7 @@ type (
 
 		NewDescriptor(renderer renderers.Newer, paths ...*treepb.NodePath) Descriptor
 
-		RegisterPanel(pnl Panel) error
+		OpenPanel(node *treepb.Node) error
 
 		ClosePanel(pnl Panel) error
 	}

@@ -46,7 +46,7 @@ func NewPanel(title string, desc ui.Descriptor, dsp Displayer) (ui.Panel, error)
 	pnl.appendErr()
 	pnl.root.AppendChild(dsp.Root())
 	pnl.refreshErrorPanel("")
-	return pnl, dbd.RegisterPanel(pnl)
+	return pnl, nil
 }
 
 func (pnl *Panel) appendTitle(title string) {

@@ -51,7 +51,7 @@ func (dbd *Dashboard) updateLayout(layout *rootpb.Layout) error {
 		return fmt.Errorf("cannot query the tree structure: %v", err)
 	}
 	for _, node := range nodes.Nodes {
-		if _, err := dbd.buildPanel(node); err != nil {
+		if err := dbd.OpenPanel(node); err != nil {
 			return err
 		}
 	}
@@ -97,12 +97,27 @@ func (dbd *Dashboard) render(displayData *uipb.DisplayData) {
 	}
 }
 
-// RegisterPanel adds a new panel to display to the dashboard.
-func (dbd *Dashboard) RegisterPanel(pnl ui.Panel) error {
+func (dbd *Dashboard) registerPanel(pnl ui.Panel) error {
 	dbd.root.AppendChild(pnl.Root())
 	desc := pnl.Desc().(*Descriptor)
 	dbd.panels[desc.ID()] = pnl
 	return dbd.ui.puller.registerPanel(desc)
+}
+
+// OpenPanel opens a panel on the dashboard or focus on it if the panel has already been opened.
+func (dbd *Dashboard) OpenPanel(node *treepb.Node) error {
+	builder := ui.Builder(node.Mime)
+	if builder == nil {
+		builder = ui.Builder(mime.Unsupported)
+	}
+	if builder == nil {
+		return errors.Errorf("MIME type %q not supported", mime.Unsupported)
+	}
+	pnl, err := builder(dbd, node)
+	if err != nil {
+		return fmt.Errorf("cannot create panel: %w", err)
+	}
+	return dbd.registerPanel(pnl)
 }
 
 func (dbd *Dashboard) ClosePanel(pnl ui.Panel) error {
@@ -111,15 +126,4 @@ func (dbd *Dashboard) ClosePanel(pnl ui.Panel) error {
 	delete(dbd.panels, desc.ID())
 	dbd.root.RemoveChild(pnl.Root())
 	return err
-}
-
-func (dbd *Dashboard) buildPanel(node *treepb.Node) (ui.Panel, error) {
-	builder := ui.Builder(node.Mime)
-	if builder == nil {
-		builder = ui.Builder(mime.Unsupported)
-	}
-	if builder == nil {
-		return nil, errors.Errorf("MIME type %q not supported", mime.Unsupported)
-	}
-	return builder(dbd, node)
 }
