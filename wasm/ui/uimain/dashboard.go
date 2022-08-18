@@ -95,11 +95,7 @@ func (dbd *Dashboard) refresh(data *treepb.NodeData) error {
 }
 
 func (dbd *Dashboard) clearLayout() {
-	panels := []ui.Panel{}
 	for _, pnl := range dbd.panels {
-		panels = append(panels, pnl)
-	}
-	for _, pnl := range panels {
 		if err := dbd.ClosePanel(pnl); err != nil {
 			dbd.ui.DisplayErr(err)
 		}
