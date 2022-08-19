@@ -38,7 +38,9 @@ const (
 	MultiscopeRootData = "multiscope/root/data"
 	// Protobuf represents a google.protobuf.Any protobuf.
 	Protobuf = "application/x-protobuf"
-	// Unsupported is for panel to display an unsupported error.
+	// Error is for a panel to display a string error.
+	Error = "multiscope/error"
+	// Unsupported is for a panel to display an unsupported error.
 	Unsupported = "multiscope/unsupported"
 )
 

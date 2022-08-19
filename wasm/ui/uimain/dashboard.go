@@ -122,7 +122,11 @@ func (dbd *Dashboard) render(displayData *uipb.DisplayData) {
 }
 
 func (dbd *Dashboard) createPanel(node *treepb.Node) error {
-	builder := ui.Builder(node.Mime)
+	pMime := node.Mime
+	if node.Error != "" {
+		pMime = mime.Error
+	}
+	builder := ui.Builder(pMime)
 	if builder == nil {
 		builder = ui.Builder(mime.Unsupported)
 	}

@@ -54,7 +54,10 @@ func marshalPBNode(node core.Node, path []string, expandChildren bool) *pb.Node 
 func pathToPBNode(root core.Parent, path []string, expandChildren bool) *pb.Node {
 	node, err := core.PathToNode(root, path)
 	if err != nil {
-		return &pb.Node{Error: err.Error()}
+		return &pb.Node{
+			Error: err.Error(),
+			Path:  &pb.NodePath{Path: path},
+		}
 	}
 	return marshalPBNode(node, path, true)
 }
