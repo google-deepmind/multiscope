@@ -93,13 +93,22 @@ func NewTextWriter(name string, parent remote.Path) (*remote.TextWriter, error) 
 	return remote.NewTextWriter(clt, name, parent)
 }
 
-// NewHTMLWriter creates a new writer to display images in Multiscope.
+// NewHTMLWriter creates a new writer to display HTML in Multiscope.
 func NewHTMLWriter(name string, parent remote.Path) (*remote.HTMLWriter, error) {
 	clt, err := Client()
 	if err != nil {
 		return nil, err
 	}
 	return remote.NewHTMLWriter(clt, name, parent)
+}
+
+// NewImageWriter creates a new writer to display images in Multiscope.
+func NewImageWriter(name string, parent remote.Path) (*remote.ImageWriter, error) {
+	clt, err := Client()
+	if err != nil {
+		return nil, err
+	}
+	return remote.NewImageWriter(clt, name, parent)
 }
 
 // EventsManager returns the registry mapping path to callback of the main Multiscope remote.

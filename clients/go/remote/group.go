@@ -17,9 +17,8 @@ type Group struct {
 // NewGroup creates a new group in the tree.
 func NewGroup(clt *Client, name string, parent Path) (*Group, error) {
 	clw := pbgrpc.NewBaseWritersClient(clt.Connection())
-	ctx := context.Background()
 	path := clt.toChildPath(name, parent)
-	rep, err := clw.NewGroup(ctx, &pb.NewGroupRequest{
+	rep, err := clw.NewGroup(context.Background(), &pb.NewGroupRequest{
 		Path: path.NodePath(),
 	})
 	if err != nil {

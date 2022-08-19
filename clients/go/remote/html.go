@@ -28,7 +28,7 @@ func NewHTMLWriter(clt *Client, name string, parent Path) (*HTMLWriter, error) {
 	}
 	writer := rep.GetWriter()
 	if writer == nil {
-		return nil, errors.New("server has returned a nil TensorWriter")
+		return nil, errors.New("server has returned a nil HTMLWriter")
 	}
 	writerPath := toPath(writer)
 	if err := clt.Display().DisplayIfDefault(writerPath); err != nil {

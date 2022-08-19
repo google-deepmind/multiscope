@@ -28,7 +28,7 @@ func NewTextWriter(clt *Client, name string, parent Path) (*TextWriter, error) {
 	}
 	writer := rep.GetWriter()
 	if writer == nil {
-		return nil, errors.New("server has returned a nil TensorWriter")
+		return nil, errors.New("server has returned a nil TextWriter")
 	}
 	writerPath := toPath(writer)
 	if err := clt.Display().DisplayIfDefault(writerPath); err != nil {
