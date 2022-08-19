@@ -20,6 +20,16 @@ func (oc OffscreenCanvas) GetContext2d() *dom.CanvasRenderingContext2D {
 	return &dom.CanvasRenderingContext2D{Value: oc.Call("getContext", "2d")}
 }
 
+// SetWidth sets the width of the canvas.
+func (oc OffscreenCanvas) SetWidth(w int) {
+	oc.Set("width", w)
+}
+
+// SetHeight sets the height of the canvas.
+func (oc OffscreenCanvas) SetHeight(h int) {
+	oc.Set("height", h)
+}
+
 // Width returns the width of the canvas.
 func (oc OffscreenCanvas) Width() int {
 	return oc.Get("width").Int()
