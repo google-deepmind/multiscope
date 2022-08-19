@@ -1,11 +1,12 @@
-// Package workerserver provides web-worker on the server side.
-package workerserver
+// Package worker provides web-worker on the server side.
+package worker
 
 import (
 	"fmt"
 	"log"
+	"multiscope/internal/server/wasmurl"
 	"net/http"
-	"path"
+	"strings"
 	"text/template"
 )
 
@@ -18,7 +19,7 @@ onmessage = function(e) {
 
 const goWorker = new Go();
 WebAssembly.instantiateStreaming(
-  fetch("/res/{{.wasmName}}.wasm"),
+  fetch("{{.wasmURL}}"),
   goWorker.importObject
 ).then((result) => {
   goWorker.run(result.instance);
@@ -34,37 +35,37 @@ func wErr(w http.ResponseWriter, format string, a ...interface{}) {
 	}
 }
 
-func split(p string) (wasmName, funcName string, err error) {
-	var dir string
-	dir, funcName = path.Split(p)
-	if dir == "" || len(dir) <= 1 {
-		return "", "", fmt.Errorf("empty wasm name")
+func parseFuncName(s string) (string, error) {
+	prefix, funcName, found := strings.Cut(s, "/")
+	if prefix == "" {
+		prefix, funcName, found = strings.Cut(funcName, "/")
 	}
-	_, wasmName = path.Split(dir[:len(dir)-1])
-	if wasmName == "" {
-		return "", "", fmt.Errorf("empty wasm name")
+	if !found {
+		return "", fmt.Errorf("malformed URL %q: cannot find separator '/'", s)
 	}
-	return
+	if prefix != "worker" {
+		return "", fmt.Errorf("URL has the wrong prefix: got %q but want worker", prefix)
+	}
+	return funcName, nil
 }
 
 // Handle requests to start new web workers.
 func Handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/javascript")
-	t := template.New("main")
-	wasmName, funcName, err := split(r.URL.Path)
+	funcName, err := parseFuncName(r.URL.Path)
 	if err != nil {
-		wErr(w, "cannot get wasm file and function name from path %q: %v. Expected format is wasm_name/func_name", r.URL.Path, err)
+		wErr(w, "cannot provide worker: %v", err)
 		return
-
 	}
+	t := template.New("main")
 	t, err = t.Parse(script)
 	if err != nil {
 		wErr(w, "error parsing template: %v", err)
 		return
 	}
 	args := map[string]string{
-		"wasmName": wasmName,
 		"funcName": funcName,
+		"wasmURL":  wasmurl.URL(),
 	}
 	if err = t.Execute(w, args); err != nil {
 		wErr(w, "error writing content: %v", err)

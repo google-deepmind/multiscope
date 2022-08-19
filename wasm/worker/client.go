@@ -35,14 +35,14 @@ func run(this js.Value, args []js.Value) interface{} {
 }
 
 // Go starts a function in a web worker.
-func Go(name string, f MainFunc) (wkr *Worker, err error) {
+func Go(f MainFunc) (wkr *Worker, err error) {
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("cannot start worker '%s:%s': %w", name, f.name(), err)
+			err = fmt.Errorf("cannot start worker from function %q: %w", f.name(), err)
 		}
 	}()
 	workers := js.Global().Get("Worker")
-	val := workers.New("worker/" + name + "/" + f.name())
+	val := workers.New("worker/" + f.name())
 	wkr = newWorker("main", val)
 	m := &pb.WorkerAck{}
 	if _, err := wkr.Recv(m); err != nil {

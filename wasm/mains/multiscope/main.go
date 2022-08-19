@@ -45,7 +45,7 @@ func main() {
 	// Main thread.
 
 	// Start the data puller worker.
-	puller, err := worker.Go("multiscope", pullDataMain)
+	puller, err := worker.Go(pullDataMain)
 	ui := uimain.NewUI(puller, grpcAddr())
 	if err != nil {
 		ui.DisplayErr(err)

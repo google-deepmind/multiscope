@@ -2,10 +2,11 @@ package scope
 
 import (
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"multiscope/internal/httpgrpc"
-	"multiscope/internal/worker/workerserver"
+	"multiscope/internal/server/worker"
 	"multiscope/web"
 	"net/http"
 	"sync"
@@ -23,6 +24,20 @@ func wErr(w http.ResponseWriter, format string, a ...interface{}) {
 	}
 }
 
+func readIndexHTML(root fs.FS) ([]byte, error) {
+	const indexHTML = "res/index.html"
+	file, err := root.Open(indexHTML)
+	if err != nil {
+		return nil, fmt.Errorf("error opening %q: %v", indexHTML, err)
+	}
+	defer file.Close()
+	buf, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read %q: %v", indexHTML, err)
+	}
+	return buf, nil
+}
+
 // RunHTTP the http server serving both httpgrpc and the ui.
 func RunHTTP(srv httpgrpc.Service, wg *sync.WaitGroup, addr string) error {
 	r := chi.NewRouter()
@@ -35,20 +50,12 @@ func RunHTTP(srv httpgrpc.Service, wg *sync.WaitGroup, addr string) error {
 		return fmt.Errorf("cannot register service: %w", err)
 	}
 	r.HandleFunc("/httpgrpc", server.Post)
-	r.Get("/worker/*", workerserver.Handle)
+	r.Get("/worker/*", worker.Handle)
 	root := web.FS()
-	const indexHTML = "res/index.html"
 	r.Get("/multiscope", func(w http.ResponseWriter, r *http.Request) {
-		file, err := root.Open(indexHTML)
+		buf, err := readIndexHTML(root)
 		if err != nil {
-			wErr(w, "error opening %q: %v", indexHTML, err)
-			return
-		}
-		defer file.Close()
-		buf, err := ioutil.ReadAll(file)
-		if err != nil {
-			wErr(w, "cannot read %q: %v", indexHTML, err)
-			return
+			wErr(w, "cannot read index.html: %v", err)
 		}
 		if _, err := w.Write(buf); err != nil {
 			wErr(w, "error writing content: %v", err)

@@ -10,9 +10,10 @@
     <link rel="stylesheet" href="res/layout.css" />
     <script src="res/wasm_exec.js"></script>
     <script>
+      const wasmURL = "res/multiscope.wasm";
       const go = new Go();
       WebAssembly.instantiateStreaming(
-        fetch("res/multiscope.wasm"),
+        fetch(wasmURL),
         go.importObject
       ).then((result) => {
         go.run(result.instance);
