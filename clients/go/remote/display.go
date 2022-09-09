@@ -14,14 +14,14 @@ type Display struct {
 	// Decides if new panels are added to the initial layout by default.
 	globalDisplayByDefault bool
 
-	list *rootpbgrpc.LayoutList
+	list *rootpb.LayoutList
 }
 
 func newDisplay(conn grpc.ClientConnInterface) *Display {
 	return &Display{
 		clt:                    rootpbgrpc.NewRootClient(conn),
 		globalDisplayByDefault: true,
-		list:                   &rootpbgrpc.LayoutList{},
+		list:                   &rootpb.LayoutList{},
 	}
 }
 
@@ -37,8 +37,8 @@ func (d *Display) DisplayIfDefault(path Path) error {
 	}
 	d.list.Displayed = append(d.list.Displayed, path.NodePath())
 	_, err := d.clt.SetLayout(context.Background(), &rootpb.SetLayoutRequest{
-		Layout: &rootpbgrpc.Layout{
-			Layout: &rootpbgrpc.Layout_List{
+		Layout: &rootpb.Layout{
+			Layout: &rootpb.Layout_List{
 				List: d.list,
 			},
 		},
