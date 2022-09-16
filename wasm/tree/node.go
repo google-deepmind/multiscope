@@ -1,3 +1,4 @@
+// Package tree builds the tree on the left of the UI.
 package tree
 
 import (

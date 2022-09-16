@@ -1,3 +1,4 @@
+// Package panels implements panels to display different kind of data.
 package panels
 
 import (

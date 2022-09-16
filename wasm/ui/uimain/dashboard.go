@@ -161,6 +161,7 @@ func (dbd *Dashboard) registerPanel(pnl ui.Panel) error {
 	return dbd.ui.puller.registerPanel(desc)
 }
 
+// ClosePanel closes a panel on the dashboard.
 func (dbd *Dashboard) ClosePanel(pnl ui.Panel) error {
 	desc := pnl.Desc().(*Descriptor)
 	err := dbd.ui.puller.unregisterPanel(desc)

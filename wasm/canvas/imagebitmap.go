@@ -10,6 +10,7 @@ type ImageBitmap struct {
 	Value js.Value
 }
 
+// ToImageBitMap takes a data buffer and builds a JS ImageBitmap.
 func ToImageBitMap(buf []byte) *ImageBitmap {
 	// Pass the data to JS.
 	typedArray := js.Global().Get("Uint8Array").New(len(buf))

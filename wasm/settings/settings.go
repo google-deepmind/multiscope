@@ -20,6 +20,7 @@ type Settings struct {
 	storage js.Value
 }
 
+// NewSettings returns a new instance of Settings.
 func NewSettings(fErr func(error)) *Settings {
 	s := &Settings{
 		fErr:    fErr,

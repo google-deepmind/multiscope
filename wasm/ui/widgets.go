@@ -1,3 +1,4 @@
+// Package ui implements the Multiscope UI.
 package ui
 
 import "honnef.co/go/js/dom/v2"

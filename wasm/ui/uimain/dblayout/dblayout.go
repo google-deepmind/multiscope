@@ -1,3 +1,4 @@
+// Package dblayout stores a layout.
 package dblayout
 
 import (
@@ -22,7 +23,7 @@ type Layout interface {
 	Remove(ui.Panel)
 }
 
-// NewLayout returns a new layout given a protocol buffer description.
+// New returns a new layout given a protocol buffer description.
 func New(dbd ui.Dashboard, lyt *rootpb.Layout) (Layout, error) {
 	if lyt == nil {
 		return newList(dbd), nil

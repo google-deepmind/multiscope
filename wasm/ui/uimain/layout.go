@@ -22,7 +22,7 @@ func newLayout(ui *UI) (*Layout, error) {
 	return l, nil
 }
 
-// Left returns the left bar of the page.
+// LeftBar returns the left bar of the page.
 func (l *Layout) LeftBar() *LeftBar {
 	return l.left
 }
