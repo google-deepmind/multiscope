@@ -17,9 +17,9 @@ import (
 
 const logQuery = false
 
-func wErr(w http.ResponseWriter, format string, a ...interface{}) {
+func wErrf(w http.ResponseWriter, format string, a ...interface{}) {
 	fmt.Println("error:", fmt.Sprintf(format, a...))
-	if _, err := w.Write([]byte(fmt.Sprintf(format, a...))); err != nil {
+	if _, err := fmt.Fprintf(w, format, a...); err != nil {
 		log.Printf("error writing error back to the client: %v", err)
 	}
 }
@@ -43,7 +43,7 @@ func RunHTTP(srv httpgrpc.Service, wg *sync.WaitGroup, addr string) error {
 	r.Get("/multiscope", func(w http.ResponseWriter, r *http.Request) {
 		args := map[string]string{"wasmURL": wasmurl.URL()}
 		if err := template.Execute(w, root, "res/index.html", args); err != nil {
-			wErr(w, "error parsing template: %v", err)
+			wErrf(w, "error parsing template: %v", err)
 			return
 		}
 	})

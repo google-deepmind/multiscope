@@ -14,14 +14,13 @@ import (
 )
 
 func TestServerDispatchesEvents(t *testing.T) {
-	root := root.NewRoot()
 	cbMap := events.NewRegistry()
-	state := grpctesting.NewState(root, cbMap, nil)
+	state := grpctesting.NewState(root.NewRoot(), cbMap, nil)
 	client := treeservice.New(nil, state)
 
 	req := &pb.SendEventsRequest{
 		Events: []*pb.Event{
-			&pb.Event{
+			{
 				Path: &pb.NodePath{Path: []string{"node"}},
 			},
 		},

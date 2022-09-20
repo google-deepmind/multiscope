@@ -38,36 +38,36 @@ type UI struct {
 
 // NewUI returns a new user interface mananing the main page.
 func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
-	ui := &UI{
+	gui := &UI{
 		addr:   c,
 		window: dom.GetWindow(),
 	}
-	ui.settings = settings.NewSettings(ui.DisplayErr)
+	gui.settings = settings.NewSettings(gui.DisplayErr)
 	var err error
-	ui.style, err = ui.newDefaultStyle()
+	gui.style, err = gui.newDefaultStyle()
 	if err != nil {
-		ui.DisplayErr(err)
-		return ui
+		gui.DisplayErr(err)
+		return gui
 	}
 
-	injector.Run(ui)
-	ui.style.OnChange(func(s *style.Style) {
-		ui.Owner().Body().Style().SetProperty("background", css.Color(s.Background()), "")
-		ui.Owner().Body().Style().SetProperty("color", css.Color(s.Foreground()), "")
+	injector.Run(gui)
+	gui.style.OnChange(func(s *style.Style) {
+		gui.Owner().Body().Style().SetProperty("background", css.Color(s.Background()), "")
+		gui.Owner().Body().Style().SetProperty("color", css.Color(s.Foreground()), "")
 	})
 
-	conn := httpgrpc.Connect(ui.addr.Scheme, ui.addr.Host)
-	ui.treeClient = treepb.NewTreeClient(conn)
-	ui.puller = newPuller(ui, puller)
-	if ui.layout, err = newLayout(ui); err != nil {
-		ui.DisplayErr(err)
-		return ui
+	conn := httpgrpc.Connect(gui.addr.Scheme, gui.addr.Host)
+	gui.treeClient = treepb.NewTreeClient(conn)
+	gui.puller = newPuller(gui, puller)
+	if gui.layout, err = newLayout(gui); err != nil {
+		gui.DisplayErr(err)
+		return gui
 	}
-	if err := ui.puller.registerPanel(ui.layout.Dashboard().descriptor()); err != nil {
-		ui.DisplayErr(err)
-		return ui
+	if err := gui.puller.registerPanel(gui.layout.Dashboard().descriptor()); err != nil {
+		gui.DisplayErr(err)
+		return gui
 	}
-	return ui
+	return gui
 }
 
 func parseFontSize(s string) (size vg.Length, err error) {
@@ -87,90 +87,90 @@ func parseFontSize(s string) (size vg.Length, err error) {
 	return wplot.ToLengthF(f), nil
 }
 
-func (ui *UI) newDefaultStyle() (*style.Style, error) {
-	s := style.NewStyle(ui.settings)
-	body := ui.Owner().Body()
-	css := dom.GetWindow().GetComputedStyle(body, "")
-	fontSize, err := parseFontSize(css.GetPropertyValue("font-size"))
+func (gui *UI) newDefaultStyle() (*style.Style, error) {
+	s := style.NewStyle(gui.settings)
+	body := gui.Owner().Body()
+	bodyCSS := dom.GetWindow().GetComputedStyle(body, "")
+	fontSize, err := parseFontSize(bodyCSS.GetPropertyValue("font-size"))
 	if err != nil {
 		return s, err
 	}
-	fontFamily := css.GetPropertyValue("font-family")
+	fontFamily := bodyCSS.GetPropertyValue("font-family")
 	s.Set("", fontFamily, fontSize)
 	return s, nil
 }
 
 // Owner returns the owner of the DOM tree of the UI.
-func (ui *UI) Owner() dom.HTMLDocument {
-	return ui.window.Document().(dom.HTMLDocument)
+func (gui *UI) Owner() dom.HTMLDocument {
+	return gui.window.Document().(dom.HTMLDocument)
 }
 
 // Dashboard returns the dashboard displaying the panels.
-func (ui *UI) Dashboard() ui.Dashboard {
-	return ui.layout.Dashboard()
+func (gui *UI) Dashboard() ui.Dashboard {
+	return gui.layout.Dashboard()
 }
 
 // DisplayErr displays an error on the UI.
-func (ui *UI) DisplayErr(err error) {
-	if err.Error() == ui.lastError {
+func (gui *UI) DisplayErr(err error) {
+	if err.Error() == gui.lastError {
 		return
 	}
-	ui.lastError = err.Error()
+	gui.lastError = err.Error()
 	fmt.Println("ERROR reported to main:")
 	fmt.Println(err)
 }
 
 // Style returns the current style of the UI.
-func (ui *UI) Style() *style.Style {
-	return ui.style
+func (gui *UI) Style() *style.Style {
+	return gui.style
 }
 
 // Layout returns the overall page layout.
-func (ui *UI) Layout() *Layout {
-	return ui.layout
+func (gui *UI) Layout() *Layout {
+	return gui.layout
 }
 
 // Settings returns Multiscope settings.
-func (ui *UI) Settings() *settings.Settings {
-	return ui.settings
+func (gui *UI) Settings() *settings.Settings {
+	return gui.settings
 }
 
-func (ui *UI) renderFrame() error {
-	displayData := ui.puller.lastDisplayData()
+func (gui *UI) renderFrame() error {
+	displayData := gui.puller.lastDisplayData()
 	if displayData == nil {
 		return nil
 	}
 	if displayData.Err != "" {
 		return fmt.Errorf("display data error: %v", displayData.Err)
 	}
-	ui.layout.Dashboard().render(displayData)
+	gui.layout.Dashboard().render(displayData)
 	return nil
 }
 
-func (ui *UI) animationFrame(period time.Duration) {
-	if err := ui.renderFrame(); err != nil {
-		ui.DisplayErr(err)
+func (gui *UI) animationFrame(period time.Duration) {
+	if err := gui.renderFrame(); err != nil {
+		gui.DisplayErr(err)
 		return
 	}
-	ui.window.RequestAnimationFrame(ui.animationFrame)
+	gui.window.RequestAnimationFrame(gui.animationFrame)
 }
 
 // MainLoop runs the user interface main loop. It never returns.
-func (ui *UI) MainLoop() {
-	ui.window.RequestAnimationFrame(ui.animationFrame)
+func (gui *UI) MainLoop() {
+	gui.window.RequestAnimationFrame(gui.animationFrame)
 	<-make(chan bool)
 }
 
 // TreeClient returns the connection to the server.
-func (ui *UI) TreeClient() treepb.TreeClient {
-	return ui.treeClient
+func (gui *UI) TreeClient() treepb.TreeClient {
+	return gui.treeClient
 }
 
 // Run a function in the background.
-func (ui *UI) Run(f func() error) {
+func (gui *UI) Run(f func() error) {
 	go func() {
 		if err := f(); err != nil {
-			ui.DisplayErr(err)
+			gui.DisplayErr(err)
 		}
 	}()
 }

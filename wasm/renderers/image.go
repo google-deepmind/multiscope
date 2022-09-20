@@ -17,7 +17,7 @@ func init() {
 }
 
 // NewImageRenderer creates a new renderer to display images on a canvas.
-func NewImageRenderer(style *style.Style, panel *uipb.Panel, aux js.Value) Renderer {
+func NewImageRenderer(stl *style.Style, panel *uipb.Panel, aux js.Value) Renderer {
 	return &imageRenderer{
 		offscreen: &canvas.OffscreenCanvas{Value: aux.Get("offscreen")},
 	}

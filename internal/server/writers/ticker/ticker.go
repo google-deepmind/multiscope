@@ -38,7 +38,7 @@ func (t *Ticker) Write(data *tickerpb.TickerData) error {
 	return t.writer.Write(data)
 }
 
-// MIME returns the mime type of this node (i.e. loupe)
+// MIME returns the mime type of this node.
 func (t *Ticker) MIME() string {
 	return t.writer.MIME()
 }

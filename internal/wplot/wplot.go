@@ -60,7 +60,7 @@ func New() *WPlot {
 
 // ToLengthF converts a number of pixels into a length.
 func ToLengthF(pixels float64) vg.Length {
-	return font.Points(float64(pixels) * .75)
+	return font.Points(pixels * .75)
 }
 
 // ToLength converts a number of pixels into a length.

@@ -10,14 +10,14 @@ import (
 
 func TestKey(t *testing.T) {
 	paths := [][]string{
-		[]string{"hello", "world"},
-		[]string{"hello/world"},
-		[]string{"hello/world/"},
-		[]string{"hello/world\\/"},
-		[]string{"hello/world\\/bonjour"},
-		[]string{`hello\`, "world"},
-		[]string{`hello\\\\`, "world"},
-		[]string{`hel\\\lo\\\\`, "world"},
+		{"hello", "world"},
+		{"hello/world"},
+		{"hello/world/"},
+		{"hello/world\\/"},
+		{"hello/world\\/bonjour"},
+		{`hello\`, "world"},
+		{`hello\\\\`, "world"},
+		{`hel\\\lo\\\\`, "world"},
 	}
 	for i, path := range paths {
 		key := core.ToKey(path)

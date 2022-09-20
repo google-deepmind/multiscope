@@ -16,7 +16,7 @@ type TestCase struct {
 	eventQueue      []*events.EventQueue
 }
 
-func consume(queue *events.EventQueue) (events []*pb.Event, err error) {
+func consume(queue *events.EventQueue) (evts []*pb.Event, err error) {
 	for {
 		var e *pb.Event
 		e, err = queue.Poll()
@@ -26,38 +26,38 @@ func consume(queue *events.EventQueue) (events []*pb.Event, err error) {
 		if e == nil {
 			return
 		}
-		events = append(events, e)
+		evts = append(evts, e)
 	}
 }
 
 func TestEventsDispatchedToSubscribers(t *testing.T) {
 	testCases := []TestCase{
-		TestCase{
+		{
 			pathsToRegister: []string{"node"},
 			pathsToProcess:  []string{"node"},
 			wantCount:       1,
 		},
-		TestCase{
+		{
 			pathsToRegister: []string{"node"},
 			pathsToProcess:  []string{"completely_different_node"},
 			wantCount:       0,
 		},
-		TestCase{
+		{
 			pathsToRegister: []string{"node", "node"},
 			pathsToProcess:  []string{"node"},
 			wantCount:       2,
 		},
-		TestCase{
+		{
 			pathsToRegister: []string{""},
 			pathsToProcess:  []string{"node"},
 			wantCount:       1,
 		},
-		TestCase{
+		{
 			pathsToRegister: []string{"node"},
 			pathsToProcess:  []string{"node", "node"},
 			wantCount:       2,
 		},
-		TestCase{
+		{
 			pathsToRegister: []string{"node"},
 			capture:         true,
 			pathsToProcess:  []string{"node", "node"},
@@ -80,11 +80,11 @@ func TestEventsDispatchedToSubscribers(t *testing.T) {
 
 		gotCount := 0
 		for _, queue := range testCases[i].eventQueue {
-			events, err := consume(queue)
+			evts, err := consume(queue)
 			if err != nil {
 				t.Error(err)
 			}
-			gotCount += len(events)
+			gotCount += len(evts)
 		}
 
 		if gotCount != testCase.wantCount {
@@ -135,12 +135,12 @@ func TestUnsubscribedQueueStopsReceivingEvents(t *testing.T) {
 			})
 		}
 		for i, s := range subscribers {
-			events, err := consume(s)
+			evts, err := consume(s)
 			if err != nil {
 				t.Error(err)
 			}
-			if len(events) != testCase.expect[i] {
-				t.Errorf("wrong number of events published for path %q, got: %d wanted %d at subscriber idx %d", testCase.subscribe[i], len(events), testCase.expect[i], i)
+			if len(evts) != testCase.expect[i] {
+				t.Errorf("wrong number of events published for path %q, got: %d wanted %d at subscriber idx %d", testCase.subscribe[i], len(evts), testCase.expect[i], i)
 			}
 		}
 	}

@@ -130,7 +130,7 @@ func (s *Settings) Get(key string, dst interface{}) bool {
 		return false
 	}
 	if err := unmarshal(buf, dst); err != nil {
-		s.fErr(fmt.Errorf("cannot get setting %q=%s: %w", key, string(buf), err))
+		s.fErr(fmt.Errorf("cannot get setting %q=%s: %w", key, buf, err))
 		return false
 	}
 	return true

@@ -24,7 +24,7 @@ type (
 		pause bool
 	}
 
-	// Caller gets called by the Ticker when it ticks
+	// Caller gets called by the Ticker when it ticks.
 	Caller func() error
 
 	// Ticker is a directory node able to perform additional synchronization on its children.
@@ -63,11 +63,12 @@ const measureStepSize = .99
 
 // NewTicker creates a new ticker node in tree.
 func NewTicker(clt *Client, name string, parent Path) (*Ticker, error) {
+	const channelBuffer = 10
 	t := &Ticker{
 		clt:    pbgrpc.NewTickersClient(clt.Connection()),
 		tick:   -1,
-		toTick: make(chan func() error, 10),
-		wait:   make(chan bool, 10),
+		toTick: make(chan func() error, channelBuffer),
+		wait:   make(chan bool, channelBuffer),
 	}
 	t.totalPeriod.HistoryTrace = measureStepSize
 	t.experimentPeriod.HistoryTrace = measureStepSize
@@ -101,9 +102,9 @@ func NewTicker(clt *Client, name string, parent Path) (*Ticker, error) {
 }
 
 func (t *Ticker) processSetPeriod(msg *pb.TickerAction_SetPeriod) error {
-	period := time.Duration(msg.GetPeriodMs())
+	p := time.Duration(msg.GetPeriodMs())
 	t.toTick <- func() error {
-		return t.SetPeriod(period * time.Millisecond)
+		return t.SetPeriod(p * time.Millisecond)
 	}
 	return nil
 }

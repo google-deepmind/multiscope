@@ -53,7 +53,7 @@ const (
 
 // NamedProtobuf extends Protobuf per go/multiscope-rfc #12 to represent a
 // protobuf with a specific type, like so:
-// application/x-protobuf;proto=google.protobuf.Timestamp
+// application/x-protobuf;proto=google.protobuf.Timestamp.
 func NamedProtobuf(name string) string {
 	return fmt.Sprintf("%s;proto=%s", Protobuf, name)
 }

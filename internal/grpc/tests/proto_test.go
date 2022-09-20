@@ -15,9 +15,9 @@ import (
 const protoWriterName = "test_proto_writer"
 
 func TestProtoWriter(t *testing.T) {
-	root := root.NewRoot()
+	rootNode := root.NewRoot()
 	// Setup the connection.
-	state := grpctesting.NewState(root, nil, nil)
+	state := grpctesting.NewState(rootNode, nil, nil)
 	conn, clt, err := grpctesting.SetupTest(state)
 	if err != nil {
 		t.Fatal(err)
@@ -28,7 +28,7 @@ func TestProtoWriter(t *testing.T) {
 
 	// Adding a node to the tree.
 	w := base.NewProtoWriter(nil)
-	root.AddChild(protoWriterName, w)
+	rootNode.AddChild(protoWriterName, w)
 
 	want := &timestamppb.Timestamp{Seconds: 42}
 	if err := w.Write(want); err != nil {

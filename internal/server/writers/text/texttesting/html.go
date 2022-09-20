@@ -13,7 +13,7 @@ import (
 const (
 	// HTML01Name is the name of the HTML writer in the tree.
 	HTML01Name = "text01"
-	// CSS01Data is the data being written
+	// CSS01Data is the data being written.
 	CSS01Data = "This is some invalid CSS"
 )
 

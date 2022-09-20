@@ -91,7 +91,7 @@ func SendEvent(ctx context.Context, clt pbgrpc.TreeClient, tickerPath []string, 
 		return err
 	}
 	_, err = clt.SendEvents(ctx, &pb.SendEventsRequest{
-		Events: []*pb.Event{&pb.Event{
+		Events: []*pb.Event{{
 			Path: &pb.NodePath{
 				Path: tickerPath,
 			},

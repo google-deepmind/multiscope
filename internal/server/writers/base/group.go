@@ -89,13 +89,13 @@ func (g *Group) MarshalData(data *pb.NodeData, path []string, lastTick uint32) {
 }
 
 func indent(r string) string {
-	if len(r) == 0 {
+	if r == "" {
 		return r
 	}
 	rs := strings.Split(r, "\n")
 	filtered := []string{}
 	for _, s := range rs {
-		if len(s) == 0 {
+		if s == "" {
 			continue
 		}
 		filtered = append(filtered, s)

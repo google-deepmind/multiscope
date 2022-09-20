@@ -14,7 +14,7 @@ type Writer struct {
 
 var _ core.Node = (*Writer)(nil)
 
-// NewWriter returns a new writer to display text
+// NewWriter returns a new writer to display text.
 func NewWriter() *Writer {
 	return &Writer{RawWriter: base.NewRawWriter(mime.PlainText)}
 }

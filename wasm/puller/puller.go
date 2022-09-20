@@ -137,14 +137,14 @@ func (p *Puller) processPullQuery(pull *uipb.Pull) error {
 			panelData.Nodes = append(panelData.Nodes, nodeData)
 		}
 	}
-	if err = p.messager.Send(displayData, nil); err != nil {
+	if err := p.messager.Send(displayData, nil); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p *Puller) processTheme(style *uipb.StyleChange) error {
-	p.style.Set(style.Theme, style.FontFamily, font.Length(style.FontSize))
+func (p *Puller) processTheme(stl *uipb.StyleChange) error {
+	p.style.Set(stl.Theme, stl.FontFamily, font.Length(stl.FontSize))
 	return nil
 }
 

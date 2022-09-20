@@ -37,7 +37,7 @@ func TestEvents(t *testing.T) {
 		wg.Done()
 		return true, nil
 	})
-	if _, err := clt.EventsManager().Register(textWriter.Path(), func() events.Callback {
+	if _, err = clt.EventsManager().Register(textWriter.Path(), func() events.Callback {
 		return cb
 	}); err != nil {
 		t.Fatal(err)
@@ -50,7 +50,7 @@ func TestEvents(t *testing.T) {
 	ctx := context.Background()
 	req := &pb.SendEventsRequest{
 		Events: []*pb.Event{
-			&pb.Event{
+			{
 				Path: textWriter.Path().NodePath(),
 			}},
 	}

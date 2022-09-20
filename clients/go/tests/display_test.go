@@ -52,7 +52,7 @@ func TestOnDisplayByDefault(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := []string{}
-	if err := checkDisplayed(clt, want); err != nil {
+	if err = checkDisplayed(clt, want); err != nil {
 		t.Errorf("error at initialization: %v", err)
 	}
 	ticker, err := remote.NewTicker(clt, "ticker", nil)

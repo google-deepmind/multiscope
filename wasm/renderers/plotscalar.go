@@ -28,9 +28,9 @@ func init() {
 }
 
 // NewPlotScalar returns a renderer to plot scalars on a canvas using gonum/plot.
-func NewPlotScalar(style *style.Style, panel *uipb.Panel, aux js.Value) Renderer {
+func NewPlotScalar(stl *style.Style, panel *uipb.Panel, aux js.Value) Renderer {
 	offscreen := canvas.OffscreenCanvas{Value: aux.Get("offscreen")}
-	return &plotScalar{canvas.New(offscreen), style}
+	return &plotScalar{canvas.New(offscreen), stl}
 }
 
 func labels(m map[string]*tablepb.Serie) []string {

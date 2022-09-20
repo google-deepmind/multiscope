@@ -16,8 +16,8 @@ import (
 const rawWriterName = "test_raw_writer"
 
 func TestRawWriter(t *testing.T) {
-	root := root.NewRoot()
-	state := grpctesting.NewState(root, nil, nil)
+	rootNode := root.NewRoot()
+	state := grpctesting.NewState(rootNode, nil, nil)
 	conn, clt, err := grpctesting.SetupTest(state)
 	if err != nil {
 		t.Fatal(err)
@@ -29,7 +29,7 @@ func TestRawWriter(t *testing.T) {
 
 	// Adding a node to the tree.
 	w := base.NewRawWriter("")
-	root.AddChild(rawWriterName, w)
+	rootNode.AddChild(rawWriterName, w)
 
 	want := []byte{1, 2, 3, 4}
 	if _, err := w.Write(want); err != nil {

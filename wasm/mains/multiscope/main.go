@@ -45,8 +45,8 @@ func main() {
 	// Main thread.
 
 	// Start the data puller worker.
-	puller, err := worker.Go(pullDataMain)
-	ui := uimain.NewUI(puller, grpcAddr())
+	pullr, err := worker.Go(pullDataMain)
+	ui := uimain.NewUI(pullr, grpcAddr())
 	if err != nil {
 		ui.DisplayErr(err)
 		return

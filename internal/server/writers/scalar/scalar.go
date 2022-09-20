@@ -40,7 +40,7 @@ func (w *Writer) AddToTree(state treeservice.State, path *treepb.NodePath) (*cor
 	return core.SetNodeAt(state.Root(), path, w)
 }
 
-// removeHead makes we only remember the last w.historyLength elements
+// removeHead makes we only remember the last w.historyLength elements.
 func (w *Writer) removeHeads() {
 	for _, serie := range w.data.LabelToSerie {
 		if len(serie.Points) <= historyLength {

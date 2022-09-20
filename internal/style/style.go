@@ -81,7 +81,7 @@ func (s *Style) SetTheme(theme string) {
 }
 
 // Set the current style.
-func (s *Style) Set(theme string, fontFamily string, fontSize font.Length) {
+func (s *Style) Set(theme, fontFamily string, fontSize font.Length) {
 	if theme != "" {
 		if t, ok := themes.Base16[theme]; ok {
 			s.theme = t

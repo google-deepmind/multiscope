@@ -42,12 +42,12 @@ func Register(f Newer) {
 }
 
 // New creates a new renderer given a panel.
-func New(style *style.Style, panel *uipb.Panel, aux js.Value) (Renderer, error) {
+func New(stl *style.Style, panel *uipb.Panel, aux js.Value) (Renderer, error) {
 	newer := nameToNewer[panel.Renderer]
 	if newer == nil {
 		return nil, errors.Errorf("renderer %q cannot be found. Available renderers are: %v", panel.Renderer, nameToNewer)
 	}
-	return newer(style, panel, aux), nil
+	return newer(stl, panel, aux), nil
 }
 
 // Name returns the name of a renderer constructor.

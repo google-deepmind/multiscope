@@ -15,8 +15,7 @@ import (
 )
 
 func TestProtoWriter(t *testing.T) {
-	root := root.NewRoot()
-	state := grpctesting.NewState(root, nil, nil)
+	state := grpctesting.NewState(root.NewRoot(), nil, nil)
 	conn, clt, err := grpctesting.SetupTest(state, base.RegisterService)
 	if err != nil {
 		t.Fatalf("testing.Start(base.RegisterService): %v", err)
@@ -62,8 +61,7 @@ func TestProtoWriter(t *testing.T) {
 }
 
 func TestRawWriter(t *testing.T) {
-	root := root.NewRoot()
-	state := grpctesting.NewState(root, nil, nil)
+	state := grpctesting.NewState(root.NewRoot(), nil, nil)
 	conn, clt, err := grpctesting.SetupTest(state, base.RegisterService)
 	if err != nil {
 		t.Fatalf("testing.Start(tree.RegisterService): %v", err)

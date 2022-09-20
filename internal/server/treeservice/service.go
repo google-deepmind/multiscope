@@ -3,7 +3,7 @@ package treeservice
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"sync"
 
 	"multiscope/internal/httpgrpc"
@@ -98,7 +98,7 @@ func (s *TreeServer) Dispatch(path *core.Path, msg proto.Message) error {
 	}
 	reply, err := s.SendEvents(ctx, &pb.SendEventsRequest{
 		Events: []*pb.Event{
-			&pb.Event{
+			{
 				Path:    path.PB(),
 				Payload: any,
 			},
@@ -111,7 +111,7 @@ func (s *TreeServer) Dispatch(path *core.Path, msg proto.Message) error {
 		if errI == "" {
 			continue
 		}
-		err = multierr.Append(err, fmt.Errorf(errI))
+		err = multierr.Append(err, errors.New(errI))
 	}
 	return err
 }

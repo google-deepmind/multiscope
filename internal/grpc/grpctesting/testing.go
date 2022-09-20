@@ -54,5 +54,4 @@ func SetupTest(state treeservice.State, services ...treeservice.RegisterServiceC
 		return nil, nil, err
 	}
 	return conn, pbgrpc.NewTreeClient(conn), nil
-
 }

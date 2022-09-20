@@ -66,7 +66,7 @@ func pathToPBNode(root core.Parent, path []string, expandChildren bool) *pb.Node
 func (s stateServer) getNodeStruct(ctx context.Context, req *pb.NodeStructRequest) (*pb.NodeStructReply, error) {
 	paths := req.GetPaths()
 	if len(paths) == 0 {
-		paths = []*pb.NodePath{&pb.NodePath{}}
+		paths = []*pb.NodePath{{}}
 	}
 	rep := &pb.NodeStructReply{}
 	rep.Nodes = make([]*pb.Node, len(paths))

@@ -37,10 +37,10 @@ type Shared struct {
 }
 
 // NewShared returns a server state shared across all clients.
-func NewShared(root core.Root, events *events.Registry, activePaths *pathlog.PathLog) *Shared {
+func NewShared(root core.Root, evnts *events.Registry, activePaths *pathlog.PathLog) *Shared {
 	return &Shared{
 		root:        root,
-		events:      events,
+		events:      evnts,
 		activePaths: activePaths,
 	}
 }

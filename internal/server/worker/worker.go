@@ -11,10 +11,9 @@ import (
 	"strings"
 )
 
-func wErr(w http.ResponseWriter, format string, a ...interface{}) {
+func wErrf(w http.ResponseWriter, format string, a ...interface{}) {
 	fmt.Println("error:", fmt.Sprintf(format, a...))
-	_, err := w.Write([]byte(fmt.Sprintf(format, a...)))
-	if err != nil {
+	if _, err := fmt.Fprintf(w, format, a...); err != nil {
 		log.Printf("error sending the error back to the client: %v", err)
 	}
 }
@@ -34,19 +33,19 @@ func parseFuncName(s string) (string, error) {
 }
 
 // Handle requests to start new web workers.
-func Handle(w http.ResponseWriter, r *http.Request, fs fs.FS) {
+func Handle(w http.ResponseWriter, r *http.Request, root fs.FS) {
 	w.Header().Set("content-type", "application/javascript")
 	funcName, err := parseFuncName(r.URL.Path)
 	if err != nil {
-		wErr(w, "cannot provide worker: %v", err)
+		wErrf(w, "cannot provide worker: %v", err)
 		return
 	}
 	args := map[string]string{
 		"funcName": funcName,
 		"wasmURL":  wasmurl.URL(),
 	}
-	if err := template.Execute(w, fs, "res/worker.js", args); err != nil {
-		wErr(w, "error parsing template: %v", err)
+	if err := template.Execute(w, root, "res/worker.js", args); err != nil {
+		wErrf(w, "error parsing template: %v", err)
 		return
 	}
 }

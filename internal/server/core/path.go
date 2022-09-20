@@ -80,7 +80,7 @@ func hasProtectedSuffix(s string) bool {
 	return n%2 > 0
 }
 
-// Split splits a key into its different path elements
+// Split a key into its different path elements.
 func (k Key) Split() []string {
 	r := strings.Split(string(k), "/")
 	pr := []string{}

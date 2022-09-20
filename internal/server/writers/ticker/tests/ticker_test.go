@@ -14,8 +14,7 @@ import (
 )
 
 func TestFastTicker(t *testing.T) {
-	root := root.NewRoot()
-	state := grpctesting.NewState(root, nil, nil)
+	state := grpctesting.NewState(root.NewRoot(), nil, nil)
 	conn, clt, err := grpctesting.SetupTest(state, ticker.RegisterService)
 	if err != nil {
 		t.Fatal(err)

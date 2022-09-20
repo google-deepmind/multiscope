@@ -68,7 +68,7 @@ func CheckTicker(clt pbgrpc.TreeClient, path []string, i int) error {
 		return err
 	}
 	got := &tickerpb.TickerData{}
-	if err = client.ToProto(data[0], got); err != nil {
+	if err := client.ToProto(data[0], got); err != nil {
 		return err
 	}
 	if diff := cmp.Diff(got, TickerData[i].Data, protocmp.Transform()); len(diff) > 0 {

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"google.golang.org/grpc"
@@ -46,7 +46,7 @@ func (c *Client) post(method string, args interface{}, replyMsg proto.Message) (
 }
 
 func (c *Client) assign(method string, resp *http.Response, replyMsg proto.Message) error {
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("cannot read request body: %v", err)
 	}
@@ -62,7 +62,7 @@ func (c *Client) assign(method string, resp *http.Response, replyMsg proto.Messa
 }
 
 // Invoke performs a unary RPC and returns after the response is received into reply.
-func (c *Client) Invoke(ctx context.Context, method string, args interface{}, reply interface{}, opts ...grpc.CallOption) error {
+func (c *Client) Invoke(ctx context.Context, method string, args, reply interface{}, opts ...grpc.CallOption) error {
 	if reply == nil {
 		return fmt.Errorf("cannot invoke method %s with a nil reply", method)
 	}

@@ -26,23 +26,23 @@ const Scalar01Name = "scalar01"
 
 // Scalar01Data is the data to write to the scalar01 writer.
 var Scalar01Data = []map[string]float64{
-	map[string]float64{"a": 1, "b": 2},
-	map[string]float64{"a": 3, "b": 4},
-	map[string]float64{"a": 5, "b": 6},
+	{"a": 1, "b": 2},
+	{"a": 3, "b": 4},
+	{"a": 5, "b": 6},
 }
 
 func buildWant() *tablepb.Series {
 	return &tablepb.Series{LabelToSerie: map[string]*tablepb.Serie{
-		"a": &tablepb.Serie{
+		"a": {
 			Points: []*tablepb.Point{
-				&tablepb.Point{X: 1, Y: 3},
-				&tablepb.Point{X: 2, Y: 5},
+				{X: 1, Y: 3},
+				{X: 2, Y: 5},
 			},
 		},
-		"b": &tablepb.Serie{
+		"b": {
 			Points: []*tablepb.Point{
-				&tablepb.Point{X: 1, Y: 4},
-				&tablepb.Point{X: 2, Y: 6},
+				{X: 1, Y: 4},
+				{X: 2, Y: 6},
 			},
 		},
 	}}

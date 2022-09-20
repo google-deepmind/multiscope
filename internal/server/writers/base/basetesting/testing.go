@@ -14,18 +14,18 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// Proto01Name is the name of the proto writer in the tree
+// Proto01Name is the name of the proto writer in the tree.
 const Proto01Name = "proto01"
 
 // Proto01Data is the data to write to the writer.
 var Proto01Data = []*timestamppb.Timestamp{
-	&timestamppb.Timestamp{
+	{
 		Seconds: 1,
 	},
-	&timestamppb.Timestamp{
+	{
 		Seconds: 2,
 	},
-	&timestamppb.Timestamp{
+	{
 		Seconds: 3,
 	},
 }
@@ -60,7 +60,7 @@ func CheckProto01(ctx context.Context, clt pbgrpc.TreeClient, path []string, i i
 	return nil
 }
 
-// Raw01Name is the name of the raw writer in the tree
+// Raw01Name is the name of the raw writer in the tree.
 const Raw01Name = "raw01"
 
 // Raw01Data is the data to write to the writer.

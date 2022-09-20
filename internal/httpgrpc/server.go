@@ -3,7 +3,7 @@ package httpgrpc
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"reflect"
@@ -51,11 +51,10 @@ func (s *Server) Register(service Service) error {
 
 const contentError = "text/plain; charset=utf-8; error"
 
-func wErr(w http.ResponseWriter, format string, a ...interface{}) {
+func wErrf(w http.ResponseWriter, format string, a ...interface{}) {
 	fmt.Println("error:", fmt.Sprintf(format, a...))
 	w.Header().Set(_ContentType, contentError)
-	_, err := w.Write([]byte(fmt.Sprintf(format, a...)))
-	if err != nil {
+	if _, err := fmt.Fprintf(w, format, a...); err != nil {
 		log.Print(err)
 	}
 }
@@ -108,12 +107,12 @@ func (s *Server) post(w http.ResponseWriter, r *http.Request) error {
 	if contentTypeRequest != contentTypeWant {
 		return fmt.Errorf("invalid content type for %s: got %q but want %q", functionCall, contentTypeRequest, contentTypeWant)
 	}
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return fmt.Errorf("cannot read request body: %v", err)
 	}
 	defer r.Body.Close()
-	if err := proto.Unmarshal(body, msg); err != nil {
+	if err = proto.Unmarshal(body, msg); err != nil {
 		return fmt.Errorf("cannot unserialize the request: %v", err)
 	}
 	ctx := context.Background()
@@ -145,7 +144,7 @@ func (s *Server) post(w http.ResponseWriter, r *http.Request) error {
 		return fmt.Errorf("call %s returned an error: %v", functionCall, out[1].Interface())
 	}
 	if _, err := w.Write(respBody); err != nil {
-		return fmt.Errorf("call %s cannot write protocol buffer data %T to the HTTP reponse: %v", functionCall, resp, err)
+		return fmt.Errorf("call %s cannot write protocol buffer data %T to the HTTP response: %v", functionCall, resp, err)
 	}
 	w.Header().Set(_ContentType, contentError)
 	return nil
@@ -155,6 +154,6 @@ func (s *Server) post(w http.ResponseWriter, r *http.Request) error {
 // It needs to be registered on a http handler.
 func (s *Server) Post(w http.ResponseWriter, r *http.Request) {
 	if err := s.post(w, r); err != nil {
-		wErr(w, err.Error())
+		wErrf(w, err.Error())
 	}
 }

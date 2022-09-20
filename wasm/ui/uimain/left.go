@@ -7,6 +7,7 @@ import (
 	"honnef.co/go/js/dom/v2"
 )
 
+// LeftBar implements the tree and its container on the left.
 type LeftBar struct {
 	ui   *UI
 	root dom.HTMLElement

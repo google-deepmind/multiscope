@@ -41,7 +41,7 @@ func NewElement(mui ui.UI) (*Element, error) {
 
 func (el *Element) fetchNode(path []string) (*treepb.Node, error) {
 	req := &treepb.NodeStructRequest{Paths: []*treepb.NodePath{
-		&treepb.NodePath{Path: path},
+		{Path: path},
 	}}
 	rep, err := el.ui.TreeClient().GetNodeStruct(context.Background(), req)
 	if err != nil {

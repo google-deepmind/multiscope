@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-// Text01Name is the name of the text writer in the tree
+// Text01Name is the name of the text writer in the tree.
 const Text01Name = "text01"
 
 // Text01Data is the data to write to the writer.

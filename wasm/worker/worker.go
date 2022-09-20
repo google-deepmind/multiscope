@@ -34,8 +34,8 @@ func newWorker(name string, val js.Value) *Worker {
 	return w
 }
 
-// PostMessage sends a message to the web worker or to the main worker.
-// The function returns immediatly.
+// Send a message to the web worker or to the main worker.
+// The function returns immediately.
 func (w *Worker) Send(m proto.Message, aux any, transferables ...any) error {
 	buf, err := proto.Marshal(m)
 	if err != nil {
@@ -54,7 +54,7 @@ func (w *Worker) Send(m proto.Message, aux any, transferables ...any) error {
 	return nil
 }
 
-// OnMessage registers a callback for when the worker receives a message.
+// Recv receives a message from another webworker.
 func (w *Worker) Recv(m proto.Message) (js.Value, error) {
 	data := <-w.msgs
 	want := string(proto.MessageName(m))

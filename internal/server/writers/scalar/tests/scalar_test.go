@@ -10,8 +10,8 @@ import (
 )
 
 func TestScalarWriter(t *testing.T) {
-	root := root.NewRoot()
-	state := grpctesting.NewState(root, nil, nil)
+	rootNode := root.NewRoot()
+	state := grpctesting.NewState(rootNode, nil, nil)
 	conn, clt, err := grpctesting.SetupTest(state)
 	if err != nil {
 		t.Fatal(err)
@@ -19,7 +19,7 @@ func TestScalarWriter(t *testing.T) {
 	}
 	defer conn.Close()
 	scalarWriter := scalar.NewWriter()
-	root.AddChild(scalartesting.Scalar01Name, scalarWriter)
+	rootNode.AddChild(scalartesting.Scalar01Name, scalarWriter)
 	for _, v := range scalartesting.Scalar01Data {
 		if err := scalarWriter.Write(v); err != nil {
 			t.Fatal(err)

@@ -20,7 +20,7 @@ func rootDescriptor() *Descriptor {
 	return &Descriptor{
 		pb: uipb.Panel{
 			Id:    0,
-			Paths: []*treepb.NodePath{&treepb.NodePath{}},
+			Paths: []*treepb.NodePath{{}},
 		}}
 }
 

@@ -19,7 +19,7 @@ type HTMLWriter struct {
 
 var _ core.Node = (*HTMLWriter)(nil)
 
-// NewHTMLWriter returns a new writer to display text
+// NewHTMLWriter returns a new writer to display text.
 func NewHTMLWriter() *HTMLWriter {
 	w := &HTMLWriter{
 		Group: base.NewGroup(mime.HTMLParent),
