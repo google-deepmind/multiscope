@@ -9,7 +9,9 @@ import (
 
 	pb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/puller"
+	"multiscope/wasm/ui/fatal"
 	"multiscope/wasm/ui/uimain"
+	"multiscope/wasm/version"
 	"multiscope/wasm/worker"
 
 	"honnef.co/go/js/dom/v2"
@@ -43,10 +45,15 @@ func main() {
 	}
 
 	// Main thread.
+	serverAddr := grpcAddr()
+	if err := version.Check(serverAddr); err != nil {
+		fatal.Display(err)
+		return
+	}
 
 	// Start the data puller worker.
 	pullr, err := worker.Go(pullDataMain)
-	ui := uimain.NewUI(pullr, grpcAddr())
+	ui := uimain.NewUI(pullr, serverAddr)
 	if err != nil {
 		ui.DisplayErr(err)
 		return

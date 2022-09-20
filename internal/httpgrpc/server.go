@@ -14,39 +14,28 @@ import (
 )
 
 type (
+	// gRPC service.
+	service any
+
 	// Registerer registers a gRPC server.
 	Registerer func(*grpc.Server)
 
-	// Service provides a gRPC service.
-	Service interface {
-		Desc() Registerer
-	}
-
 	// Server serves gRPC-like requests over http.
 	Server struct {
-		registry map[string]Service
+		registry map[string]service
 	}
 )
 
 // NewServer creates a server serving gRPC-like request on top of http.
 func NewServer() *Server {
 	return &Server{
-		registry: make(map[string]Service),
+		registry: make(map[string]service),
 	}
 }
 
-func toDesc(ep Service) map[string]grpc.ServiceInfo {
-	s := grpc.NewServer()
-	ep.Desc()(s)
-	return s.GetServiceInfo()
-}
-
-// Register a gRPC service to the server.
-func (s *Server) Register(service Service) error {
-	for name := range toDesc(service) {
-		s.registry[name] = service
-	}
-	return nil
+// RegisterService a gRPC service to the server.
+func (s *Server) RegisterService(desc *grpc.ServiceDesc, impl any) {
+	s.registry[desc.ServiceName] = impl
 }
 
 const contentError = "text/plain; charset=utf-8; error"
@@ -59,7 +48,7 @@ func wErrf(w http.ResponseWriter, format string, a ...interface{}) {
 	}
 }
 
-func protoFromMethod(service Service, met reflect.Value) (proto.Message, error) {
+func protoFromMethod(service service, met reflect.Value) (proto.Message, error) {
 	metTP := met.Type()
 	const wantNum = 2
 	if metTP.NumIn() != wantNum {

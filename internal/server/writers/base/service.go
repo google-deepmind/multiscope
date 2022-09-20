@@ -22,7 +22,7 @@ type Service struct {
 var _ pbgrpc.BaseWritersServer = (*Service)(nil)
 
 // RegisterService registers the BaseWriters service to a gRPC server.
-func RegisterService(srv *grpc.Server, state treeservice.StateProvider) {
+func RegisterService(srv grpc.ServiceRegistrar, state treeservice.StateProvider) {
 	pbgrpc.RegisterBaseWritersServer(srv, &Service{state: state})
 }
 

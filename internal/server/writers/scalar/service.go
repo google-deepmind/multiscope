@@ -23,7 +23,7 @@ type Service struct {
 var _ pbgrpc.ScalarsServer = (*Service)(nil)
 
 // RegisterService registers the TableWriters service to a gRPC server.
-func RegisterService(srv *grpc.Server, state treeservice.StateProvider) {
+func RegisterService(srv grpc.ServiceRegistrar, state treeservice.StateProvider) {
 	pbgrpc.RegisterScalarsServer(srv, &Service{state: state})
 }
 

@@ -22,6 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RootClient interface {
+	// Get the version of the proto API.
+	GetVersion(ctx context.Context, in *GetVersionRequest, opts ...grpc.CallOption) (*GetVersionResponse, error)
 	// Set the layout of the UI.
 	SetLayout(ctx context.Context, in *SetLayoutRequest, opts ...grpc.CallOption) (*SetLayoutResponse, error)
 }
@@ -32,6 +34,15 @@ type rootClient struct {
 
 func NewRootClient(cc grpc.ClientConnInterface) RootClient {
 	return &rootClient{cc}
+}
+
+func (c *rootClient) GetVersion(ctx context.Context, in *GetVersionRequest, opts ...grpc.CallOption) (*GetVersionResponse, error) {
+	out := new(GetVersionResponse)
+	err := c.cc.Invoke(ctx, "/multiscope.root.Root/GetVersion", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *rootClient) SetLayout(ctx context.Context, in *SetLayoutRequest, opts ...grpc.CallOption) (*SetLayoutResponse, error) {
@@ -47,6 +58,8 @@ func (c *rootClient) SetLayout(ctx context.Context, in *SetLayoutRequest, opts .
 // All implementations must embed UnimplementedRootServer
 // for forward compatibility
 type RootServer interface {
+	// Get the version of the proto API.
+	GetVersion(context.Context, *GetVersionRequest) (*GetVersionResponse, error)
 	// Set the layout of the UI.
 	SetLayout(context.Context, *SetLayoutRequest) (*SetLayoutResponse, error)
 	mustEmbedUnimplementedRootServer()
@@ -56,6 +69,9 @@ type RootServer interface {
 type UnimplementedRootServer struct {
 }
 
+func (UnimplementedRootServer) GetVersion(context.Context, *GetVersionRequest) (*GetVersionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
+}
 func (UnimplementedRootServer) SetLayout(context.Context, *SetLayoutRequest) (*SetLayoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetLayout not implemented")
 }
@@ -70,6 +86,24 @@ type UnsafeRootServer interface {
 
 func RegisterRootServer(s grpc.ServiceRegistrar, srv RootServer) {
 	s.RegisterService(&Root_ServiceDesc, srv)
+}
+
+func _Root_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVersionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RootServer).GetVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/multiscope.root.Root/GetVersion",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RootServer).GetVersion(ctx, req.(*GetVersionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Root_SetLayout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -97,6 +131,10 @@ var Root_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "multiscope.root.Root",
 	HandlerType: (*RootServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetVersion",
+			Handler:    _Root_GetVersion_Handler,
+		},
 		{
 			MethodName: "SetLayout",
 			Handler:    _Root_SetLayout_Handler,

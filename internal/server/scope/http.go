@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"multiscope/internal/httpgrpc"
+	"multiscope/internal/server/treeservice"
 	"multiscope/internal/server/wasmurl"
 	"multiscope/internal/server/worker"
 	"multiscope/internal/template"
@@ -25,16 +26,14 @@ func wErrf(w http.ResponseWriter, format string, a ...interface{}) {
 }
 
 // RunHTTP the http server serving both httpgrpc and the ui.
-func RunHTTP(srv httpgrpc.Service, wg *sync.WaitGroup, addr string) error {
+func RunHTTP(srv *treeservice.TreeServer, wg *sync.WaitGroup, addr string) error {
 	r := chi.NewRouter()
 	r.Use(middleware.NoCache)
 	if logQuery {
 		r.Use(middleware.Logger)
 	}
 	server := httpgrpc.NewServer()
-	if err := server.Register(srv); err != nil {
-		return fmt.Errorf("cannot register service: %w", err)
-	}
+	srv.RegisterServices(server)
 	r.HandleFunc("/httpgrpc", server.Post)
 	root := web.FS()
 	r.Get("/worker/*", func(w http.ResponseWriter, r *http.Request) {

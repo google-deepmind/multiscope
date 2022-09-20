@@ -58,7 +58,7 @@ linters-settings:
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
   lll:
-    line-length: 200
+    line-length: 300
   misspell:
     locale: US
   nolintlint:
@@ -94,7 +94,6 @@ linters:
     - gosimple
     - govet
     - ineffassign
-    - lll
     - misspell
     - nakedret
     - noctx
@@ -112,6 +111,7 @@ linters:
   # - bodyclose
   # - asciicheck
   # - dupl
+  # - lll
   # - scopelint
   # - gochecknoinits
   # - gochecknoglobals

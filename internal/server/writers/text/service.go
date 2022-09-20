@@ -21,7 +21,7 @@ type Service struct {
 }
 
 // RegisterService registers the TableWriters service to a gRPC server.
-func RegisterService(srv *grpc.Server, state treeservice.StateProvider) {
+func RegisterService(srv grpc.ServiceRegistrar, state treeservice.StateProvider) {
 	pbgrpc.RegisterTextServer(srv, &Service{state: state})
 }
 

@@ -17,9 +17,7 @@ message LayoutList {
 
 // Message to store layout data such as node path to display.
 message Layout {
-  oneof layout {
-    LayoutList list = 1;
-  }
+  oneof layout { LayoutList list = 1; }
 }
 
 // Sets the layout to display.
@@ -27,7 +25,14 @@ message SetLayoutRequest { Layout layout = 1; }
 
 message SetLayoutResponse {}
 
+// Get the API version.
+message GetVersionRequest {}
+
+message GetVersionResponse { string version = 1; }
+
 service Root {
+  // Get the version of the proto API.
+  rpc GetVersion(GetVersionRequest) returns (GetVersionResponse) {}
   // Set the layout of the UI.
   rpc SetLayout(SetLayoutRequest) returns (SetLayoutResponse) {}
 }

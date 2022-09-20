@@ -24,7 +24,7 @@ type Service struct {
 var _ pbgrpc.TickersServer = (*Service)(nil)
 
 // RegisterService registers the TensorWriters service to a gRPC server.
-func RegisterService(srv *grpc.Server, state treeservice.StateProvider) {
+func RegisterService(srv grpc.ServiceRegistrar, state treeservice.StateProvider) {
 	pbgrpc.RegisterTickersServer(srv, &Service{state: state})
 }
 

@@ -176,7 +176,7 @@ func (s *TreeServer) Desc() httpgrpc.Registerer {
 }
 
 // RegisterServices registers the main stream service to the server as well as all the services provided by the nodes.
-func (s *TreeServer) RegisterServices(grpcServer *grpc.Server) {
+func (s *TreeServer) RegisterServices(grpcServer grpc.ServiceRegistrar) {
 	pbgrpc.RegisterTreeServer(grpcServer, s)
 	if s.Registry == nil {
 		return

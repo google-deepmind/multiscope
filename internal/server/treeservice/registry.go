@@ -9,7 +9,7 @@ type (
 	StateProvider func() State
 
 	// RegisterServiceCallback to register a grpc service provided by a node.
-	RegisterServiceCallback func(s *grpc.Server, state StateProvider)
+	RegisterServiceCallback func(srv grpc.ServiceRegistrar, state StateProvider)
 
 	// Registry of create handlers.
 	Registry struct {
