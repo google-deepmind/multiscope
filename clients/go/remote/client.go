@@ -6,10 +6,14 @@ import (
 	"fmt"
 	"multiscope/internal/grpc/client"
 	"multiscope/internal/server/scope"
+	rootpb "multiscope/protos/root_go_proto"
+	rootpbgrpc "multiscope/protos/root_go_proto"
 	pb "multiscope/protos/tree_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
 	"net"
 	"net/url"
+	"os"
+	"path/filepath"
 	"sync"
 
 	"google.golang.org/grpc"
@@ -56,7 +60,14 @@ func Connect(ctx context.Context, targetURL string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewClient(conn)
+	clt, err := NewClient(conn)
+	if err != nil {
+		return nil, err
+	}
+	if err := clt.setDefaultKeyDict(); err != nil {
+		return nil, err
+	}
+	return clt, nil
 }
 
 func connectUDS(ctx context.Context, parsedURL *url.URL) (*grpc.ClientConn, error) {
@@ -148,4 +159,20 @@ func (clt *Client) NewChildClient(name string) (*Client, error) {
 // Display returns the client related to display on the dashboard.
 func (clt *Client) Display() *Display {
 	return clt.display
+}
+
+// SetGlobalName sets a global name on the server used to retrieve the settings on the UI.
+func (clt *Client) SetGlobalName(name string) error {
+	rootClt := rootpbgrpc.NewRootClient(clt.Connection())
+	if _, err := rootClt.SetKeySettings(context.Background(), &rootpb.SetKeySettingsRequest{
+		KeySettings: name,
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (clt *Client) setDefaultKeyDict() error {
+	name := fmt.Sprintf("go/client/default/%s", filepath.Base(os.Args[0]))
+	return clt.SetGlobalName(name)
 }

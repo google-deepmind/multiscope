@@ -29,6 +29,16 @@ func (srv *Service) GetVersion(ctx context.Context, req *pb.GetVersionRequest) (
 	return &pb.GetVersionResponse{Version: protos.Version}, nil
 }
 
+// SetKeySettings sets a global name to fetch the UI settings.
+func (srv *Service) SetKeySettings(ctx context.Context, req *pb.SetKeySettingsRequest) (*pb.SetKeySettingsResponse, error) {
+	state := srv.state() // use state throughout this RPC lifetime.
+	root := state.Root().(*Root)
+	if err := root.setKeySettings(req.KeySettings); err != nil {
+		return nil, err
+	}
+	return &pb.SetKeySettingsResponse{}, nil
+}
+
 // SetLayout sets the UI layout.
 func (srv *Service) SetLayout(ctx context.Context, req *pb.SetLayoutRequest) (*pb.SetLayoutResponse, error) {
 	state := srv.state() // use state throughout this RPC lifetime.
@@ -37,4 +47,13 @@ func (srv *Service) SetLayout(ctx context.Context, req *pb.SetLayoutRequest) (*p
 		return nil, err
 	}
 	return &pb.SetLayoutResponse{}, nil
+}
+
+// GetRootInfo returns information about the root node.
+func (srv *Service) GetRootInfo(ctx context.Context, req *pb.GetRootInfoRequest) (*pb.GetRootInfoResponse, error) {
+	state := srv.state() // use state throughout this RPC lifetime.
+	root := state.Root().(*Root)
+	return &pb.GetRootInfoResponse{
+		Info: root.cloneInfo(),
+	}, nil
 }

@@ -12,6 +12,8 @@ type LeftBar struct {
 	ui   *UI
 	root dom.HTMLElement
 	tree *tree.Element
+
+	visibleSetting bool
 }
 
 const settingLeftBarVisible = "leftbar_visible"
@@ -31,26 +33,25 @@ func newLeftBar(ui *UI) (*LeftBar, error) {
 		return l, err
 	}
 	l.root.AppendChild(l.tree.Root())
-	if l.isVisible() {
-		l.show()
-	} else {
-		l.hide()
-	}
+	l.ui.Settings().Listen(settingLeftBarVisible, &l.visibleSetting, func(any) error {
+		if l.visibleSetting {
+			l.root.Style().SetProperty("display", "block", "")
+		} else {
+			l.root.Style().SetProperty("display", "none", "")
+		}
+		return nil
+	})
 	return l, nil
 }
 
 func (l *LeftBar) isVisible() bool {
-	var visible bool
-	l.ui.Settings().Get(settingLeftBarVisible, &visible)
-	return visible
+	return l.visibleSetting
 }
 
 func (l *LeftBar) show() {
-	l.ui.Settings().Set(settingLeftBarVisible, true)
-	l.root.Style().SetProperty("display", "block", "")
+	l.ui.Settings().Set(l, settingLeftBarVisible, true)
 }
 
 func (l *LeftBar) hide() {
-	l.ui.Settings().Set(settingLeftBarVisible, false)
-	l.root.Style().SetProperty("display", "none", "")
+	l.ui.Settings().Set(l, settingLeftBarVisible, false)
 }

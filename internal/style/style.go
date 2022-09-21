@@ -3,6 +3,7 @@ package style
 
 import (
 	"image/color"
+	"multiscope/internal/settings"
 
 	"github.com/tdegris/base16-go/themes"
 	"gonum.org/v1/plot/font"
@@ -31,48 +32,29 @@ var googleLight = themes.Theme{
 }
 
 type (
-	// Settings to store styles.
-	Settings interface {
-		Set(key string, val interface{})
-		Get(key string, obj interface{}) bool
-	}
-
 	// Style stores all attributes related to style.
 	Style struct {
-		theme   themes.Theme
-		toApply []func(*Style)
+		themeName string
+		theme     themes.Theme
 
 		fontFamily string
 		fontSize   font.Length
-		settings   Settings
+		settings   settings.Settings
+
+		toApply []func(*Style)
 	}
 )
 
 // NewStyle returns a new style with some default.
-func NewStyle(settings Settings) *Style {
+func NewStyle(sets settings.Settings) *Style {
 	s := &Style{
 		fontFamily: "helvetica",
 		fontSize:   vg.Points(12),
 		theme:      googleLight,
-		settings:   settings,
+		settings:   sets,
 	}
-	if settings != nil {
-		s.loadSetting()
-		s.OnChange(saveSetting)
-	}
+	s.settings.Listen("style", &s.themeName, s.updateCB)
 	return s
-}
-
-func (s *Style) loadSetting() {
-	var theme string
-	if !s.settings.Get("style", &theme) {
-		return
-	}
-	s.SetTheme(theme)
-}
-
-func saveSetting(st *Style) {
-	st.settings.Set("style", st.theme.Name)
 }
 
 // SetTheme sets the current theme.
@@ -83,9 +65,7 @@ func (s *Style) SetTheme(theme string) {
 // Set the current style.
 func (s *Style) Set(theme, fontFamily string, fontSize font.Length) {
 	if theme != "" {
-		if t, ok := themes.Base16[theme]; ok {
-			s.theme = t
-		}
+		s.settings.Set(s, "style", theme)
 	}
 	if fontFamily != "" {
 		s.fontFamily = fontFamily
@@ -93,13 +73,16 @@ func (s *Style) Set(theme, fontFamily string, fontSize font.Length) {
 	if fontSize >= 0 {
 		s.fontSize = fontSize
 	}
-	s.updateCB()
 }
 
-func (s *Style) updateCB() {
+func (s *Style) updateCB(any) error {
+	if t, ok := themes.Base16[s.themeName]; ok {
+		s.theme = t
+	}
 	for _, f := range s.toApply {
 		f(s)
 	}
+	return nil
 }
 
 // Theme returns the current theme.

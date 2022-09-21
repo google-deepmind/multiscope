@@ -8,7 +8,10 @@ import "tree.proto";
 option go_package = "multiscope/protos/root_go_proto";
 
 // Multiscope metadata (e.g. UI layout).
-message RootInfo { Layout layout = 1; }
+message RootInfo {
+  string key_settings = 1;
+  Layout layout = 2;
+}
 
 message LayoutList {
   // Paths to be displayed.
@@ -20,6 +23,11 @@ message Layout {
   oneof layout { LayoutList list = 1; }
 }
 
+// Sets the key for the UI settings.
+message SetKeySettingsRequest { string key_settings = 1; }
+
+message SetKeySettingsResponse {}
+
 // Sets the layout to display.
 message SetLayoutRequest { Layout layout = 1; }
 
@@ -30,9 +38,18 @@ message GetVersionRequest {}
 
 message GetVersionResponse { string version = 1; }
 
+// Get root info.
+message GetRootInfoRequest {}
+
+message GetRootInfoResponse { RootInfo info = 1; }
+
 service Root {
   // Get the version of the proto API.
   rpc GetVersion(GetVersionRequest) returns (GetVersionResponse) {}
+  // Return info at the root node.
+  rpc GetRootInfo(GetRootInfoRequest) returns (GetRootInfoResponse) {}
+  // Set the key for the UI settings.
+  rpc SetKeySettings(SetKeySettingsRequest) returns (SetKeySettingsResponse) {}
   // Set the layout of the UI.
   rpc SetLayout(SetLayoutRequest) returns (SetLayoutResponse) {}
 }

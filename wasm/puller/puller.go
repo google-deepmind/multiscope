@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"multiscope/internal/httpgrpc"
+	"multiscope/internal/settings"
 	"multiscope/internal/style"
 	treepb "multiscope/protos/tree_go_proto"
 	treepbgrpc "multiscope/protos/tree_go_proto"
@@ -30,6 +31,7 @@ type (
 		queries chan queryS
 
 		messager   *worker.Worker
+		settings   settings.Settings
 		style      *style.Style
 		treeClient treepb.TreeClient
 		req        *request
@@ -41,9 +43,10 @@ func New(messager *worker.Worker) *Puller {
 	p := &Puller{
 		queries:  make(chan queryS, 1),
 		messager: messager,
-		style:    style.NewStyle(nil),
 		req:      newRequest(),
 	}
+	p.settings = newSettings(p.sendError)
+	p.style = style.NewStyle(p.settings)
 	connect := uipb.Connect{}
 	var globalErr error
 	if _, err := p.messager.Recv(&connect); err != nil {

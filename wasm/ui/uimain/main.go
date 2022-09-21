@@ -3,11 +3,13 @@
 package uimain
 
 import (
+	"context"
 	"fmt"
 	"multiscope/internal/css"
 	"multiscope/internal/httpgrpc"
 	"multiscope/internal/style"
 	"multiscope/internal/wplot"
+	rootpb "multiscope/protos/root_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/injector"
@@ -20,6 +22,7 @@ import (
 
 	"github.com/pkg/errors"
 	"gonum.org/v1/plot/vg"
+	"google.golang.org/grpc"
 	"honnef.co/go/js/dom/v2"
 )
 
@@ -42,10 +45,14 @@ func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 		addr:   c,
 		window: dom.GetWindow(),
 	}
-	gui.settings = settings.NewSettings(gui.DisplayErr)
-	var err error
-	gui.style, err = gui.newDefaultStyle()
+
+	conn := httpgrpc.Connect(gui.addr.Scheme, gui.addr.Host)
+	rootInfo, err := fetchRootInfo(conn)
 	if err != nil {
+		gui.DisplayErr(err)
+	}
+	gui.settings = settings.NewSettings(rootInfo.KeySettings, gui.DisplayErr)
+	if gui.style, err = gui.newDefaultStyle(); err != nil {
 		gui.DisplayErr(err)
 		return gui
 	}
@@ -56,10 +63,9 @@ func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 		gui.Owner().Body().Style().SetProperty("color", css.Color(s.Foreground()), "")
 	})
 
-	conn := httpgrpc.Connect(gui.addr.Scheme, gui.addr.Host)
 	gui.treeClient = treepb.NewTreeClient(conn)
 	gui.puller = newPuller(gui, puller)
-	if gui.layout, err = newLayout(gui); err != nil {
+	if gui.layout, err = newLayout(gui, rootInfo); err != nil {
 		gui.DisplayErr(err)
 		return gui
 	}
@@ -68,6 +74,15 @@ func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 		return gui
 	}
 	return gui
+}
+
+func fetchRootInfo(conn grpc.ClientConnInterface) (*rootpb.RootInfo, error) {
+	rootClient := rootpb.NewRootClient(conn)
+	resp, err := rootClient.GetRootInfo(context.Background(), &rootpb.GetRootInfoRequest{})
+	if err != nil {
+		return &rootpb.RootInfo{}, err
+	}
+	return resp.Info, nil
 }
 
 func parseFontSize(s string) (size vg.Length, err error) {

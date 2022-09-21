@@ -22,21 +22,35 @@ type Element struct {
 // NewElement returns a new tree element displaying the Multiscope tree.
 func NewElement(mui ui.UI) (*Element, error) {
 	el := &Element{
-		ui:       mui,
-		p:        mui.Owner().CreateElement("p").(*dom.HTMLParagraphElement),
-		settings: newSettings(mui),
+		ui: mui,
+		p:  mui.Owner().CreateElement("p").(*dom.HTMLParagraphElement),
 	}
+	el.settings = newSettings(el)
+	el.settings.registerListener()
+	if el.root != nil {
+		return el, nil
+	}
+	// No settings has been loaded. Force a refresh.
+	if err := el.refresh(nil); err != nil {
+		return nil, err
+	}
+	return el, nil
+}
 
+func (el *Element) refresh(src any) error {
+	if src == el.settings {
+		return nil
+	}
 	var err error
 	el.root, err = el.newNode(nil, "")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if err := el.root.expand(); err != nil {
-		return nil, err
+		return err
 	}
 	el.p.AppendChild(el.root.childrenList)
-	return el, nil
+	return nil
 }
 
 func (el *Element) fetchNode(path []string) (*treepb.Node, error) {

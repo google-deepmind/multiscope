@@ -10,7 +10,8 @@ import (
 	"honnef.co/go/js/dom/v2"
 )
 
-const settingKey = "layout"
+// SettingKey is the key used in the settings to store the layout.
+const SettingKey = "layout"
 
 // Layout within the dashboard organizing the display of the panels.
 type Layout interface {
@@ -32,13 +33,4 @@ func New(dbd ui.Dashboard, lyt *rootpb.Layout) (Layout, error) {
 		return newList(dbd), nil
 	}
 	return newList(dbd), errors.Errorf("unknown layout")
-}
-
-// LoadPB loads a layout configuration from the settings.
-func LoadPB(dbd ui.Dashboard) *rootpb.Layout {
-	l := &rootpb.Layout{}
-	if !dbd.UI().Settings().Get(settingKey, l) {
-		return nil
-	}
-	return l
 }

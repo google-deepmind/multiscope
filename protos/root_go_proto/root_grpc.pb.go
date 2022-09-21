@@ -24,6 +24,10 @@ const _ = grpc.SupportPackageIsVersion7
 type RootClient interface {
 	// Get the version of the proto API.
 	GetVersion(ctx context.Context, in *GetVersionRequest, opts ...grpc.CallOption) (*GetVersionResponse, error)
+	// Return info at the root node.
+	GetRootInfo(ctx context.Context, in *GetRootInfoRequest, opts ...grpc.CallOption) (*GetRootInfoResponse, error)
+	// Set the key for the UI settings.
+	SetKeySettings(ctx context.Context, in *SetKeySettingsRequest, opts ...grpc.CallOption) (*SetKeySettingsResponse, error)
 	// Set the layout of the UI.
 	SetLayout(ctx context.Context, in *SetLayoutRequest, opts ...grpc.CallOption) (*SetLayoutResponse, error)
 }
@@ -45,6 +49,24 @@ func (c *rootClient) GetVersion(ctx context.Context, in *GetVersionRequest, opts
 	return out, nil
 }
 
+func (c *rootClient) GetRootInfo(ctx context.Context, in *GetRootInfoRequest, opts ...grpc.CallOption) (*GetRootInfoResponse, error) {
+	out := new(GetRootInfoResponse)
+	err := c.cc.Invoke(ctx, "/multiscope.root.Root/GetRootInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rootClient) SetKeySettings(ctx context.Context, in *SetKeySettingsRequest, opts ...grpc.CallOption) (*SetKeySettingsResponse, error) {
+	out := new(SetKeySettingsResponse)
+	err := c.cc.Invoke(ctx, "/multiscope.root.Root/SetKeySettings", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *rootClient) SetLayout(ctx context.Context, in *SetLayoutRequest, opts ...grpc.CallOption) (*SetLayoutResponse, error) {
 	out := new(SetLayoutResponse)
 	err := c.cc.Invoke(ctx, "/multiscope.root.Root/SetLayout", in, out, opts...)
@@ -60,6 +82,10 @@ func (c *rootClient) SetLayout(ctx context.Context, in *SetLayoutRequest, opts .
 type RootServer interface {
 	// Get the version of the proto API.
 	GetVersion(context.Context, *GetVersionRequest) (*GetVersionResponse, error)
+	// Return info at the root node.
+	GetRootInfo(context.Context, *GetRootInfoRequest) (*GetRootInfoResponse, error)
+	// Set the key for the UI settings.
+	SetKeySettings(context.Context, *SetKeySettingsRequest) (*SetKeySettingsResponse, error)
 	// Set the layout of the UI.
 	SetLayout(context.Context, *SetLayoutRequest) (*SetLayoutResponse, error)
 	mustEmbedUnimplementedRootServer()
@@ -71,6 +97,12 @@ type UnimplementedRootServer struct {
 
 func (UnimplementedRootServer) GetVersion(context.Context, *GetVersionRequest) (*GetVersionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
+}
+func (UnimplementedRootServer) GetRootInfo(context.Context, *GetRootInfoRequest) (*GetRootInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRootInfo not implemented")
+}
+func (UnimplementedRootServer) SetKeySettings(context.Context, *SetKeySettingsRequest) (*SetKeySettingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetKeySettings not implemented")
 }
 func (UnimplementedRootServer) SetLayout(context.Context, *SetLayoutRequest) (*SetLayoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetLayout not implemented")
@@ -106,6 +138,42 @@ func _Root_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Root_GetRootInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRootInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RootServer).GetRootInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/multiscope.root.Root/GetRootInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RootServer).GetRootInfo(ctx, req.(*GetRootInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Root_SetKeySettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetKeySettingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RootServer).SetKeySettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/multiscope.root.Root/SetKeySettings",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RootServer).SetKeySettings(ctx, req.(*SetKeySettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Root_SetLayout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SetLayoutRequest)
 	if err := dec(in); err != nil {
@@ -134,6 +202,14 @@ var Root_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVersion",
 			Handler:    _Root_GetVersion_Handler,
+		},
+		{
+			MethodName: "GetRootInfo",
+			Handler:    _Root_GetRootInfo_Handler,
+		},
+		{
+			MethodName: "SetKeySettings",
+			Handler:    _Root_SetKeySettings_Handler,
 		},
 		{
 			MethodName: "SetLayout",

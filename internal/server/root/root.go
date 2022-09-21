@@ -8,6 +8,8 @@ import (
 	"multiscope/internal/server/writers/base"
 	rootpb "multiscope/protos/root_go_proto"
 	pb "multiscope/protos/tree_go_proto"
+
+	"google.golang.org/protobuf/proto"
 )
 
 // Root is the root of the Multiscope tree.
@@ -48,4 +50,17 @@ func (r *Root) setLayout(layout *rootpb.Layout) error {
 	defer r.mut.Unlock()
 	r.info.Layout = layout
 	return r.writer.Write(r.info)
+}
+
+func (r *Root) setKeySettings(name string) error {
+	r.mut.Lock()
+	defer r.mut.Unlock()
+	r.info.KeySettings = name
+	return r.writer.Write(r.info)
+}
+
+func (r *Root) cloneInfo() *rootpb.RootInfo {
+	r.mut.Lock()
+	defer r.mut.Unlock()
+	return proto.Clone(r.info).(*rootpb.RootInfo)
 }

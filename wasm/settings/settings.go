@@ -2,136 +2,95 @@
 package settings
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"syscall/js"
 
-	"github.com/pkg/errors"
-	"google.golang.org/protobuf/proto"
+	"multiscope/internal/settings"
 )
 
-const prefix = "multiscope/"
+const multiscope = "multiscope_wasm"
 
-// Settings stores settings in cookies.
-type Settings struct {
-	fErr    func(error)
-	storage js.Value
-}
-
-// NewSettings returns a new instance of Settings.
-func NewSettings(fErr func(error)) *Settings {
-	s := &Settings{
-		fErr:    fErr,
-		storage: js.Global().Get("localStorage"),
+type (
+	storage struct {
+		settings map[string]map[string]string
+		parent   *Settings
 	}
 
-	js.Global().Set("multiscopeSettings", js.FuncOf(func(js.Value, []js.Value) interface{} {
-		go s.printSettings()
-		return nil
-	}))
+	// Settings stores settings in cookies.
+	Settings struct {
+		*settings.Base
+		settings storage
+		dictKey  string
+		storage  js.Value
+	}
+)
 
+var _ settings.Settings = (*Settings)(nil)
+
+// NewSettings returns a new instance of Settings.
+func NewSettings(dictKey string, fErr func(error)) *Settings {
+	s := &Settings{
+		storage: js.Global().Get("localStorage"),
+		dictKey: dictKey,
+	}
+	s.settings = storage{
+		settings: make(map[string]map[string]string),
+		parent:   s,
+	}
+	s.Base = settings.NewBase(&s.settings, fErr)
+
+	val := s.storage.Get(multiscope)
+	if val.IsNull() || val.IsUndefined() {
+		return s
+	}
+	if err := json.Unmarshal([]byte(val.String()), &s.settings.settings); err != nil {
+		fErr(fmt.Errorf("cannot load settings from frontend storage: %v", err))
+	}
 	return s
 }
 
-func (s *Settings) printSettings() {
-	keys := js.Global().Get("Object").Call("keys", s.storage)
-	for i := 0; i < keys.Length(); i++ {
-		key := keys.Index(i).String()
-		before, after, found := strings.Cut(key, "/")
-		if !found || before != prefix[:len(prefix)-1] {
-			continue
-		}
-		fmt.Printf("%q: %v\n", after, s.storage.Get(key).String())
+// SetDictKey sets the key used to fetch the dictionary of settings.
+func (s *Settings) SetDictKey(dict string) {
+	if dict == s.dictKey {
+		return
 	}
+	s.dictKey = dict
+	s.Base.CallAll()
 }
 
-func (s *Settings) del(key string) {
-	s.storage.Call("removeItem", prefix+key)
+func (s *Settings) updateStorage() error {
+	buf, err := json.Marshal(s.settings.settings)
+	if err != nil {
+		return fmt.Errorf("cannot update frontend storage: %v", err)
+	}
+	s.storage.Set(multiscope, string(buf))
+	return nil
 }
 
-func (s *Settings) store(key string, buf []byte) {
-	s.storage.Set(prefix+key, string(buf))
+func (s *storage) Delete(key string) error {
+	keyValues := s.settings[s.parent.dictKey]
+	if keyValues == nil {
+		return nil
+	}
+	delete(keyValues, key)
+	return s.parent.updateStorage()
 }
 
-func (s *Settings) load(key string) string {
-	val := s.storage.Get(prefix + key)
-	if val.IsNull() || val.IsUndefined() {
+func (s *storage) Store(key string, buf []byte) error {
+	keyValues := s.settings[s.parent.dictKey]
+	if keyValues == nil {
+		keyValues = make(map[string]string)
+		s.settings[s.parent.dictKey] = keyValues
+	}
+	keyValues[key] = string(buf)
+	return s.parent.updateStorage()
+}
+
+func (s *storage) Load(key string) string {
+	keyValues := s.settings[s.parent.dictKey]
+	if keyValues == nil {
 		return ""
 	}
-	return val.String()
-}
-
-const (
-	protoPrefix = "proto"
-	jsonPrefix  = "json"
-)
-
-func withPrefix(prefix string, msg []byte) []byte {
-	buf := []byte(prefix + ":")
-	buf = append(buf, msg...)
-	return buf
-}
-
-func marshal(val interface{}) ([]byte, error) {
-	msg, ok := val.(proto.Message)
-	if !ok {
-		jbuf, err := json.Marshal(val)
-		if err != nil {
-			return nil, err
-		}
-		return withPrefix(jsonPrefix, jbuf), nil
-	}
-	buf, err := proto.Marshal(msg)
-	if err != nil {
-		return nil, err
-	}
-	enc := base64.StdEncoding.EncodeToString(buf)
-	return withPrefix(protoPrefix, []byte(enc)), nil
-}
-
-// Set a key,value pair in the settings.
-func (s *Settings) Set(key string, val interface{}) {
-	if val == nil {
-		s.del(key)
-		return
-	}
-	buf, err := marshal(val)
-	if err != nil {
-		s.fErr(fmt.Errorf("cannot store key %q: cannot serialize object %T to JSON: %w", key, val, err))
-		return
-	}
-	s.store(key, buf)
-}
-
-func unmarshal(val string, dst interface{}) error {
-	before, after, found := strings.Cut(val, ":")
-	if !found {
-		return errors.Errorf("cannot find setting separator ':'")
-	}
-	switch before {
-	case jsonPrefix:
-		return json.Unmarshal([]byte(after), dst)
-	case protoPrefix:
-		dec, err := base64.StdEncoding.DecodeString(after)
-		if err != nil {
-			return fmt.Errorf("cannot decode proto buffer: %w", err)
-		}
-		return proto.Unmarshal(dec, dst.(proto.Message))
-	}
-	return errors.Errorf("unknown value prefix: %q", before)
-}
-
-// Get a key,value pair from the setting.
-func (s *Settings) Get(key string, dst interface{}) bool {
-	buf := s.load(key)
-	if buf == "" {
-		return false
-	}
-	if err := unmarshal(buf, dst); err != nil {
-		s.fErr(fmt.Errorf("cannot get setting %q=%s: %w", key, buf, err))
-		return false
-	}
-	return true
+	return keyValues[key]
 }

@@ -22,11 +22,9 @@ type Dashboard struct {
 	panels   map[ui.PanelID]ui.Panel
 	layout   dblayout.Layout
 	root     dom.Node
-
-	layoutServer *rootpb.Layout
 }
 
-func newDashboard(main *UI) (*Dashboard, error) {
+func newDashboard(main *UI, rootInfo *rootpb.RootInfo) (*Dashboard, error) {
 	const dashboardClass = "container__middle"
 	elements := main.Owner().GetElementsByClassName(dashboardClass)
 	if len(elements) != 1 {
@@ -38,12 +36,21 @@ func newDashboard(main *UI) (*Dashboard, error) {
 		panels:   make(map[ui.PanelID]ui.Panel),
 		root:     elements[0],
 	}
-	var err error
-	dbd.layout, err = dblayout.New(dbd, nil)
-	if err != nil {
-		return dbd, err
+
+	var layoutSettings rootpb.Layout
+	main.Settings().Listen(dblayout.SettingKey, &layoutSettings, func(src any) error {
+		if src == dbd.layout {
+			return nil
+		}
+		return dbd.buildLayout(&layoutSettings)
+	})
+	if dbd.layout != nil {
+		return dbd, nil
 	}
-	dbd.root.AppendChild(dbd.layout.Root())
+	// No layout build from the setting, so we build a new one.
+	if err := dbd.buildLayout(rootInfo.Layout); err != nil {
+		return nil, err
+	}
 	return dbd, nil
 }
 
@@ -56,30 +63,11 @@ func (dbd *Dashboard) UI() ui.UI {
 	return dbd.ui
 }
 
-func (dbd *Dashboard) refresh(data *treepb.NodeData) error {
-	pb := data.GetPb()
-	if pb == nil {
-		return nil
-	}
-	root := rootpb.RootInfo{}
-	if err := pb.UnmarshalTo(&root); err != nil {
-		return fmt.Errorf("cannot unmarshal root info: %v", err)
-	}
+func (dbd *Dashboard) buildLayout(toLoad *rootpb.Layout) error {
 	if dbd.layout != nil {
 		dbd.clearLayout()
 	}
 
-	var toLoad *rootpb.Layout
-	if dbd.layoutServer == nil {
-		// This is the first time the server is sending us a layout.
-		// Load the layout from the settings instead.
-		toLoad = dblayout.LoadPB(dbd)
-	}
-	dbd.layoutServer = root.Layout
-	if toLoad == nil {
-		// No layout available in the settings.
-		toLoad = dbd.layoutServer
-	}
 	var err error
 	dbd.layout, err = dblayout.New(dbd, toLoad)
 	dbd.root.AppendChild(dbd.layout.Root())
@@ -92,6 +80,23 @@ func (dbd *Dashboard) refresh(data *treepb.NodeData) error {
 		}
 	}()
 	return nil
+}
+
+func (dbd *Dashboard) refreshFromServer(data *treepb.NodeData) error {
+	pb := data.GetPb()
+	if pb == nil {
+		return nil
+	}
+	root := rootpb.RootInfo{}
+	if err := pb.UnmarshalTo(&root); err != nil {
+		return fmt.Errorf("cannot unmarshal root info: %v", err)
+	}
+
+	dbd.ui.settings.SetDictKey(root.KeySettings)
+	if root.Layout != nil {
+		return nil
+	}
+	return dbd.buildLayout(root.Layout)
 }
 
 func (dbd *Dashboard) clearLayout() {
@@ -107,7 +112,7 @@ func (dbd *Dashboard) render(displayData *uipb.DisplayData) {
 	for id, nodes := range displayData.Data {
 		for _, node := range nodes.Nodes {
 			if id == 0 {
-				if err := dbd.refresh(node); err != nil {
+				if err := dbd.refreshFromServer(node); err != nil {
 					dbd.ui.DisplayErr(err)
 				}
 				continue
