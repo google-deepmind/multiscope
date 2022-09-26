@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"multiscope/internal/httpgrpc"
-	"multiscope/protos"
+	"multiscope/internal/version"
 	rootpb "multiscope/protos/root_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
 )
@@ -19,8 +19,8 @@ func Check(addr *uipb.Connect) error {
 	if err != nil {
 		return fmt.Errorf("cannot get the server gRPC API: %v", err)
 	}
-	if resp.Version != protos.Version {
-		return fmt.Errorf("frontend client version %q does not match the server gRPC API version %q.\nYou may need to recompile the WASM frontend client, restart the server, then reload the page", resp.Version, protos.Version)
+	if resp.Version != version.Version {
+		return fmt.Errorf("frontend client version %q does not match the server gRPC API version %q.\nYou may need to recompile the WASM frontend client, restart the server, then reload the page", resp.Version, version.Version)
 	}
 	return nil
 }

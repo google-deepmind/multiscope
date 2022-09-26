@@ -3,7 +3,8 @@
 VERSION=`date '+%Y%m%d_%H%M%S'`
 
 CONTENT=$(cat <<EOF
-package protos
+// Package version specifies the gRPC API version.
+package version
 
 // Version of the proto API.
 // A new version is generated every time the protocol buffers are
@@ -13,4 +14,4 @@ const Version = "$VERSION"
 EOF
 )
 
-echo $CONTENT > version.go
+echo $CONTENT > ../internal/version/version.go

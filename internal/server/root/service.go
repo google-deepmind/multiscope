@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"multiscope/internal/server/treeservice"
-	"multiscope/protos"
+	"multiscope/internal/version"
 	pb "multiscope/protos/root_go_proto"
 	pbgrpc "multiscope/protos/root_go_proto"
 
@@ -26,7 +26,7 @@ func RegisterService(srv grpc.ServiceRegistrar, state treeservice.StateProvider)
 
 // GetVersion returns the version of the gRPC API of the server.
 func (srv *Service) GetVersion(ctx context.Context, req *pb.GetVersionRequest) (*pb.GetVersionResponse, error) {
-	return &pb.GetVersionResponse{Version: protos.Version}, nil
+	return &pb.GetVersionResponse{Version: version.Version}, nil
 }
 
 // SetKeySettings sets a global name to fetch the UI settings.
