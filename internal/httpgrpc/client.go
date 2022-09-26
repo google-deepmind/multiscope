@@ -62,7 +62,7 @@ func (c *Client) assign(method string, resp *http.Response, replyMsg proto.Messa
 }
 
 // Invoke performs a unary RPC and returns after the response is received into reply.
-func (c *Client) Invoke(ctx context.Context, method string, args, reply interface{}, opts ...grpc.CallOption) error {
+func (c *Client) Invoke(ctx context.Context, method string, args, reply any, opts ...grpc.CallOption) error {
 	if reply == nil {
 		return fmt.Errorf("cannot invoke method %s with a nil reply", method)
 	}

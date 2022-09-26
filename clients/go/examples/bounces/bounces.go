@@ -119,7 +119,7 @@ func runBounce(wg *sync.WaitGroup, name string, size int) {
 	wg.Done()
 	for true {
 		w1.Write(b.UpdateImage())
-		w2.Write(map[string]interface{}{
+		w2.Write(map[string]any{
 			"x": b.bl.pos.X,
 			"y": b.bl.pos.Y,
 		})

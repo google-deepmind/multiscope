@@ -40,7 +40,7 @@ func (s *Server) RegisterService(desc *grpc.ServiceDesc, impl any) {
 
 const contentError = "text/plain; charset=utf-8; error"
 
-func wErrf(w http.ResponseWriter, format string, a ...interface{}) {
+func wErrf(w http.ResponseWriter, format string, a ...any) {
 	fmt.Println("error:", fmt.Sprintf(format, a...))
 	w.Header().Set(_ContentType, contentError)
 	if _, err := fmt.Fprintf(w, format, a...); err != nil {

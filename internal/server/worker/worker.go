@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func wErrf(w http.ResponseWriter, format string, a ...interface{}) {
+func wErrf(w http.ResponseWriter, format string, a ...any) {
 	fmt.Println("error:", fmt.Sprintf(format, a...))
 	if _, err := fmt.Fprintf(w, format, a...); err != nil {
 		log.Printf("error sending the error back to the client: %v", err)

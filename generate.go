@@ -1,4 +1,4 @@
-// Package to generate all the files require for Multiscope.
+// Package multiscope is used to generate all the files require for Multiscope.
 package multiscope
 
 //#go:generate cp $GOROOT/misc/wasm/wasm_exec.js ./web/res

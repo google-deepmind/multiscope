@@ -1,4 +1,4 @@
-// Template provides helper functions to execute Go templates.
+// Package template provides helper functions to execute Go templates.
 package template
 
 import (
