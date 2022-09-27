@@ -51,7 +51,7 @@ const (
 	jsonPrefix  = "json"
 )
 
-func unmarshal(val string, dst interface{}) error {
+func unmarshal(val string, dst any) error {
 	before, after, found := strings.Cut(val, ":")
 	if !found {
 		return errors.Errorf("cannot find setting separator ':'")
@@ -85,7 +85,7 @@ func withPrefix(prefix string, msg []byte) []byte {
 	return buf
 }
 
-func marshal(val interface{}) ([]byte, error) {
+func marshal(val any) ([]byte, error) {
 	msg, ok := val.(proto.Message)
 	if !ok {
 		jbuf, err := json.Marshal(val)

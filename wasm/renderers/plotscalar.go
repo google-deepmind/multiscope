@@ -84,7 +84,7 @@ func (rdr *plotScalar) Render(data *treepb.NodeData) (*treepb.NodeData, error) {
 		l.Color = colors[nextColor%len(colors)]
 		l.Width = 3
 		if err != nil {
-			gErr = multierr.Append(gErr, errors.Errorf("error while adding the line to the plot: %v\n", err))
+			gErr = multierr.Append(gErr, errors.Errorf("error while adding the line to the plot: %v", err))
 		}
 		plt.Add(label, l)
 		nextColor++

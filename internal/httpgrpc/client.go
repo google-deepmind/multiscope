@@ -24,7 +24,7 @@ func contentType(m proto.Message) string {
 	return "application/protobuf;proto=" + string(fullName.Parent().Name()+"."+fullName.Name())
 }
 
-func (c *Client) post(method string, args interface{}, replyMsg proto.Message) (*http.Response, error) {
+func (c *Client) post(method string, args any, replyMsg proto.Message) (*http.Response, error) {
 	request := args.(proto.Message)
 	body, err := proto.Marshal(request)
 	if err != nil {
@@ -74,10 +74,7 @@ func (c *Client) Invoke(ctx context.Context, method string, args, reply any, opt
 	if err != nil {
 		return err
 	}
-	if err := c.assign(method, resp, replyMsg); err != nil {
-		return err
-	}
-	return nil
+	return c.assign(method, resp, replyMsg)
 }
 
 // NewStream begins a streaming RPC.

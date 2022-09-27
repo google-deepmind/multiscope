@@ -45,7 +45,7 @@ func NewScalarWriter(clt *Client, name string, parent Path) (*ScalarWriter, erro
 
 var floatTarget = reflect.TypeOf(float64(0))
 
-func toFloat(v interface{}) (float64, bool) {
+func toFloat(v any) (float64, bool) {
 	if !reflect.TypeOf(v).ConvertibleTo(floatTarget) {
 		return 0, false
 	}
@@ -54,7 +54,7 @@ func toFloat(v interface{}) (float64, bool) {
 
 // Write a set of (key,value) pairs.
 // An error is returned if a value cannot be converted to float64.
-func (w *ScalarWriter) Write(data map[string]interface{}) error {
+func (w *ScalarWriter) Write(data map[string]any) error {
 	fData := make(map[string]float64)
 	for k, v := range data {
 		vf, ok := toFloat(v)

@@ -140,10 +140,7 @@ func (p *Puller) processPullQuery(pull *uipb.Pull) error {
 			panelData.Nodes = append(panelData.Nodes, nodeData)
 		}
 	}
-	if err := p.messager.Send(displayData, nil); err != nil {
-		return err
-	}
-	return nil
+	return p.messager.Send(displayData, nil)
 }
 
 func (p *Puller) processTheme(stl *uipb.StyleChange) error {

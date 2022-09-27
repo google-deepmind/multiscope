@@ -43,14 +43,14 @@ func main() {
 			break
 		}
 		t := float64(ticker.CurrentTick()) / 100
-		if err = wSin.Write(map[string]interface{}{
+		if err = wSin.Write(map[string]any{
 			"sa": math.Sin(t),
 			"sb": math.Sin(t * 2),
 			"sc": math.Sin(t / 2),
 		}); err != nil {
 			break
 		}
-		if err = wCos.Write(map[string]interface{}{
+		if err = wCos.Write(map[string]any{
 			"ca": math.Cos(t),
 			"cb": math.Cos(t * 2),
 			"cc": math.Cos(t / 2),

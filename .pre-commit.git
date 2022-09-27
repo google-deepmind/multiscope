@@ -17,6 +17,14 @@ if [[ ! -x "$GOLINTER" ]]; then
 fi
 
 
+REVIVE=`which revive`
+
+if [[ ! -x "$REVIVE" ]]; then
+  printf "\t\033[41mPlease install revive\033[0m"
+  exit 1
+fi
+
+
 FOLDERS=`find . -type f -name "*.go" -exec dirname "{}" \; | awk -F "/" '{print $2}' | awk 'NF' | sort -u`
 
 PASS=true
@@ -29,7 +37,7 @@ do
   echo $CMD
   zsh -c "$CMD"
   if [[ $? == 0 ]]; then
-    printf "\033[32m$GOFMT $FOLDER\033[0m \033[0;30m\033[42mpass\033[0m\n"
+    printf "\033[32m$GOFMT $FOLDER\033[0m \033[0;30m\033[42mPASS\033[0m\n"
   else
     printf "\033[31m$GOFMT $FOLDER\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
     PASS=false
@@ -39,13 +47,22 @@ do
   if [[ $FOLDER == 'wasm' ]]; then
 	  ENV="GOOS=js GOARCH=wasm"
   fi
-  CMD="$ENV $GOLINTER run --config .golangci.yml $FOLDER/..."
+  CMD="$ENV $GOLINTER run --fast --config .golangci.yml $FOLDER/..."
   echo $CMD
   zsh -c "$CMD"
   if [[ $? == 0 ]]; then
-    printf "\033[32m$GOLINTER $FOLDER\033[0m \033[0;30m\033[42mpass\033[0m\n"
+    printf "\033[32m$GOLINTER $FOLDER\033[0m \033[0;30m\033[42mPASS\033[0m\n"
   else
     printf "\033[31m$GOLINTER $FOLDER\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+    PASS=false
+  fi
+  CMD="$ENV $REVIVE --config .revive.toml $FOLDER/..."
+  echo $CMD
+  zsh -c "$CMD"
+  if [[ $? == 0 ]]; then
+    printf "\033[32m$REVIVE $FOLDER\033[0m \033[0;30m\033[42mPASS\033[0m\n"
+  else
+    printf "\033[31m$REVIVE $FOLDER\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
     PASS=false
   fi
 
@@ -54,7 +71,7 @@ do
   echo $CMD
   zsh -c "$CMD"
   if [[ $? == 0 ]]; then
-    printf "\033[32mTests $FOLDER\033[0m \033[0;30m\033[42mpass\033[0m\n"
+    printf "\033[32mTests $FOLDER\033[0m \033[0;30m\033[42mPASS\033[0m\n"
   else
     printf "\033[31mTests $FOLDER\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
     PASS=false

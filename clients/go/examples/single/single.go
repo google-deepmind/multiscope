@@ -33,7 +33,7 @@ func main() {
 		}
 		const factor = 0.01
 		t := float64(ticker.CurrentTick())
-		if err = w.Write(map[string]interface{}{
+		if err = w.Write(map[string]any{
 			"a": 2 + math.Sin(t*factor),
 			"b": 4 + math.Sin(t*factor),
 			"c": 6 + math.Sin(t*factor),

@@ -52,7 +52,7 @@ type WithPBPath interface {
 
 // Set finds a path starting from parent and set dst to the node found in the tree.
 // The code returns an error if the node in the tree cannot be cast to dst.
-func Set(dst interface{}, parent Parent, withPath WithPBPath) error {
+func Set(dst any, parent Parent, withPath WithPBPath) error {
 	if withPath == nil {
 		return errors.New("cannot get a path in the tree from nil")
 	}

@@ -92,7 +92,7 @@ func (s *TreeServer) GetNodeData(ctx context.Context, req *pb.NodeDataRequest) (
 // Dispatch events using the SendEvents entry point.
 func (s *TreeServer) Dispatch(path *core.Path, msg proto.Message) error {
 	ctx := context.Background()
-	any, err := anypb.New(msg)
+	pl, err := anypb.New(msg)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (s *TreeServer) Dispatch(path *core.Path, msg proto.Message) error {
 		Events: []*pb.Event{
 			{
 				Path:    path.PB(),
-				Payload: any,
+				Payload: pl,
 			},
 		},
 	})

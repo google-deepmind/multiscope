@@ -31,9 +31,9 @@ var Proto01Data = []*timestamppb.Timestamp{
 }
 
 // TimestampToAny convert a timestamp proto into an Any proto.
-func TimestampToAny(ts *timestamppb.Timestamp) (any *anypb.Any, err error) {
-	any = &anypb.Any{}
-	err = any.MarshalFrom(ts)
+func TimestampToAny(ts *timestamppb.Timestamp) (an *anypb.Any, err error) {
+	an = &anypb.Any{}
+	err = an.MarshalFrom(ts)
 	return
 }
 

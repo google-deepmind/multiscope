@@ -86,7 +86,7 @@ func ToProto(nodeData *pb.NodeData, msg proto.Message) error {
 
 // SendEvent sends an event to the server given a path.
 func SendEvent(ctx context.Context, clt pbgrpc.TreeClient, tickerPath []string, event proto.Message) error {
-	any, err := anypb.New(event)
+	pl, err := anypb.New(event)
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func SendEvent(ctx context.Context, clt pbgrpc.TreeClient, tickerPath []string, 
 			Path: &pb.NodePath{
 				Path: tickerPath,
 			},
-			Payload: any,
+			Payload: pl,
 		}},
 	})
 	return err

@@ -11,7 +11,7 @@ func IsWorker() bool {
 	return !js.Global().Get("document").Truthy()
 }
 
-func run(this js.Value, args []js.Value) interface{} {
+func run(this js.Value, args []js.Value) any {
 	if len(args) == 0 {
 		panic("no function name given to the web worker. Please use runWorker(functionName);")
 	}
