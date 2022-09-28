@@ -46,6 +46,8 @@ do
   # Running the linter.
   if [[ $FOLDER == 'wasm' ]]; then
 	  ENV="GOOS=js GOARCH=wasm"
+  else
+  	  EMV="GOOS= GOARCH="
   fi
   CMD="$ENV $GOLINTER run --fast --config .golangci.yml $FOLDER/..."
   echo $CMD
