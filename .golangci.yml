@@ -90,26 +90,24 @@ linters:
     - gofmt
     - goimports
     - goprintffuncname
-    - gosec
     - gosimple
     - govet
     - ineffassign
     - misspell
     - nakedret
-    - noctx
     - nolintlint
     - revive
     - staticcheck
     - stylecheck
     - typecheck
     - unconvert
-    - unparam
     - unused
     - whitespace
 
   # don't enable:
   # - bodyclose
   # - asciicheck
+  # - noctx
   # - dupl
   # - lll
   # - scopelint
@@ -119,12 +117,14 @@ linters:
   # - godox
   # - goerr113
   # - gomnd
+  # - gosec
   # - interfacer
   # - maligned
   # - nestif
   # - prealloc
   # - testpackage
   # - wsl
+  # - unparam
 
 issues:
   include:
