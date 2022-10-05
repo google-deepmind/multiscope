@@ -57,7 +57,7 @@ public network for example).
 
 Open the right port on the desktop in chrome to see the UI of multiscope. It
 will look like this:
-<img alt="double" src="doc/double.png" width="400"  />
+<img alt="double" src="doc/double.png" width="400" />
 
 ### Clients
 
