@@ -8,3 +8,4 @@
 *.dvi
 *.synctex.gz
 *~
+clients/python/build/*
