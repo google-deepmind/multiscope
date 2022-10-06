@@ -84,14 +84,11 @@ linters:
     - exportloopref
     - funlen
     - goconst
-    - gocritic
     - gocyclo
     - godot
     - gofmt
     - goimports
     - goprintffuncname
-    - gosimple
-    - govet
     - ineffassign
     - misspell
     - nakedret
@@ -101,7 +98,6 @@ linters:
     - stylecheck
     - typecheck
     - unconvert
-    - unused
     - whitespace
 
   # don't enable:
@@ -114,10 +110,13 @@ linters:
   # - gochecknoinits
   # - gochecknoglobals
   # - gocognit
+  # - gocritic #super slow
   # - godox
   # - goerr113
   # - gomnd
   # - gosec
+  # - gosimple #super slow
+  # - govet #super slow
   # - interfacer
   # - maligned
   # - nestif
@@ -125,6 +124,7 @@ linters:
   # - testpackage
   # - wsl
   # - unparam
+  # - unused #has false positive (ans is slow)
 
 issues:
   include:
