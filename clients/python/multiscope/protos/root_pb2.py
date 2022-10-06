@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 import tree_pb2 as tree__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nroot.proto\x12\x0fmultiscope.root\x1a\ntree.proto\"3\n\x08RootInfo\x12\'\n\x06layout\x18\x01 \x01(\x0b\x32\x17.multiscope.root.Layout\"1\n\x06Layout\x12\'\n\tdisplayed\x18\x02 \x03(\x0b\x32\x14.multiscope.NodePath\";\n\x10SetLayoutRequest\x12\'\n\x06layout\x18\x01 \x01(\x0b\x32\x17.multiscope.root.Layout\"\x13\n\x11SetLayoutResponse2\\\n\x04Root\x12T\n\tSetLayout\x12!.multiscope.root.SetLayoutRequest\x1a\".multiscope.root.SetLayoutResponse\"\x00\x42!Z\x1fmultiscope/protos/root_go_protob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nroot.proto\x12\x0fmultiscope.root\x1a\ntree.proto\"I\n\x08RootInfo\x12\x14\n\x0ckey_settings\x18\x01 \x01(\t\x12\'\n\x06layout\x18\x02 \x01(\x0b\x32\x17.multiscope.root.Layout\"5\n\nLayoutList\x12\'\n\tdisplayed\x18\x02 \x03(\x0b\x32\x14.multiscope.NodePath\"?\n\x06Layout\x12+\n\x04list\x18\x01 \x01(\x0b\x32\x1b.multiscope.root.LayoutListH\x00\x42\x08\n\x06layout\"-\n\x15SetKeySettingsRequest\x12\x14\n\x0ckey_settings\x18\x01 \x01(\t\"\x18\n\x16SetKeySettingsResponse\";\n\x10SetLayoutRequest\x12\'\n\x06layout\x18\x01 \x01(\x0b\x32\x17.multiscope.root.Layout\"\x13\n\x11SetLayoutResponse\"\x13\n\x11GetVersionRequest\"%\n\x12GetVersionResponse\x12\x0f\n\x07version\x18\x01 \x01(\t\"\x14\n\x12GetRootInfoRequest\">\n\x13GetRootInfoResponse\x12\'\n\x04info\x18\x01 \x01(\x0b\x32\x19.multiscope.root.RootInfo2\xf6\x02\n\x04Root\x12W\n\nGetVersion\x12\".multiscope.root.GetVersionRequest\x1a#.multiscope.root.GetVersionResponse\"\x00\x12Z\n\x0bGetRootInfo\x12#.multiscope.root.GetRootInfoRequest\x1a$.multiscope.root.GetRootInfoResponse\"\x00\x12\x63\n\x0eSetKeySettings\x12&.multiscope.root.SetKeySettingsRequest\x1a\'.multiscope.root.SetKeySettingsResponse\"\x00\x12T\n\tSetLayout\x12!.multiscope.root.SetLayoutRequest\x1a\".multiscope.root.SetLayoutResponse\"\x00\x42!Z\x1fmultiscope/protos/root_go_protob\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'root_pb2', globals())
@@ -23,13 +23,27 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z\037multiscope/protos/root_go_proto'
   _ROOTINFO._serialized_start=43
-  _ROOTINFO._serialized_end=94
-  _LAYOUT._serialized_start=96
-  _LAYOUT._serialized_end=145
-  _SETLAYOUTREQUEST._serialized_start=147
-  _SETLAYOUTREQUEST._serialized_end=206
-  _SETLAYOUTRESPONSE._serialized_start=208
-  _SETLAYOUTRESPONSE._serialized_end=227
-  _ROOT._serialized_start=229
-  _ROOT._serialized_end=321
+  _ROOTINFO._serialized_end=116
+  _LAYOUTLIST._serialized_start=118
+  _LAYOUTLIST._serialized_end=171
+  _LAYOUT._serialized_start=173
+  _LAYOUT._serialized_end=236
+  _SETKEYSETTINGSREQUEST._serialized_start=238
+  _SETKEYSETTINGSREQUEST._serialized_end=283
+  _SETKEYSETTINGSRESPONSE._serialized_start=285
+  _SETKEYSETTINGSRESPONSE._serialized_end=309
+  _SETLAYOUTREQUEST._serialized_start=311
+  _SETLAYOUTREQUEST._serialized_end=370
+  _SETLAYOUTRESPONSE._serialized_start=372
+  _SETLAYOUTRESPONSE._serialized_end=391
+  _GETVERSIONREQUEST._serialized_start=393
+  _GETVERSIONREQUEST._serialized_end=412
+  _GETVERSIONRESPONSE._serialized_start=414
+  _GETVERSIONRESPONSE._serialized_end=451
+  _GETROOTINFOREQUEST._serialized_start=453
+  _GETROOTINFOREQUEST._serialized_end=473
+  _GETROOTINFORESPONSE._serialized_start=475
+  _GETROOTINFORESPONSE._serialized_end=537
+  _ROOT._serialized_start=540
+  _ROOT._serialized_end=914
 # @@protoc_insertion_point(module_scope)
