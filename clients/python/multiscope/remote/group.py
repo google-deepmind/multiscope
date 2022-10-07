@@ -5,8 +5,8 @@ from typing import Optional, Text, Tuple
 
 import six
 
-from golang.multiscope.streams import writers_pb2 as writers_pb
-from golang.stream import stream_pb2 as pb
+# from golang.multiscope.streams import writers_pb2 as writers_pb
+from multiscope.protos import tree_pb2 as pb
 from multiscope.remote import control
 from multiscope.remote import stream_client
 from multiscope.remote.writers import base
@@ -19,6 +19,7 @@ class ParentNode(base.Node):
 
 def join_path(parent: ParentNode, name: str) -> Tuple[str]:
   path = parent.path if parent else ()
+  # TODO: sort out these types.
   return path + (name,)  # pytype: disable=bad-return-type
 
 
@@ -28,15 +29,16 @@ def join_path_pb(parent: ParentNode, name: str) -> pb.NodePath:
   return node_path
 
 
-class Group(ParentNode):
-  """Multiscope parent node."""
+# TODO: re-enable once needed.
+# class Group(ParentNode):
+#   """Multiscope parent node."""
 
-  @control.init
-  def __init__(self, name: Text, parent: Optional[ParentNode] = None):
-    path = join_path(parent, name)
-    request = pb.CreateNodeRequest()
-    request.path.path.extend(path)
-    request.type = writers_pb.Writers().group
-    resp = stream_client.CreateNode(request=request)
-    self.name = name
-    super().__init__(path=tuple(resp.path.path))
+#   @control.init
+#   def __init__(self, name: Text, parent: Optional[ParentNode] = None):
+#     path = join_path(parent, name)
+#     request = pb.CreateNodeRequest()
+#     request.path.path.extend(path)
+#     request.type = writers_pb.Writers().group
+#     resp = stream_client.CreateNode(request=request)
+#     self.name = name
+#     super().__init__(path=tuple(resp.path.path))

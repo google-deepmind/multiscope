@@ -1,9 +1,12 @@
-from golang.multiscope.streams.root import root_pb2 as root_pb
-from golang.stream import stream_pb2 as pb
+# TODO: does not work yet!
+
+from absl.testing import absltest
+
 import multiscope
+from multiscope.protos import root_pb2 as root_pb
+from multiscope.protos import tree_pb2 as pb
 from multiscope.remote import stream_client
 from multiscope.remote.control import control
-from absl.testing import absltest
 
 
 class TestControl(absltest.TestCase):

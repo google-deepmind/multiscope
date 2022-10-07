@@ -4,8 +4,8 @@ import abc
 import threading
 from typing import Callable, Text, Tuple
 
-from golang.multiscope.streams.root import root_pb2 as root_pb
-from golang.stream import stream_pb2
+# from multiscope import root_pb2 as root_pb
+# from multiscope.protos import tree_pb2 as stream_pb2
 from multiscope.remote import active_paths
 from multiscope.remote import control
 from multiscope.remote import stream_client
@@ -44,32 +44,17 @@ class Writer(Node):
     with self._should_write_lock:
       self._should_write = is_active
 
-  def _set_display(self) -> stream_pb2.PutNodeDataReply:
-    action = root_pb.RootAction()
-    node_path = stream_pb2.NodePath()
-    node_path.path.extend(self.path)
-    action.display.add_display_paths.append(node_path)
-    request = stream_pb2.PutNodeDataRequest()
-    # Sets an empty path corresponding to multiscope root.
-    request.data.path.SetInParent()
-    request.data.pb.Pack(action)
-    return stream_client.PutNodeData(request=request)
-
-  @control.method
-  def set_display_size(self, height: int,
-                       width: int) -> stream_pb2.PutNodeDataReply:
-    """Sets the size (in pixels) of the panel displaying the data."""
-    action = root_pb.RootAction()
-    set_size = root_pb.RootAction.Display.SetSize()
-    set_size.path.path.extend(self.path)
-    set_size.size.height = height
-    set_size.size.width = width
-    action.display.set_display_sizes.append(set_size)
-    request = stream_pb2.PutNodeDataRequest()
-    # Sets an empty path corresponding to multiscope root.
-    request.data.path.SetInParent()
-    request.data.pb.Pack(action)
-    return stream_client.PutNodeData(request=request)
+  # TODO(b/251324180): re-enable this.
+  # def _set_display(self) -> stream_pb2.PutNodeDataReply:
+  #   action = root_pb.RootAction()
+  #   node_path = stream_pb2.NodePath()
+  #   node_path.path.extend(self.path)
+  #   action.display.add_display_paths.append(node_path)
+  #   request = stream_pb2.PutNodeDataRequest()
+  #   # Sets an empty path corresponding to multiscope root.
+  #   request.data.path.SetInParent()
+  #   request.data.pb.Pack(action)
+  #   return stream_client.PutNodeData(request=request)
 
   def register_activity_callback(self, cb: Callable[[bool], None]):
     active_paths.register_callback(self.path, cb)

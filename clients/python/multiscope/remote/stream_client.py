@@ -1,14 +1,16 @@
 """A GRPC client for talking to the stream backend."""
+
+import logging
 import threading
 from typing import Optional, Text
 from urllib import parse
 
 import grpc
 
-from golang.stream import stream_pb2 as pb
-from golang.stream import stream_pb2_grpc as pb_grpc
+from multiscope.protos import tree_pb2 as pb
+from multiscope.protos import tree_pb2_grpc as pb_grpc
 
-_stub: Optional[pb_grpc.StreamStub] = None
+_stub: Optional[pb_grpc.TreeStub] = None
 _reset_epoch: int = 0
 _mu = threading.Lock()
 
@@ -20,29 +22,16 @@ def InitializeStub(url: Text) -> None:
   global _stub
   if _stub is not None:
     raise AssertionError('GRPC stub already initialized')
-  if parse.urlparse(url).scheme == 'unix':
-    creds = grpc.local_channel_credentials(grpc.LocalConnectionType.UDS)
-  else:
-    raise ValueError(
-        'The selected GRPC authentication scheme not supported. Use a '
-        'different url type.')
+  # TODO: Use authenticated channels.
   global channel
-  channel = grpc.secure_channel(
-      url,
-      credentials=creds,
-      # Remove all grpc limits on max message size to support writing very
-      # large messages (eg the mujoco scene init message).
-      #
-      # This effectively limits the message to the default protobuf max message
-      # size. See also http://yaqs/5863428325507072.
-      options=[('grpc.max_send_message_length', -1),
-               ('grpc.max_receive_message_length', -1)])
-  _stub = pb_grpc.StreamStub(channel)
+  logging.warning("Using an unsecure gRPC channel!")
+  channel = grpc.insecure_channel(url)
+  _stub = pb_grpc.TreeStub(channel)
 
 
 def TryConnecting(timeout_secs: int):
   _stub.GetNodeData(
-      pb.NodeDataRequest(paths=[]), wait_for_ready=True, timeout=timeout_secs)
+      pb.NodeDataRequest(reqs=[]), wait_for_ready=True, timeout=timeout_secs)
 
 
 def Initialized() -> bool:
@@ -55,12 +44,8 @@ def ResetEpoch() -> int:
     return _reset_epoch
 
 
-def CreateNode(*args, **kwargs):
-  return _stub.CreateNode(*args, **kwargs)
-
-
-def PutNodeData(*args, **kwargs):
-  return _stub.PutNodeData(*args, **kwargs)
+def GetNodeStruct(*args, **kwargs):
+  return _stub.GetNodeStruct(*args, **kwargs)
 
 
 def GetNodeData(*args, **kwargs):

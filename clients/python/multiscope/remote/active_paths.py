@@ -7,7 +7,7 @@ from typing import Callable, List, Mapping, Tuple
 
 from absl import logging
 
-from golang.stream import stream_pb2 as pb
+from multiscope.protos import tree_pb2 as pb
 from multiscope.remote import stream_client
 
 path_to_callables: Mapping[Tuple[str], List[Callable[[bool], None]]] = \

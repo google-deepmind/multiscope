@@ -1,10 +1,11 @@
 import threading
 
-from golang.stream import stream_pb2 as pb
+from absl.testing import absltest
+
+from multiscope.protos import tree_pb2 as pb
 from multiscope import remote as multiscope
 from multiscope.remote import active_paths
 from multiscope.remote import stream_client
-from absl.testing import absltest
 
 
 class ActivePathTest(absltest.TestCase):
@@ -30,8 +31,8 @@ class ActivePathTest(absltest.TestCase):
     active_paths.register_callback(tuple(path_a), active_a)
 
     stream_client.GetNodeData(
-        pb.NodeDataRequest(paths=[
-            pb.NodePath(path=path_ab),
+        pb.NodeDataRequest(reqs=[
+            pb.DataRequest(path=pb.NodePath(path=path_ab), lastTick=0),
         ]))
     is_active_ab.wait()
     self.assertFalse(is_active_a.is_set())
@@ -39,8 +40,8 @@ class ActivePathTest(absltest.TestCase):
     is_active_a.clear()
     is_active_ab.clear()
     stream_client.GetNodeData(
-        pb.NodeDataRequest(paths=[
-            pb.NodePath(path=path_a),
+        pb.NodeDataRequest(reqs=[
+            pb.DataRequest(path=pb.NodePath(path=path_a), lastTick=0),
         ]))
     is_active_a.wait()
     is_active_ab.wait()
