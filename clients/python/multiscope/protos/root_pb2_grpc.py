@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import root_pb2 as root__pb2
+from multiscope.protos import root_pb2 as multiscope_dot_protos_dot_root__pb2
 
 
 class RootStub(object):
@@ -16,23 +16,23 @@ class RootStub(object):
         """
         self.GetVersion = channel.unary_unary(
                 '/multiscope.root.Root/GetVersion',
-                request_serializer=root__pb2.GetVersionRequest.SerializeToString,
-                response_deserializer=root__pb2.GetVersionResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_root__pb2.GetVersionRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_root__pb2.GetVersionResponse.FromString,
                 )
         self.GetRootInfo = channel.unary_unary(
                 '/multiscope.root.Root/GetRootInfo',
-                request_serializer=root__pb2.GetRootInfoRequest.SerializeToString,
-                response_deserializer=root__pb2.GetRootInfoResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_root__pb2.GetRootInfoRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_root__pb2.GetRootInfoResponse.FromString,
                 )
         self.SetKeySettings = channel.unary_unary(
                 '/multiscope.root.Root/SetKeySettings',
-                request_serializer=root__pb2.SetKeySettingsRequest.SerializeToString,
-                response_deserializer=root__pb2.SetKeySettingsResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_root__pb2.SetKeySettingsRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_root__pb2.SetKeySettingsResponse.FromString,
                 )
         self.SetLayout = channel.unary_unary(
                 '/multiscope.root.Root/SetLayout',
-                request_serializer=root__pb2.SetLayoutRequest.SerializeToString,
-                response_deserializer=root__pb2.SetLayoutResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_root__pb2.SetLayoutRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_root__pb2.SetLayoutResponse.FromString,
                 )
 
 
@@ -72,23 +72,23 @@ def add_RootServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GetVersion': grpc.unary_unary_rpc_method_handler(
                     servicer.GetVersion,
-                    request_deserializer=root__pb2.GetVersionRequest.FromString,
-                    response_serializer=root__pb2.GetVersionResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_root__pb2.GetVersionRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_root__pb2.GetVersionResponse.SerializeToString,
             ),
             'GetRootInfo': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRootInfo,
-                    request_deserializer=root__pb2.GetRootInfoRequest.FromString,
-                    response_serializer=root__pb2.GetRootInfoResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_root__pb2.GetRootInfoRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_root__pb2.GetRootInfoResponse.SerializeToString,
             ),
             'SetKeySettings': grpc.unary_unary_rpc_method_handler(
                     servicer.SetKeySettings,
-                    request_deserializer=root__pb2.SetKeySettingsRequest.FromString,
-                    response_serializer=root__pb2.SetKeySettingsResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_root__pb2.SetKeySettingsRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_root__pb2.SetKeySettingsResponse.SerializeToString,
             ),
             'SetLayout': grpc.unary_unary_rpc_method_handler(
                     servicer.SetLayout,
-                    request_deserializer=root__pb2.SetLayoutRequest.FromString,
-                    response_serializer=root__pb2.SetLayoutResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_root__pb2.SetLayoutRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_root__pb2.SetLayoutResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -112,8 +112,8 @@ class Root(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.root.Root/GetVersion',
-            root__pb2.GetVersionRequest.SerializeToString,
-            root__pb2.GetVersionResponse.FromString,
+            multiscope_dot_protos_dot_root__pb2.GetVersionRequest.SerializeToString,
+            multiscope_dot_protos_dot_root__pb2.GetVersionResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -129,8 +129,8 @@ class Root(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.root.Root/GetRootInfo',
-            root__pb2.GetRootInfoRequest.SerializeToString,
-            root__pb2.GetRootInfoResponse.FromString,
+            multiscope_dot_protos_dot_root__pb2.GetRootInfoRequest.SerializeToString,
+            multiscope_dot_protos_dot_root__pb2.GetRootInfoResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -146,8 +146,8 @@ class Root(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.root.Root/SetKeySettings',
-            root__pb2.SetKeySettingsRequest.SerializeToString,
-            root__pb2.SetKeySettingsResponse.FromString,
+            multiscope_dot_protos_dot_root__pb2.SetKeySettingsRequest.SerializeToString,
+            multiscope_dot_protos_dot_root__pb2.SetKeySettingsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -163,7 +163,7 @@ class Root(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.root.Root/SetLayout',
-            root__pb2.SetLayoutRequest.SerializeToString,
-            root__pb2.SetLayoutResponse.FromString,
+            multiscope_dot_protos_dot_root__pb2.SetLayoutRequest.SerializeToString,
+            multiscope_dot_protos_dot_root__pb2.SetLayoutResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

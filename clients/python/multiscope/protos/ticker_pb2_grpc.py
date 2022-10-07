@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import ticker_pb2 as ticker__pb2
+from multiscope.protos import ticker_pb2 as multiscope_dot_protos_dot_ticker__pb2
 
 
 class TickersStub(object):
@@ -16,13 +16,13 @@ class TickersStub(object):
         """
         self.New = channel.unary_unary(
                 '/multiscope.ticker.Tickers/New',
-                request_serializer=ticker__pb2.NewTickerRequest.SerializeToString,
-                response_deserializer=ticker__pb2.NewTickerResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_ticker__pb2.NewTickerRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_ticker__pb2.NewTickerResponse.FromString,
                 )
         self.Write = channel.unary_unary(
                 '/multiscope.ticker.Tickers/Write',
-                request_serializer=ticker__pb2.WriteRequest.SerializeToString,
-                response_deserializer=ticker__pb2.WriteResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_ticker__pb2.WriteRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_ticker__pb2.WriteResponse.FromString,
                 )
 
 
@@ -48,13 +48,13 @@ def add_TickersServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'New': grpc.unary_unary_rpc_method_handler(
                     servicer.New,
-                    request_deserializer=ticker__pb2.NewTickerRequest.FromString,
-                    response_serializer=ticker__pb2.NewTickerResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_ticker__pb2.NewTickerRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_ticker__pb2.NewTickerResponse.SerializeToString,
             ),
             'Write': grpc.unary_unary_rpc_method_handler(
                     servicer.Write,
-                    request_deserializer=ticker__pb2.WriteRequest.FromString,
-                    response_serializer=ticker__pb2.WriteResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_ticker__pb2.WriteRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_ticker__pb2.WriteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -78,8 +78,8 @@ class Tickers(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.ticker.Tickers/New',
-            ticker__pb2.NewTickerRequest.SerializeToString,
-            ticker__pb2.NewTickerResponse.FromString,
+            multiscope_dot_protos_dot_ticker__pb2.NewTickerRequest.SerializeToString,
+            multiscope_dot_protos_dot_ticker__pb2.NewTickerResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -95,7 +95,7 @@ class Tickers(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.ticker.Tickers/Write',
-            ticker__pb2.WriteRequest.SerializeToString,
-            ticker__pb2.WriteResponse.FromString,
+            multiscope_dot_protos_dot_ticker__pb2.WriteRequest.SerializeToString,
+            multiscope_dot_protos_dot_ticker__pb2.WriteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

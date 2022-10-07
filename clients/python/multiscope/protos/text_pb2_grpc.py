@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import text_pb2 as text__pb2
+from multiscope.protos import text_pb2 as multiscope_dot_protos_dot_text__pb2
 
 
 class TextStub(object):
@@ -16,28 +16,28 @@ class TextStub(object):
         """
         self.NewWriter = channel.unary_unary(
                 '/multiscope.text.Text/NewWriter',
-                request_serializer=text__pb2.NewWriterRequest.SerializeToString,
-                response_deserializer=text__pb2.NewWriterResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_text__pb2.NewWriterRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_text__pb2.NewWriterResponse.FromString,
                 )
         self.NewHTMLWriter = channel.unary_unary(
                 '/multiscope.text.Text/NewHTMLWriter',
-                request_serializer=text__pb2.NewHTMLWriterRequest.SerializeToString,
-                response_deserializer=text__pb2.NewHTMLWriterResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_text__pb2.NewHTMLWriterRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_text__pb2.NewHTMLWriterResponse.FromString,
                 )
         self.Write = channel.unary_unary(
                 '/multiscope.text.Text/Write',
-                request_serializer=text__pb2.WriteRequest.SerializeToString,
-                response_deserializer=text__pb2.WriteResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_text__pb2.WriteRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_text__pb2.WriteResponse.FromString,
                 )
         self.WriteHTML = channel.unary_unary(
                 '/multiscope.text.Text/WriteHTML',
-                request_serializer=text__pb2.WriteHTMLRequest.SerializeToString,
-                response_deserializer=text__pb2.WriteHTMLResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_text__pb2.WriteHTMLRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_text__pb2.WriteHTMLResponse.FromString,
                 )
         self.WriteCSS = channel.unary_unary(
                 '/multiscope.text.Text/WriteCSS',
-                request_serializer=text__pb2.WriteCSSRequest.SerializeToString,
-                response_deserializer=text__pb2.WriteCSSResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_text__pb2.WriteCSSRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_text__pb2.WriteCSSResponse.FromString,
                 )
 
 
@@ -84,28 +84,28 @@ def add_TextServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'NewWriter': grpc.unary_unary_rpc_method_handler(
                     servicer.NewWriter,
-                    request_deserializer=text__pb2.NewWriterRequest.FromString,
-                    response_serializer=text__pb2.NewWriterResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_text__pb2.NewWriterRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_text__pb2.NewWriterResponse.SerializeToString,
             ),
             'NewHTMLWriter': grpc.unary_unary_rpc_method_handler(
                     servicer.NewHTMLWriter,
-                    request_deserializer=text__pb2.NewHTMLWriterRequest.FromString,
-                    response_serializer=text__pb2.NewHTMLWriterResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_text__pb2.NewHTMLWriterRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_text__pb2.NewHTMLWriterResponse.SerializeToString,
             ),
             'Write': grpc.unary_unary_rpc_method_handler(
                     servicer.Write,
-                    request_deserializer=text__pb2.WriteRequest.FromString,
-                    response_serializer=text__pb2.WriteResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_text__pb2.WriteRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_text__pb2.WriteResponse.SerializeToString,
             ),
             'WriteHTML': grpc.unary_unary_rpc_method_handler(
                     servicer.WriteHTML,
-                    request_deserializer=text__pb2.WriteHTMLRequest.FromString,
-                    response_serializer=text__pb2.WriteHTMLResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_text__pb2.WriteHTMLRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_text__pb2.WriteHTMLResponse.SerializeToString,
             ),
             'WriteCSS': grpc.unary_unary_rpc_method_handler(
                     servicer.WriteCSS,
-                    request_deserializer=text__pb2.WriteCSSRequest.FromString,
-                    response_serializer=text__pb2.WriteCSSResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_text__pb2.WriteCSSRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_text__pb2.WriteCSSResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -129,8 +129,8 @@ class Text(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.text.Text/NewWriter',
-            text__pb2.NewWriterRequest.SerializeToString,
-            text__pb2.NewWriterResponse.FromString,
+            multiscope_dot_protos_dot_text__pb2.NewWriterRequest.SerializeToString,
+            multiscope_dot_protos_dot_text__pb2.NewWriterResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -146,8 +146,8 @@ class Text(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.text.Text/NewHTMLWriter',
-            text__pb2.NewHTMLWriterRequest.SerializeToString,
-            text__pb2.NewHTMLWriterResponse.FromString,
+            multiscope_dot_protos_dot_text__pb2.NewHTMLWriterRequest.SerializeToString,
+            multiscope_dot_protos_dot_text__pb2.NewHTMLWriterResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -163,8 +163,8 @@ class Text(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.text.Text/Write',
-            text__pb2.WriteRequest.SerializeToString,
-            text__pb2.WriteResponse.FromString,
+            multiscope_dot_protos_dot_text__pb2.WriteRequest.SerializeToString,
+            multiscope_dot_protos_dot_text__pb2.WriteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -180,8 +180,8 @@ class Text(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.text.Text/WriteHTML',
-            text__pb2.WriteHTMLRequest.SerializeToString,
-            text__pb2.WriteHTMLResponse.FromString,
+            multiscope_dot_protos_dot_text__pb2.WriteHTMLRequest.SerializeToString,
+            multiscope_dot_protos_dot_text__pb2.WriteHTMLResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -197,7 +197,7 @@ class Text(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.text.Text/WriteCSS',
-            text__pb2.WriteCSSRequest.SerializeToString,
-            text__pb2.WriteCSSResponse.FromString,
+            multiscope_dot_protos_dot_text__pb2.WriteCSSRequest.SerializeToString,
+            multiscope_dot_protos_dot_text__pb2.WriteCSSResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

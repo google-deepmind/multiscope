@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import tree_pb2 as tree__pb2
+from multiscope.protos import tree_pb2 as multiscope_dot_protos_dot_tree__pb2
 
 
 class TreeStub(object):
@@ -16,33 +16,33 @@ class TreeStub(object):
         """
         self.GetNodeStruct = channel.unary_unary(
                 '/multiscope.Tree/GetNodeStruct',
-                request_serializer=tree__pb2.NodeStructRequest.SerializeToString,
-                response_deserializer=tree__pb2.NodeStructReply.FromString,
+                request_serializer=multiscope_dot_protos_dot_tree__pb2.NodeStructRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_tree__pb2.NodeStructReply.FromString,
                 )
         self.GetNodeData = channel.unary_unary(
                 '/multiscope.Tree/GetNodeData',
-                request_serializer=tree__pb2.NodeDataRequest.SerializeToString,
-                response_deserializer=tree__pb2.NodeDataReply.FromString,
+                request_serializer=multiscope_dot_protos_dot_tree__pb2.NodeDataRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_tree__pb2.NodeDataReply.FromString,
                 )
         self.SendEvents = channel.unary_unary(
                 '/multiscope.Tree/SendEvents',
-                request_serializer=tree__pb2.SendEventsRequest.SerializeToString,
-                response_deserializer=tree__pb2.SendEventsReply.FromString,
+                request_serializer=multiscope_dot_protos_dot_tree__pb2.SendEventsRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_tree__pb2.SendEventsReply.FromString,
                 )
         self.ResetState = channel.unary_unary(
                 '/multiscope.Tree/ResetState',
-                request_serializer=tree__pb2.ResetStateRequest.SerializeToString,
-                response_deserializer=tree__pb2.ResetStateReply.FromString,
+                request_serializer=multiscope_dot_protos_dot_tree__pb2.ResetStateRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_tree__pb2.ResetStateReply.FromString,
                 )
         self.ActivePaths = channel.unary_stream(
                 '/multiscope.Tree/ActivePaths',
-                request_serializer=tree__pb2.ActivePathsRequest.SerializeToString,
-                response_deserializer=tree__pb2.ActivePathsReply.FromString,
+                request_serializer=multiscope_dot_protos_dot_tree__pb2.ActivePathsRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_tree__pb2.ActivePathsReply.FromString,
                 )
         self.StreamEvents = channel.unary_stream(
                 '/multiscope.Tree/StreamEvents',
-                request_serializer=tree__pb2.StreamEventsRequest.SerializeToString,
-                response_deserializer=tree__pb2.Event.FromString,
+                request_serializer=multiscope_dot_protos_dot_tree__pb2.StreamEventsRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_tree__pb2.Event.FromString,
                 )
 
 
@@ -98,33 +98,33 @@ def add_TreeServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GetNodeStruct': grpc.unary_unary_rpc_method_handler(
                     servicer.GetNodeStruct,
-                    request_deserializer=tree__pb2.NodeStructRequest.FromString,
-                    response_serializer=tree__pb2.NodeStructReply.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_tree__pb2.NodeStructRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_tree__pb2.NodeStructReply.SerializeToString,
             ),
             'GetNodeData': grpc.unary_unary_rpc_method_handler(
                     servicer.GetNodeData,
-                    request_deserializer=tree__pb2.NodeDataRequest.FromString,
-                    response_serializer=tree__pb2.NodeDataReply.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_tree__pb2.NodeDataRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_tree__pb2.NodeDataReply.SerializeToString,
             ),
             'SendEvents': grpc.unary_unary_rpc_method_handler(
                     servicer.SendEvents,
-                    request_deserializer=tree__pb2.SendEventsRequest.FromString,
-                    response_serializer=tree__pb2.SendEventsReply.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_tree__pb2.SendEventsRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_tree__pb2.SendEventsReply.SerializeToString,
             ),
             'ResetState': grpc.unary_unary_rpc_method_handler(
                     servicer.ResetState,
-                    request_deserializer=tree__pb2.ResetStateRequest.FromString,
-                    response_serializer=tree__pb2.ResetStateReply.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_tree__pb2.ResetStateRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_tree__pb2.ResetStateReply.SerializeToString,
             ),
             'ActivePaths': grpc.unary_stream_rpc_method_handler(
                     servicer.ActivePaths,
-                    request_deserializer=tree__pb2.ActivePathsRequest.FromString,
-                    response_serializer=tree__pb2.ActivePathsReply.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_tree__pb2.ActivePathsRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_tree__pb2.ActivePathsReply.SerializeToString,
             ),
             'StreamEvents': grpc.unary_stream_rpc_method_handler(
                     servicer.StreamEvents,
-                    request_deserializer=tree__pb2.StreamEventsRequest.FromString,
-                    response_serializer=tree__pb2.Event.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_tree__pb2.StreamEventsRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_tree__pb2.Event.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -148,8 +148,8 @@ class Tree(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.Tree/GetNodeStruct',
-            tree__pb2.NodeStructRequest.SerializeToString,
-            tree__pb2.NodeStructReply.FromString,
+            multiscope_dot_protos_dot_tree__pb2.NodeStructRequest.SerializeToString,
+            multiscope_dot_protos_dot_tree__pb2.NodeStructReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -165,8 +165,8 @@ class Tree(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.Tree/GetNodeData',
-            tree__pb2.NodeDataRequest.SerializeToString,
-            tree__pb2.NodeDataReply.FromString,
+            multiscope_dot_protos_dot_tree__pb2.NodeDataRequest.SerializeToString,
+            multiscope_dot_protos_dot_tree__pb2.NodeDataReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -182,8 +182,8 @@ class Tree(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.Tree/SendEvents',
-            tree__pb2.SendEventsRequest.SerializeToString,
-            tree__pb2.SendEventsReply.FromString,
+            multiscope_dot_protos_dot_tree__pb2.SendEventsRequest.SerializeToString,
+            multiscope_dot_protos_dot_tree__pb2.SendEventsReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -199,8 +199,8 @@ class Tree(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.Tree/ResetState',
-            tree__pb2.ResetStateRequest.SerializeToString,
-            tree__pb2.ResetStateReply.FromString,
+            multiscope_dot_protos_dot_tree__pb2.ResetStateRequest.SerializeToString,
+            multiscope_dot_protos_dot_tree__pb2.ResetStateReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -216,8 +216,8 @@ class Tree(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/multiscope.Tree/ActivePaths',
-            tree__pb2.ActivePathsRequest.SerializeToString,
-            tree__pb2.ActivePathsReply.FromString,
+            multiscope_dot_protos_dot_tree__pb2.ActivePathsRequest.SerializeToString,
+            multiscope_dot_protos_dot_tree__pb2.ActivePathsReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -233,7 +233,7 @@ class Tree(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/multiscope.Tree/StreamEvents',
-            tree__pb2.StreamEventsRequest.SerializeToString,
-            tree__pb2.Event.FromString,
+            multiscope_dot_protos_dot_tree__pb2.StreamEventsRequest.SerializeToString,
+            multiscope_dot_protos_dot_tree__pb2.Event.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

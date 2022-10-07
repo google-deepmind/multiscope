@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import scalar_pb2 as scalar__pb2
+from multiscope.protos import scalar_pb2 as multiscope_dot_protos_dot_scalar__pb2
 
 
 class ScalarsStub(object):
@@ -16,13 +16,13 @@ class ScalarsStub(object):
         """
         self.NewWriter = channel.unary_unary(
                 '/multiscope.scalar.Scalars/NewWriter',
-                request_serializer=scalar__pb2.NewWriterRequest.SerializeToString,
-                response_deserializer=scalar__pb2.NewWriterResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_scalar__pb2.NewWriterRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_scalar__pb2.NewWriterResponse.FromString,
                 )
         self.Write = channel.unary_unary(
                 '/multiscope.scalar.Scalars/Write',
-                request_serializer=scalar__pb2.WriteRequest.SerializeToString,
-                response_deserializer=scalar__pb2.WriteResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_scalar__pb2.WriteRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_scalar__pb2.WriteResponse.FromString,
                 )
 
 
@@ -48,13 +48,13 @@ def add_ScalarsServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'NewWriter': grpc.unary_unary_rpc_method_handler(
                     servicer.NewWriter,
-                    request_deserializer=scalar__pb2.NewWriterRequest.FromString,
-                    response_serializer=scalar__pb2.NewWriterResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_scalar__pb2.NewWriterRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_scalar__pb2.NewWriterResponse.SerializeToString,
             ),
             'Write': grpc.unary_unary_rpc_method_handler(
                     servicer.Write,
-                    request_deserializer=scalar__pb2.WriteRequest.FromString,
-                    response_serializer=scalar__pb2.WriteResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_scalar__pb2.WriteRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_scalar__pb2.WriteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -78,8 +78,8 @@ class Scalars(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.scalar.Scalars/NewWriter',
-            scalar__pb2.NewWriterRequest.SerializeToString,
-            scalar__pb2.NewWriterResponse.FromString,
+            multiscope_dot_protos_dot_scalar__pb2.NewWriterRequest.SerializeToString,
+            multiscope_dot_protos_dot_scalar__pb2.NewWriterResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -95,7 +95,7 @@ class Scalars(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.scalar.Scalars/Write',
-            scalar__pb2.WriteRequest.SerializeToString,
-            scalar__pb2.WriteResponse.FromString,
+            multiscope_dot_protos_dot_scalar__pb2.WriteRequest.SerializeToString,
+            multiscope_dot_protos_dot_scalar__pb2.WriteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

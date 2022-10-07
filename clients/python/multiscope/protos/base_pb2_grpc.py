@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import base_pb2 as base__pb2
+from multiscope.protos import base_pb2 as multiscope_dot_protos_dot_base__pb2
 
 
 class BaseWritersStub(object):
@@ -20,28 +20,28 @@ class BaseWritersStub(object):
         """
         self.NewGroup = channel.unary_unary(
                 '/multiscope.base.BaseWriters/NewGroup',
-                request_serializer=base__pb2.NewGroupRequest.SerializeToString,
-                response_deserializer=base__pb2.NewGroupResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_base__pb2.NewGroupRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_base__pb2.NewGroupResponse.FromString,
                 )
         self.NewProtoWriter = channel.unary_unary(
                 '/multiscope.base.BaseWriters/NewProtoWriter',
-                request_serializer=base__pb2.NewProtoWriterRequest.SerializeToString,
-                response_deserializer=base__pb2.NewProtoWriterResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_base__pb2.NewProtoWriterRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_base__pb2.NewProtoWriterResponse.FromString,
                 )
         self.WriteProto = channel.unary_unary(
                 '/multiscope.base.BaseWriters/WriteProto',
-                request_serializer=base__pb2.WriteProtoRequest.SerializeToString,
-                response_deserializer=base__pb2.WriteProtoResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_base__pb2.WriteProtoRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_base__pb2.WriteProtoResponse.FromString,
                 )
         self.NewRawWriter = channel.unary_unary(
                 '/multiscope.base.BaseWriters/NewRawWriter',
-                request_serializer=base__pb2.NewRawWriterRequest.SerializeToString,
-                response_deserializer=base__pb2.NewRawWriterResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_base__pb2.NewRawWriterRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_base__pb2.NewRawWriterResponse.FromString,
                 )
         self.WriteRaw = channel.unary_unary(
                 '/multiscope.base.BaseWriters/WriteRaw',
-                request_serializer=base__pb2.WriteRawRequest.SerializeToString,
-                response_deserializer=base__pb2.WriteRawResponse.FromString,
+                request_serializer=multiscope_dot_protos_dot_base__pb2.WriteRawRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_base__pb2.WriteRawResponse.FromString,
                 )
 
 
@@ -92,28 +92,28 @@ def add_BaseWritersServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'NewGroup': grpc.unary_unary_rpc_method_handler(
                     servicer.NewGroup,
-                    request_deserializer=base__pb2.NewGroupRequest.FromString,
-                    response_serializer=base__pb2.NewGroupResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_base__pb2.NewGroupRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_base__pb2.NewGroupResponse.SerializeToString,
             ),
             'NewProtoWriter': grpc.unary_unary_rpc_method_handler(
                     servicer.NewProtoWriter,
-                    request_deserializer=base__pb2.NewProtoWriterRequest.FromString,
-                    response_serializer=base__pb2.NewProtoWriterResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_base__pb2.NewProtoWriterRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_base__pb2.NewProtoWriterResponse.SerializeToString,
             ),
             'WriteProto': grpc.unary_unary_rpc_method_handler(
                     servicer.WriteProto,
-                    request_deserializer=base__pb2.WriteProtoRequest.FromString,
-                    response_serializer=base__pb2.WriteProtoResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_base__pb2.WriteProtoRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_base__pb2.WriteProtoResponse.SerializeToString,
             ),
             'NewRawWriter': grpc.unary_unary_rpc_method_handler(
                     servicer.NewRawWriter,
-                    request_deserializer=base__pb2.NewRawWriterRequest.FromString,
-                    response_serializer=base__pb2.NewRawWriterResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_base__pb2.NewRawWriterRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_base__pb2.NewRawWriterResponse.SerializeToString,
             ),
             'WriteRaw': grpc.unary_unary_rpc_method_handler(
                     servicer.WriteRaw,
-                    request_deserializer=base__pb2.WriteRawRequest.FromString,
-                    response_serializer=base__pb2.WriteRawResponse.SerializeToString,
+                    request_deserializer=multiscope_dot_protos_dot_base__pb2.WriteRawRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_base__pb2.WriteRawResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -141,8 +141,8 @@ class BaseWriters(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.base.BaseWriters/NewGroup',
-            base__pb2.NewGroupRequest.SerializeToString,
-            base__pb2.NewGroupResponse.FromString,
+            multiscope_dot_protos_dot_base__pb2.NewGroupRequest.SerializeToString,
+            multiscope_dot_protos_dot_base__pb2.NewGroupResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -158,8 +158,8 @@ class BaseWriters(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.base.BaseWriters/NewProtoWriter',
-            base__pb2.NewProtoWriterRequest.SerializeToString,
-            base__pb2.NewProtoWriterResponse.FromString,
+            multiscope_dot_protos_dot_base__pb2.NewProtoWriterRequest.SerializeToString,
+            multiscope_dot_protos_dot_base__pb2.NewProtoWriterResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -175,8 +175,8 @@ class BaseWriters(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.base.BaseWriters/WriteProto',
-            base__pb2.WriteProtoRequest.SerializeToString,
-            base__pb2.WriteProtoResponse.FromString,
+            multiscope_dot_protos_dot_base__pb2.WriteProtoRequest.SerializeToString,
+            multiscope_dot_protos_dot_base__pb2.WriteProtoResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -192,8 +192,8 @@ class BaseWriters(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.base.BaseWriters/NewRawWriter',
-            base__pb2.NewRawWriterRequest.SerializeToString,
-            base__pb2.NewRawWriterResponse.FromString,
+            multiscope_dot_protos_dot_base__pb2.NewRawWriterRequest.SerializeToString,
+            multiscope_dot_protos_dot_base__pb2.NewRawWriterResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -209,7 +209,7 @@ class BaseWriters(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/multiscope.base.BaseWriters/WriteRaw',
-            base__pb2.WriteRawRequest.SerializeToString,
-            base__pb2.WriteRawResponse.FromString,
+            multiscope_dot_protos_dot_base__pb2.WriteRawRequest.SerializeToString,
+            multiscope_dot_protos_dot_base__pb2.WriteRawResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
