@@ -11,6 +11,7 @@ package protos
 //go:generate protoc -I ../protos --go_out=../.. --go-grpc_out=../.. ../protos/ticker.proto
 //go:generate protoc -I ../protos --go_out=../.. --go-grpc_out=../.. ../protos/tree.proto
 //go:generate protoc -I ../protos --go_out=../.. --go-grpc_out=../.. ../protos/ui.proto
+//go:generate protoc -I ../protos --go_out=../.. --go-grpc_out=../.. ../protos/tensor.proto
 
 // Generate the API version.
 //go:generate zsh ./generate_version.zsh
