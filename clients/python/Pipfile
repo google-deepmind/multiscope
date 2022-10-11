@@ -13,6 +13,7 @@ grpcio = "*"
 [dev-packages]
 black = "*"
 pipenv-setup = {extras = ["black"], version = "*"}
+pytype = "*"
 
 [requires]
 python_version = "3.8"
