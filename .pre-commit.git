@@ -3,24 +3,16 @@
 GOFMT=`which gofmt`
 
 if [[ ! -x "$GOFMT" ]]; then
-  printf "\t\033[41mPlease install gofmt\033[0m"
+  printf "\t\033[41mPlease install gofmt.\033[0m"
   exit 1
 fi
 
 find . \( -name "*.go" ! -name "*.pb.go" \) -exec $GOFMT -w {} \;
 
-GOLINTER=`which golangci-lint`
-
-if [[ ! -x "$GOLINTER" ]]; then
-  printf "\t\033[41mPlease install golangci-lint\033[0m"
-  exit 1
-fi
-
-
 REVIVE=`which revive`
 
 if [[ ! -x "$REVIVE" ]]; then
-  printf "\t\033[41mPlease install revive\033[0m"
+  printf "\t\033[41mPlease install revive (https://github.com/mgechev/revive).\033[0m"
   exit 1
 fi
 
@@ -48,15 +40,6 @@ do
 	  ENV="GOOS=js GOARCH=wasm"
   else
   	  EMV="GOOS= GOARCH="
-  fi
-  CMD="$ENV $GOLINTER run --fast --config .golangci.yml $FOLDER/..."
-  echo $CMD
-  zsh -c "$CMD"
-  if [[ $? == 0 ]]; then
-    printf "\033[32m$GOLINTER $FOLDER\033[0m \033[0;30m\033[42mPASS\033[0m\n"
-  else
-    printf "\033[31m$GOLINTER $FOLDER\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
-    PASS=false
   fi
   CMD="$ENV $REVIVE --config .revive.toml $FOLDER/..."
   echo $CMD
