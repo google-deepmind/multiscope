@@ -12,6 +12,7 @@ from multiscope.remote.control import control
 class TestControl(absltest.TestCase):
 
   def testDisable(self):
+    # TODO(b/253491234): implement disable.
     multiscope.disable()
     self.assertIsNone(multiscope.start_server())
     # Strict mode is enabled in BUILD rule for all tests.
@@ -24,6 +25,7 @@ class TestControl(absltest.TestCase):
     control._disabled = False
 
   def testReset(self):
+    # TODO(b/253450753): fails with GRPC stub already initialized.
     text_data = 'foo'
     multiscope.start_server()
     t = multiscope.Ticker('ticker')
