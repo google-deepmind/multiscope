@@ -1,17 +1,19 @@
 """Interactions with the server."""
 # TODO: this is a minimal implementation, far from the original.
 
+import threading
+from typing import Optional, Tuple
+
 import atexit
 import logging
 import os
-import pdb
 import subprocess
-import threading
 
 from absl import flags
-from typing import Tuple
 
-from multiscope.remote import active_paths, stream_client
+from multiscope.remote import active_paths
+from multiscope.remote import control
+from multiscope.remote import stream_client
 
 
 _HTTP_PORT = flags.DEFINE_integer("http_port", 5972, "http port.")
@@ -24,13 +26,47 @@ _MULTISCOPE_BINARY_PATH = flags.DEFINE_string(
   "The path to the pre-built multiscope binary.")
 
 
-def start_server(connection_timeout_secs: int = 15) -> Tuple[int, int]:
-  """Starts the server and returns the http and grpc ports."""
-  # TODO: add safety?
-  return start_server_unsafe(connection_timeout_secs)
+_web_port: Optional[int] = None
+_grpc_url: Optional[str] = None
+_lock = threading.Lock()
 
 
-def start_server_unsafe(connection_timeout_secs) -> Tuple[int, int]:
+def start_server(connection_timeout_secs: int = 15) -> Optional[int]:
+  """Starts the Multiscope server.
+
+  This function may be called multiple times, but the server will only be
+  started once. No exceptions will be thrown even if we fail to start unless the
+  `multiscope_strict_mode` flag is enabled.
+
+  Args:
+    port: requested port for the multiscope web server
+    experiment_path: unique identifier used to persist per-experiment settings
+      like the dashboard layout. A good value is the google3 path to the
+      experiment target, eg "learning/deepmind/your/experiment/target". If None,
+      will try to auto-infer the experiment path, but this doesn't work on borg
+      due to the way xmanager packages experiments.
+
+  Returns:
+     Actually picked port for the multiscope web server. None if multiscope
+     is disabled.
+  """
+  # Race condition guard.
+  with _lock:
+    if control.disabled():
+      return None
+
+    global _web_port, _grpc_url
+    if _web_port is not None:
+      logging.warning(
+          'multiscope.start_server called more than once; ignoring. '
+          'Multiscope dashboard already started at: %s',
+          get_dashboard_url(_web_port))
+      return _web_port
+
+    _web_port, _grpc_url = start_server_unsafe(connection_timeout_secs)
+  return _web_port
+
+def start_server_unsafe(connection_timeout_secs) -> Tuple[int, str]:
   """Starts the server and returns the http and grpc ports."""
   # TODO: this currently requires:
   #
@@ -78,4 +114,11 @@ def start_server_unsafe(connection_timeout_secs) -> Tuple[int, int]:
       daemon=True,
   ).start()
 
-  return _HTTP_PORT.value, _GRPC_PORT.value
+  return _HTTP_PORT.value, grpc_url
+
+def get_dashboard_url(port: int) -> str:
+  if _LOCAL.value:
+    return f"http://localhost:{port}"
+  else:
+    # TODO: implement.
+    raise NotImplementedError("Figure the base out?")

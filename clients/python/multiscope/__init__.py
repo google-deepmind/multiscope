@@ -2,6 +2,8 @@
 
 from absl import flags
 
+from multiscope.remote.control.control import disable
+from multiscope.remote.control.control import DISABLE_MULTISCOPE
 from multiscope.remote.server import start_server
 from multiscope.remote.writers.text import TextWriter
 

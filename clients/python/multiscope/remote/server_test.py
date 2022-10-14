@@ -5,7 +5,6 @@ from absl.testing import absltest
 import multiscope
 
 
-# TODO(b/253450753): fails with GRPC stub already initialized.
 class TestServer(absltest.TestCase):
 
   # Users may be starting multiple servers. Although this is a programming
