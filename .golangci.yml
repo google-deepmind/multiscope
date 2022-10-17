@@ -84,7 +84,6 @@ linters:
     - exportloopref
     - funlen
     - goconst
-    - gocyclo
     - godot
     - gofmt
     - goimports
@@ -111,6 +110,7 @@ linters:
   # - gochecknoglobals
   # - gocognit
   # - gocritic #super slow
+  # - gocyclo #false positive
   # - godox
   # - goerr113
   # - gomnd

@@ -18,10 +18,10 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// TensorWritersClient is the client API for TensorWriters service.
+// TensorsClient is the client API for Tensors service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type TensorWritersClient interface {
+type TensorsClient interface {
 	// Create a new tensor writer node in Multiscope.
 	NewWriter(ctx context.Context, in *NewWriterRequest, opts ...grpc.CallOption) (*NewWriterResponse, error)
 	// Reset the data of a writer.
@@ -30,152 +30,152 @@ type TensorWritersClient interface {
 	Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*WriteResponse, error)
 }
 
-type tensorWritersClient struct {
+type tensorsClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewTensorWritersClient(cc grpc.ClientConnInterface) TensorWritersClient {
-	return &tensorWritersClient{cc}
+func NewTensorsClient(cc grpc.ClientConnInterface) TensorsClient {
+	return &tensorsClient{cc}
 }
 
-func (c *tensorWritersClient) NewWriter(ctx context.Context, in *NewWriterRequest, opts ...grpc.CallOption) (*NewWriterResponse, error) {
+func (c *tensorsClient) NewWriter(ctx context.Context, in *NewWriterRequest, opts ...grpc.CallOption) (*NewWriterResponse, error) {
 	out := new(NewWriterResponse)
-	err := c.cc.Invoke(ctx, "/multiscope.tensors.TensorWriters/NewWriter", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/multiscope.tensors.Tensors/NewWriter", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tensorWritersClient) ResetWriter(ctx context.Context, in *ResetWriterRequest, opts ...grpc.CallOption) (*ResetWriterResponse, error) {
+func (c *tensorsClient) ResetWriter(ctx context.Context, in *ResetWriterRequest, opts ...grpc.CallOption) (*ResetWriterResponse, error) {
 	out := new(ResetWriterResponse)
-	err := c.cc.Invoke(ctx, "/multiscope.tensors.TensorWriters/ResetWriter", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/multiscope.tensors.Tensors/ResetWriter", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tensorWritersClient) Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*WriteResponse, error) {
+func (c *tensorsClient) Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*WriteResponse, error) {
 	out := new(WriteResponse)
-	err := c.cc.Invoke(ctx, "/multiscope.tensors.TensorWriters/Write", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/multiscope.tensors.Tensors/Write", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// TensorWritersServer is the server API for TensorWriters service.
-// All implementations must embed UnimplementedTensorWritersServer
+// TensorsServer is the server API for Tensors service.
+// All implementations must embed UnimplementedTensorsServer
 // for forward compatibility
-type TensorWritersServer interface {
+type TensorsServer interface {
 	// Create a new tensor writer node in Multiscope.
 	NewWriter(context.Context, *NewWriterRequest) (*NewWriterResponse, error)
 	// Reset the data of a writer.
 	ResetWriter(context.Context, *ResetWriterRequest) (*ResetWriterResponse, error)
 	// Write tensor data to Multiscope.
 	Write(context.Context, *WriteRequest) (*WriteResponse, error)
-	mustEmbedUnimplementedTensorWritersServer()
+	mustEmbedUnimplementedTensorsServer()
 }
 
-// UnimplementedTensorWritersServer must be embedded to have forward compatible implementations.
-type UnimplementedTensorWritersServer struct {
+// UnimplementedTensorsServer must be embedded to have forward compatible implementations.
+type UnimplementedTensorsServer struct {
 }
 
-func (UnimplementedTensorWritersServer) NewWriter(context.Context, *NewWriterRequest) (*NewWriterResponse, error) {
+func (UnimplementedTensorsServer) NewWriter(context.Context, *NewWriterRequest) (*NewWriterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewWriter not implemented")
 }
-func (UnimplementedTensorWritersServer) ResetWriter(context.Context, *ResetWriterRequest) (*ResetWriterResponse, error) {
+func (UnimplementedTensorsServer) ResetWriter(context.Context, *ResetWriterRequest) (*ResetWriterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResetWriter not implemented")
 }
-func (UnimplementedTensorWritersServer) Write(context.Context, *WriteRequest) (*WriteResponse, error) {
+func (UnimplementedTensorsServer) Write(context.Context, *WriteRequest) (*WriteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Write not implemented")
 }
-func (UnimplementedTensorWritersServer) mustEmbedUnimplementedTensorWritersServer() {}
+func (UnimplementedTensorsServer) mustEmbedUnimplementedTensorsServer() {}
 
-// UnsafeTensorWritersServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TensorWritersServer will
+// UnsafeTensorsServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to TensorsServer will
 // result in compilation errors.
-type UnsafeTensorWritersServer interface {
-	mustEmbedUnimplementedTensorWritersServer()
+type UnsafeTensorsServer interface {
+	mustEmbedUnimplementedTensorsServer()
 }
 
-func RegisterTensorWritersServer(s grpc.ServiceRegistrar, srv TensorWritersServer) {
-	s.RegisterService(&TensorWriters_ServiceDesc, srv)
+func RegisterTensorsServer(s grpc.ServiceRegistrar, srv TensorsServer) {
+	s.RegisterService(&Tensors_ServiceDesc, srv)
 }
 
-func _TensorWriters_NewWriter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tensors_NewWriter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(NewWriterRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TensorWritersServer).NewWriter(ctx, in)
+		return srv.(TensorsServer).NewWriter(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/multiscope.tensors.TensorWriters/NewWriter",
+		FullMethod: "/multiscope.tensors.Tensors/NewWriter",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TensorWritersServer).NewWriter(ctx, req.(*NewWriterRequest))
+		return srv.(TensorsServer).NewWriter(ctx, req.(*NewWriterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TensorWriters_ResetWriter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tensors_ResetWriter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ResetWriterRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TensorWritersServer).ResetWriter(ctx, in)
+		return srv.(TensorsServer).ResetWriter(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/multiscope.tensors.TensorWriters/ResetWriter",
+		FullMethod: "/multiscope.tensors.Tensors/ResetWriter",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TensorWritersServer).ResetWriter(ctx, req.(*ResetWriterRequest))
+		return srv.(TensorsServer).ResetWriter(ctx, req.(*ResetWriterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TensorWriters_Write_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tensors_Write_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(WriteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TensorWritersServer).Write(ctx, in)
+		return srv.(TensorsServer).Write(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/multiscope.tensors.TensorWriters/Write",
+		FullMethod: "/multiscope.tensors.Tensors/Write",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TensorWritersServer).Write(ctx, req.(*WriteRequest))
+		return srv.(TensorsServer).Write(ctx, req.(*WriteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// TensorWriters_ServiceDesc is the grpc.ServiceDesc for TensorWriters service.
+// Tensors_ServiceDesc is the grpc.ServiceDesc for Tensors service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var TensorWriters_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "multiscope.tensors.TensorWriters",
-	HandlerType: (*TensorWritersServer)(nil),
+var Tensors_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "multiscope.tensors.Tensors",
+	HandlerType: (*TensorsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "NewWriter",
-			Handler:    _TensorWriters_NewWriter_Handler,
+			Handler:    _Tensors_NewWriter_Handler,
 		},
 		{
 			MethodName: "ResetWriter",
-			Handler:    _TensorWriters_ResetWriter_Handler,
+			Handler:    _Tensors_ResetWriter_Handler,
 		},
 		{
 			MethodName: "Write",
-			Handler:    _TensorWriters_Write_Handler,
+			Handler:    _Tensors_Write_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -34,7 +34,9 @@ func grpcAddr() *pb.Connect {
 }
 
 func pullDataMain(wkr *worker.Worker) {
-	puller.New(wkr).Pull()
+	if plr := puller.New(wkr); plr != nil {
+		plr.Pull()
+	}
 }
 
 func main() {

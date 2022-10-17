@@ -61,7 +61,7 @@ message Tensor {
   // can be used for all tensor types. The purpose of this representation is to
   // reduce serialization overhead during RPC call by avoiding serialization of
   // many repeated small items.
-  bytes tensor_content = 4 [ctype = CORD];
+  bytes content = 4 [ctype = CORD];
 }
 
 // Request to create a new TensorWriter in the tree.
@@ -91,7 +91,7 @@ message ResetWriterRequest {
 
 message ResetWriterResponse {}
 
-service TensorWriters {
+service Tensors {
   // Create a new tensor writer node in Multiscope.
   rpc NewWriter(NewWriterRequest) returns (NewWriterResponse) {}
 

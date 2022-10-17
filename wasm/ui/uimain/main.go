@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"multiscope/internal/css"
+	"multiscope/internal/fmtx"
 	"multiscope/internal/httpgrpc"
 	"multiscope/internal/style"
 	"multiscope/internal/wplot"
@@ -127,6 +128,7 @@ func (gui *UI) Dashboard() ui.Dashboard {
 
 // DisplayErr displays an error on the UI.
 func (gui *UI) DisplayErr(err error) {
+	err = fmtx.FormatError(err)
 	if err.Error() == gui.lastError {
 		return
 	}
@@ -156,7 +158,7 @@ func (gui *UI) renderFrame() error {
 		return nil
 	}
 	if displayData.Err != "" {
-		return fmt.Errorf("display data error: %v", displayData.Err)
+		return fmt.Errorf("display data error: %s", displayData.Err)
 	}
 	gui.layout.Dashboard().render(displayData)
 	return nil

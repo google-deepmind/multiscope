@@ -26,7 +26,7 @@ const TimeLabel = "__time__"
 
 var historyLength = 200
 
-// NewWriter returns a vega writer collecting data to be plotted.
+// NewWriter returns a writer collecting data to be plotted.
 func NewWriter() *Writer {
 	w := &Writer{}
 	w.ProtoWriter = base.NewProtoWriter(w.data)

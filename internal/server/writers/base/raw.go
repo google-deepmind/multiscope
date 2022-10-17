@@ -2,14 +2,11 @@ package base
 
 import (
 	"bytes"
-	"fmt"
 	"sync"
 
 	"multiscope/internal/server/core"
 	"multiscope/internal/server/treeservice"
 	pb "multiscope/protos/tree_go_proto"
-
-	"google.golang.org/protobuf/proto"
 )
 
 // RawWriter implements a leaf node to stream raw bytes.
@@ -22,12 +19,6 @@ type RawWriter struct {
 
 var _ core.Node = (*RawWriter)(nil)
 
-// TODO(vikrantvarma): set size via API once implemented and delete this.
-const (
-	DefaultHeight = 300
-	DefaultWidth  = 300
-)
-
 // NewRawWriter returns a new writer to stream raw bytes.
 func NewRawWriter(mime string) *RawWriter {
 	return &RawWriter{
@@ -37,26 +28,12 @@ func NewRawWriter(mime string) *RawWriter {
 }
 
 // Write sets the content of the leaf with p.
-func (w *RawWriter) Write(p []byte) (n int, err error) {
+func (w *RawWriter) Write(p []byte) error {
 	buf := w.LockBuffer()
 	defer w.UnlockBuffer()
 
 	buf.Reset()
-	n, err = buf.Write(p)
-	return
-}
-
-// HandleWrite handles a put data request for a RawWriter.
-func (w *RawWriter) HandleWrite(msg proto.Message) error {
-	data, ok := msg.(*pb.NodeData)
-	if !ok {
-		// Indicates a bug.
-		return fmt.Errorf("internal error in RawWriter: data of unexpected type '%T'; expected NodeData", msg)
-	}
-	if data.GetRaw() == nil {
-		return fmt.Errorf("`raw` must be set in NodeData for RawWriter")
-	}
-	_, err := w.Write(data.GetRaw())
+	_, err := buf.Write(p)
 	return err
 }
 
