@@ -6,6 +6,7 @@ import (
 	"multiscope/internal/server/treeservice"
 	"multiscope/internal/server/writers/base"
 	"multiscope/internal/server/writers/scalar"
+	"multiscope/internal/server/writers/tensor"
 	"multiscope/internal/server/writers/text"
 	"multiscope/internal/server/writers/ticker"
 )
@@ -18,6 +19,7 @@ func All() []treeservice.RegisterServiceCallback {
 		scalar.RegisterService,
 		text.RegisterService,
 		ticker.RegisterService,
+		tensor.RegisterService,
 	}
 }
 

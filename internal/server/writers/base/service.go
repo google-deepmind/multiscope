@@ -94,7 +94,7 @@ func (srv *Service) WriteRaw(ctx context.Context, req *pb.WriteRawRequest) (*pb.
 	if err := core.Set(&writer, state.Root(), req.GetWriter()); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "cannot get the RawWriter from the tree: %v", err)
 	}
-	_, err := writer.Write(req.GetData())
+	err := writer.Write(req.GetData())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "cannot write data: %v", err)
 	}

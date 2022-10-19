@@ -21,6 +21,5 @@ func NewWriter() *Writer {
 
 // Write writes text as the current data to stream.
 func (w *Writer) Write(text string) error {
-	_, err := w.RawWriter.Write([]byte(text))
-	return err
+	return w.RawWriter.Write([]byte(text))
 }

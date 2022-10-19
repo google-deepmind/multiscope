@@ -28,7 +28,10 @@ func newWorker(name string, val js.Value) *Worker {
 		if len(args) != 1 {
 			panic("worker.onmessage received the wrong number of arguments")
 		}
-		w.msgs <- dom.WrapEvent(args[0]).(*dom.MessageEvent).Data()
+		data := dom.WrapEvent(args[0]).(*dom.MessageEvent).Data()
+		go func() {
+			w.msgs <- data
+		}()
 		return nil
 	}))
 	return w
@@ -45,12 +48,14 @@ func (w *Worker) Send(m proto.Message, aux any, transferables ...any) error {
 		w.buf = js.Global().Get("Uint8Array").New(len(buf))
 	}
 	js.CopyBytesToJS(w.buf, buf)
+	typeURL := string(proto.MessageName(m))
+	jsTransferables := js.ValueOf(transferables)
 	w.val.Call("postMessage", map[string]any{
 		"proto":   w.buf,
 		"size":    len(buf),
-		"typeurl": string(proto.MessageName(m)),
+		"typeurl": typeURL,
 		"aux":     aux,
-	}, js.ValueOf(transferables))
+	}, jsTransferables)
 	return nil
 }
 

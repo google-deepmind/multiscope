@@ -1,6 +1,7 @@
 package renderers
 
 import (
+	"math"
 	"multiscope/internal/style"
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
@@ -23,12 +24,22 @@ func NewImageRenderer(stl *style.Style, panel *uipb.Panel, aux js.Value) Rendere
 	}
 }
 
+func computeRatio(imageSize, canvasSize int) (float64, float64) {
+	return float64(imageSize), float64(canvasSize) / float64(imageSize)
+}
+
 func (rdr *imageRenderer) Render(data *treepb.NodeData) (*treepb.NodeData, error) {
+	if len(data.GetRaw()) == 0 {
+		return nil, nil
+	}
 	imageBitmap := canvas.ToImageBitMap(data.GetRaw())
-	rdr.offscreen.SetWidth(imageBitmap.Width())
-	rdr.offscreen.SetHeight(imageBitmap.Height())
+
+	width, ratioWidth := computeRatio(imageBitmap.Width(), rdr.offscreen.Width())
+	height, ratioHeight := computeRatio(imageBitmap.Height(), rdr.offscreen.Height())
+	imageRatio := math.Min(ratioWidth, ratioHeight)
+
 	ctx := rdr.offscreen.GetContext2d()
 	ctx.Value.Set("imageSmoothingEnabled", false)
-	ctx.Value.Call("drawImage", imageBitmap.Value, 0, 0)
+	ctx.Value.Call("drawImage", imageBitmap.Value, 0, 0, int(width*imageRatio), int(height*imageRatio))
 	return nil, nil
 }

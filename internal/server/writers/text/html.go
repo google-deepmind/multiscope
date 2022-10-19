@@ -52,15 +52,14 @@ func (w *HTMLWriter) SetForwards(state treeservice.State, writerPath *core.Path)
 // WriteCSS writes the CSS to use with the HTML.
 func (w *HTMLWriter) WriteCSS(text string) error {
 	w.cssData = text
-	_, err := w.css.Write([]byte(text))
+	err := w.css.Write([]byte(text))
 	return err
 }
 
 // Write writes HTML as utf-8 encoded text, which might be sanitized when being displayed.
 func (w *HTMLWriter) Write(text string) error {
 	w.htmlData = text
-	_, err := w.html.Write([]byte(text))
-	return err
+	return w.html.Write([]byte(text))
 }
 
 // HTML returns the HTML string value written by the writer.

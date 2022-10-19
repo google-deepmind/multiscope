@@ -29,6 +29,9 @@ type (
 	// TextWriter writes plain text.
 	TextWriter = remote.TextWriter
 
+	// TensorWriter writes tensor data.
+	TensorWriter = remote.TensorWriter
+
 	// Group is a directory node in the tree.
 	Group = remote.Group
 
@@ -109,6 +112,15 @@ func NewImageWriter(name string, parent remote.Path) (*remote.ImageWriter, error
 		return nil, err
 	}
 	return remote.NewImageWriter(clt, name, parent)
+}
+
+// NewTensorWriter creates a new writer to display images in Multiscope.
+func NewTensorWriter(name string, parent remote.Path) (*remote.TensorWriter, error) {
+	clt, err := Client()
+	if err != nil {
+		return nil, err
+	}
+	return remote.NewTensorWriter(clt, name, parent)
 }
 
 // EventsManager returns the registry mapping path to callback of the main Multiscope remote.

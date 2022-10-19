@@ -4,6 +4,7 @@ package puller
 import (
 	"context"
 	"fmt"
+	"multiscope/internal/fmtx"
 	"multiscope/internal/httpgrpc"
 	"multiscope/internal/settings"
 	"multiscope/internal/style"
@@ -18,6 +19,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/multierr"
 	"gonum.org/v1/plot/font"
+	"google.golang.org/protobuf/encoding/prototext"
 )
 
 type (
@@ -45,31 +47,33 @@ func New(messager *worker.Worker) *Puller {
 		messager: messager,
 		req:      newRequest(),
 	}
-	p.settings = newSettings(p.sendError)
-	p.style = style.NewStyle(p.settings)
-	connect := uipb.Connect{}
-	var globalErr error
-	if _, err := p.messager.Recv(&connect); err != nil {
-		globalErr = multierr.Append(globalErr, err)
+	if err := p.init(); err != nil {
+		p.sendError(err)
+		return nil
 	}
-	if connect.Scheme == "" {
-		err := errors.Errorf("invalid scheme: %q", connect.Scheme)
-		globalErr = multierr.Append(globalErr, err)
-	}
-	if connect.Host == "" {
-		err := errors.Errorf("invalid host: %q", connect.Host)
-		globalErr = multierr.Append(globalErr, err)
-	}
-	if globalErr != nil {
-		p.sendError(globalErr)
-	}
-
-	p.treeClient = treepbgrpc.NewTreeClient(httpgrpc.Connect(connect.Scheme, connect.Host))
-	go p.receiveQuery()
 	return p
 }
 
+func (p *Puller) init() error {
+	p.settings = newSettings(p.sendError)
+	p.style = style.NewStyle(p.settings)
+	connect := uipb.Connect{}
+	if _, err := p.messager.Recv(&connect); err != nil {
+		return errors.Errorf("cannot unmarshal connection info from the main worker: %v", err)
+	}
+	if connect.Scheme == "" {
+		return errors.Errorf("invalid scheme: %q", connect.Scheme)
+	}
+	if connect.Host == "" {
+		return errors.Errorf("invalid host: %q", connect.Host)
+	}
+	p.treeClient = treepbgrpc.NewTreeClient(httpgrpc.Connect(connect.Scheme, connect.Host))
+	go p.receiveQuery()
+	return nil
+}
+
 func (p *Puller) sendError(err error) {
+	err = fmtx.FormatError(err)
 	if sendErr := p.messager.Send(&uipb.DisplayData{Err: err.Error()}, nil); sendErr != nil {
 		fmt.Printf("WORKER ERROR: cannot send error to main: %v\nError being sent: %v\n", sendErr, err)
 	}
@@ -110,6 +114,16 @@ func (p *Puller) processUnregisterPanel(pbPanel *uipb.Panel, aux js.Value) error
 	return gErr
 }
 
+func renderData(rdr renderers.Renderer, data *treepb.NodeData) (rendered *treepb.NodeData, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			rendered = nil
+			err = errors.Errorf("renderer %T generated the following rendering error:\n%q\n for the following treepb.NodeData:\n%s", rdr, r, prototext.Format(data))
+		}
+	}()
+	return rdr.Render(data)
+}
+
 func (p *Puller) processPullQuery(pull *uipb.Pull) error {
 	ctx := context.Background()
 	resp, err := p.treeClient.GetNodeData(ctx, p.req.pb())
@@ -125,7 +139,7 @@ func (p *Puller) processPullQuery(pull *uipb.Pull) error {
 		}
 		p.req.setLastTick(nodeData.Path, nodeData.Tick)
 		for _, panel := range p.req.panels(nodeData.Path) {
-			renderedData, err := panel.rdr.Render(nodeData)
+			renderedData, err := renderData(panel.rdr, nodeData)
 			if renderedData == nil {
 				renderedData = &treepb.NodeData{}
 			}

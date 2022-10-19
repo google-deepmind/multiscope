@@ -32,7 +32,7 @@ func TestRawWriter(t *testing.T) {
 	rootNode.AddChild(rawWriterName, w)
 
 	want := []byte{1, 2, 3, 4}
-	if _, err := w.Write(want); err != nil {
+	if err := w.Write(want); err != nil {
 		t.Fatalf("error while writing data: %v", err)
 	}
 

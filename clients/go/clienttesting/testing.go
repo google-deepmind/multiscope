@@ -3,6 +3,7 @@ package clienttesting
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"multiscope/clients/go/remote"
 	"multiscope/internal/grpc/client"
@@ -11,6 +12,9 @@ import (
 	pb "multiscope/protos/tree_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
 	"sync"
+	"time"
+
+	"go.uber.org/multierr"
 )
 
 // Start a Multiscope gRPC server and returns a client connected to the server.
@@ -61,6 +65,48 @@ func ForceActive(clt pbgrpc.TreeClient, paths ...[]string) error {
 	}
 	if _, err := client.NodesData(ctx, clt, nodes); err != nil {
 		return err
+	}
+	return nil
+}
+
+func checkPathToNodesResponse(nodes []*pb.Node) error {
+	var err error
+	for _, node := range nodes {
+		errS := node.GetError()
+		if len(errS) > 0 {
+			err = multierr.Append(err, errors.New(errS))
+		}
+	}
+	return err
+}
+
+// CheckBecomeActive checks if a writer becomes active after one of its child has been queried.
+func CheckBecomeActive(clt *remote.Client, childPath []string, writer remote.WithShouldWrite) error {
+	// Check that the writer is not active.
+	if writer.ShouldWrite() {
+		return fmt.Errorf("%T.ShouldWrite should be equal to false", writer)
+	}
+	// Query one of the child.
+	ctx := context.Background()
+	nodes, err := client.PathToNodes(ctx, clt.TreeClient(), childPath)
+	if err != nil {
+		return err
+	}
+	if err := checkPathToNodesResponse(nodes); err != nil {
+		return err
+	}
+	if _, err := client.NodesData(ctx, clt.TreeClient(), nodes); err != nil {
+		return err
+	}
+	// Check that the writer becomes active.
+	now := time.Now()
+	const timeout = 5 * time.Second
+	var shouldWrite bool
+	for !shouldWrite && time.Since(now) < timeout {
+		shouldWrite = writer.ShouldWrite()
+	}
+	if !shouldWrite {
+		return fmt.Errorf("%T.ShouldWrite was not equal to true after %v", writer, timeout)
 	}
 	return nil
 }
