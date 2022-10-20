@@ -1,3 +1,4 @@
+// Package histogram implements a writer to display histograms.
 package histogram
 
 import (
