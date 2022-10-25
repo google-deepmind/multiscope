@@ -2,7 +2,7 @@
 
 import abc
 import threading
-from typing import Callable, Text, Tuple
+from typing import Callable, Tuple
 
 # from multiscope import root_pb2 as root_pb
 # from multiscope.protos import tree_pb2 as stream_pb2
@@ -13,7 +13,7 @@ from multiscope.remote import stream_client
 
 class Node(abc.ABC):
 
-  def __init__(self, path: Tuple[Text]):
+  def __init__(self, path: Tuple[str]):
     self.path = path
     self.name = self.path[-1]
 
@@ -21,7 +21,7 @@ class Node(abc.ABC):
 class Writer(Node):
   """A writer has a write method.."""
 
-  def __init__(self, path: Tuple[Text]):
+  def __init__(self, path: Tuple[str]):
     Node.__init__(self, path=path)
     self._should_write = False
     self._should_write_lock = threading.Lock()
