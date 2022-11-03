@@ -13,7 +13,7 @@ from multiscope.remote import stream_client
 
 class Node(abc.ABC):
 
-  def __init__(self, path: Tuple[str]):
+  def __init__(self, path: Tuple[str, ...]):
     self.path = path
     self.name = self.path[-1]
 
@@ -21,7 +21,7 @@ class Node(abc.ABC):
 class Writer(Node):
   """A writer has a write method.."""
 
-  def __init__(self, path: Tuple[str]):
+  def __init__(self, path: Tuple[str, ...]):
     Node.__init__(self, path=path)
     self._should_write = False
     self._should_write_lock = threading.Lock()

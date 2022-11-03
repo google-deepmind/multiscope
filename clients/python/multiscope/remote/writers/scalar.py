@@ -11,7 +11,20 @@ from multiscope.remote.writers import base
 
 
 class ScalarWriter(base.Writer):
-  """Display a time series plot on the Multiscope page."""
+  """Display a time series plot on the Multiscope page.
+
+  This Writer writes dictionaries of floats or sequences of floats. Example:
+
+  ```
+  scalar_writer.write({
+      'b': 5.7,
+      'a': [1, 2, 3],
+  })
+  ```
+
+  will result in four entries, `'b': 5.7, 'a1':1, 'a2':2, 'a3':3`,
+  on multiscope.
+  """
 
   @control.init
   def __init__(self, name: str, parent: Optional[group.ParentNode] = None):
@@ -30,11 +43,10 @@ class ScalarWriter(base.Writer):
 
   @control.method
   def write(self, values: Mapping[str, Any]):
-    """Write data to the vega writer."""
+    """Writes data to the vega writer."""
     converted_values: dict[str, float] = {}
     for k, v in values.items():
       try:
-        # TODO: add comment on why this is here.
         for sub_key, sub_val in enumerate(v):
           converted_values[k + str(sub_key)] = float(sub_val)
       except TypeError:

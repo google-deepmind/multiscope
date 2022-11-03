@@ -17,10 +17,9 @@ class ParentNode(base.Node):
   """Parent node to which children can be added."""
 
 
-def join_path(parent: ParentNode, name: str) -> Tuple[str]:
+def join_path(parent: ParentNode, name: str) -> Tuple[str, ...]:
   path = parent.path if parent else ()
-  # TODO: sort out these types.
-  return path + (name,)  # pytype: disable=bad-return-type
+  return path + (name,)
 
 
 def join_path_pb(parent: ParentNode, name: str) -> pb.NodePath:

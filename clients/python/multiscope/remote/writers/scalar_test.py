@@ -67,7 +67,7 @@ class TestScopeScalarWriter(absltest.TestCase):
       w._client.request.label_to_value, {"both0": 0., "both1": 1.})
 
   def test_writer_nan(self):
-    """Write NaN and Inf."""
+    """Writes NaN and Inf."""
     w = scalar.ScalarWriter("nan")
     for _ in range(0, 10):
       w.write({
