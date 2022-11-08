@@ -42,7 +42,7 @@ func NewPanel(title string, desc ui.Descriptor, dsp Displayer) (ui.Panel, error)
 		desc: desc,
 		dsp:  dsp,
 	}
-	pnl.root = dbd.UI().Owner().CreateElement("div").(*dom.HTMLDivElement)
+	pnl.root = dbd.UI().Owner().Doc().CreateElement("div").(*dom.HTMLDivElement)
 	pnl.appendTitle(title)
 	pnl.appendErr()
 	pnl.root.AppendChild(dsp.Root())
@@ -51,22 +51,19 @@ func NewPanel(title string, desc ui.Descriptor, dsp Displayer) (ui.Panel, error)
 }
 
 func (pnl *Panel) appendTitle(title string) {
-	owner := pnl.desc.Dashboard().UI().Owner()
-	bar := owner.CreateElement("div")
+	mui := pnl.desc.Dashboard().UI()
+	bar := mui.Owner().CreateChild(pnl.root, "div")
 	bar.Class().Add("panel-title")
-	pnl.root.AppendChild(bar)
 
-	bar.AppendChild(owner.CreateTextNode(title))
+	mui.Owner().CreateTextNode(bar, title)
 
-	rightSpan := owner.CreateElement("span").(*dom.HTMLSpanElement)
+	rightSpan := mui.Owner().CreateChild(bar, "span").(*dom.HTMLSpanElement)
 	rightSpan.Style().SetProperty("float", "right", "")
-	closeButton := ui.NewButton(owner, "Ⓧ", pnl.processCloseEvent)
-	rightSpan.AppendChild(closeButton)
-	bar.AppendChild(rightSpan)
+	mui.Owner().NewIconButton(rightSpan, "close", pnl.processCloseEvent)
 }
 
 func (pnl *Panel) appendErr() {
-	pnl.err = NewErrorElement(pnl.desc.Dashboard().UI().Owner())
+	pnl.err = NewErrorElement(pnl.desc.Dashboard().UI())
 	pnl.root.AppendChild(pnl.err)
 }
 
@@ -124,8 +121,8 @@ func (pnl *Panel) Display(data *treepb.NodeData) {
 }
 
 // NewErrorElement returns an element to display an error.
-func NewErrorElement(owner dom.HTMLDocument) dom.HTMLElement {
-	el := owner.CreateElement("p").(dom.HTMLElement)
+func NewErrorElement(mui ui.UI) dom.HTMLElement {
+	el := mui.Owner().Doc().CreateElement("p").(dom.HTMLElement)
 	el.Class().Add("error-content")
 	return el
 }

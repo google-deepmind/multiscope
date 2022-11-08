@@ -1,3 +1,4 @@
+// Package ui provides core UI abstractions.
 package ui
 
 import (
@@ -17,7 +18,7 @@ type (
 	// UI is top structures owning all the UI elements.
 	UI interface {
 		// Owner of the UI.
-		Owner() dom.HTMLDocument
+		Owner() *Owner
 
 		// Settings returns the global settings.
 		Settings() *settings.Settings

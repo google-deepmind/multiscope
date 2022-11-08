@@ -5,15 +5,14 @@ package injector
 
 import (
 	"multiscope/internal/style"
-
-	"honnef.co/go/js/dom/v2"
+	"multiscope/wasm/ui"
 )
 
 // UI using the injected code.
 type UI interface {
 	Style() *style.Style
 
-	Owner() dom.HTMLDocument
+	Owner() *ui.Owner
 }
 
 var deps = []func(UI){}

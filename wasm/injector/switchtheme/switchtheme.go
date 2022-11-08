@@ -31,7 +31,7 @@ func switchtheme(ui injector.UI) {
 			break
 		}
 	}
-	ui.Owner().AddEventListener("keypress", false, func(ev dom.Event) {
+	ui.Owner().Doc().AddEventListener("keypress", false, func(ev dom.Event) {
 		kev := ev.(*dom.KeyboardEvent)
 		char := string([]byte{byte(kev.CharCode())})
 		if char == "t" {

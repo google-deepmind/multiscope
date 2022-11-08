@@ -23,14 +23,12 @@ type html struct {
 func newHTML(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	owner := dbd.UI().Owner()
 	dsp := &html{
-		root: owner.CreateElement("div").(*dom.HTMLDivElement),
+		root: owner.Doc().CreateElement("div").(*dom.HTMLDivElement),
 	}
 	dsp.root.Class().Add("html-content")
-	dsp.style = owner.CreateElement("style").(*dom.HTMLStyleElement)
+	dsp.style = owner.CreateChild(dsp.root, "style").(*dom.HTMLStyleElement)
 	dsp.style.SetAttribute("scoped", "")
-	dsp.root.AppendChild(dsp.style)
-	dsp.el = owner.CreateElement("p").(*dom.HTMLParagraphElement)
-	dsp.root.AppendChild(dsp.el)
+	dsp.el = owner.CreateChild(dsp.root, "p").(*dom.HTMLParagraphElement)
 	htmlPath := &treepb.NodePath{
 		Path: append(append([]string{}, node.Path.Path...), mime.NodeNameHTML),
 	}

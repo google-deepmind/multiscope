@@ -20,7 +20,7 @@ type text struct {
 
 func newText(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp := &text{
-		root: dbd.UI().Owner().CreateElement("p").(*dom.HTMLParagraphElement),
+		root: dbd.UI().Owner().Doc().CreateElement("p").(*dom.HTMLParagraphElement),
 	}
 	dsp.root.Class().Add("text-content")
 	desc := dbd.NewDescriptor(node, nil, node.Path)

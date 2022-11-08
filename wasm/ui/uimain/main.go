@@ -29,6 +29,7 @@ import (
 
 // UI is the main page (i.e. user interface) with which the user interacts.
 type UI struct {
+	owner      *ui.Owner
 	window     dom.Window
 	addr       *uipb.Connect
 	treeClient treepb.TreeClient
@@ -46,7 +47,7 @@ func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 		addr:   c,
 		window: dom.GetWindow(),
 	}
-
+	gui.owner = ui.NewOwner(gui.window.Document().(dom.HTMLDocument))
 	conn := httpgrpc.Connect(gui.addr.Scheme, gui.addr.Host)
 	rootInfo, err := fetchRootInfo(conn)
 	if err != nil {
@@ -60,8 +61,8 @@ func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 
 	injector.Run(gui)
 	gui.style.OnChange(func(s *style.Style) {
-		gui.Owner().Body().Style().SetProperty("background", css.Color(s.Background()), "")
-		gui.Owner().Body().Style().SetProperty("color", css.Color(s.Foreground()), "")
+		gui.Owner().Doc().Body().Style().SetProperty("background", css.Color(s.Background()), "")
+		gui.Owner().Doc().Body().Style().SetProperty("color", css.Color(s.Foreground()), "")
 	})
 
 	gui.treeClient = treepb.NewTreeClient(conn)
@@ -105,7 +106,7 @@ func parseFontSize(s string) (size vg.Length, err error) {
 
 func (gui *UI) newDefaultStyle() (*style.Style, error) {
 	s := style.NewStyle(gui.settings)
-	body := gui.Owner().Body()
+	body := gui.Owner().Doc().Body()
 	bodyCSS := dom.GetWindow().GetComputedStyle(body, "")
 	fontSize, err := parseFontSize(bodyCSS.GetPropertyValue("font-size"))
 	if err != nil {
@@ -117,8 +118,8 @@ func (gui *UI) newDefaultStyle() (*style.Style, error) {
 }
 
 // Owner returns the owner of the DOM tree of the UI.
-func (gui *UI) Owner() dom.HTMLDocument {
-	return gui.window.Document().(dom.HTMLDocument)
+func (gui *UI) Owner() *ui.Owner {
+	return gui.owner
 }
 
 // Dashboard returns the dashboard displaying the panels.

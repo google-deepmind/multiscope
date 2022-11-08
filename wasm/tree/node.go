@@ -38,21 +38,20 @@ func (el *Element) newNode(parent *Node, name string) (*Node, error) {
 		n.item = el.p
 		return n, nil
 	}
-	n.item = el.ui.Owner().CreateElement("li").(dom.HTMLElement)
+	owner := el.ui.Owner()
+	n.item = owner.Doc().CreateElement("li").(dom.HTMLElement)
 	n.item.Class().Add("tree-list")
 	if node.HasChildren {
-		n.caret = ui.NewButton(el.ui.Owner(), "▶ ", func(ev dom.Event) {
+		n.caret = owner.NewTextButton(n.item, "▶ ", func(ev dom.Event) {
 			if err := n.expand(); err != nil {
 				el.ui.DisplayErr(err)
 			}
 		})
-		n.item.AppendChild(n.caret)
 	}
 	if ui.Builder(n.node.Mime) == nil {
-		n.item.AppendChild(el.ui.Owner().CreateTextNode(name))
+		owner.CreateTextNode(n.item, name)
 	} else {
-		open := ui.NewButton(n.el.ui.Owner(), name, n.openPanel)
-		n.item.AppendChild(open)
+		owner.NewTextButton(n.item, name, n.openPanel)
 	}
 
 	if node.HasChildren && el.settings.isVisible(node.Path.Path) {
@@ -80,7 +79,7 @@ func (n *Node) expand() error {
 		return nil
 	}
 	n.children = make(map[string]*Node)
-	n.childrenList = n.el.ui.Owner().CreateElement("ul").(*dom.HTMLUListElement)
+	n.childrenList = n.el.ui.Owner().CreateChild(n.item, "ul").(*dom.HTMLUListElement)
 	n.childrenList.Class().Add("tree-list")
 	for _, child := range n.node.Children {
 		childNode, err := n.el.newNode(n, child.Name)
@@ -90,7 +89,6 @@ func (n *Node) expand() error {
 		n.children[child.Name] = childNode
 		n.childrenList.AppendChild(childNode.item)
 	}
-	n.item.AppendChild(n.childrenList)
 	if n.caret != nil {
 		n.show()
 	}

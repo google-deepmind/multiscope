@@ -20,7 +20,7 @@ type scalarPlot struct {
 
 func newScalarPlot(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp := &scalarPlot{}
-	dsp.canvas = dbd.UI().Owner().CreateElement("canvas").(*dom.HTMLCanvasElement)
+	dsp.canvas = dbd.UI().Owner().Doc().CreateElement("canvas").(*dom.HTMLCanvasElement)
 	dsp.canvas.SetHeight(400)
 	dsp.canvas.SetWidth(800)
 	desc := dbd.NewDescriptor(node, renderers.NewPlotScalar, node.Path)

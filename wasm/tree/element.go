@@ -23,7 +23,7 @@ type Element struct {
 func NewElement(mui ui.UI) (*Element, error) {
 	el := &Element{
 		ui: mui,
-		p:  mui.Owner().CreateElement("p").(*dom.HTMLParagraphElement),
+		p:  mui.Owner().Doc().CreateElement("p").(*dom.HTMLParagraphElement),
 	}
 	el.settings = newSettings(el)
 	el.settings.registerListener()

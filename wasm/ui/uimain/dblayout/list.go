@@ -21,7 +21,7 @@ func newList(dbd ui.Dashboard) Layout {
 	lyt := &list{
 		dbd:  dbd,
 		pb:   &rootpb.LayoutList{},
-		root: dbd.UI().Owner().CreateElement("div").(*dom.HTMLDivElement),
+		root: dbd.UI().Owner().Doc().CreateElement("div").(*dom.HTMLDivElement),
 	}
 	return lyt
 }

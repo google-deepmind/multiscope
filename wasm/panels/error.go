@@ -38,9 +38,9 @@ type (
 func newErrorDisplayer(dbd ui.Dashboard, node *treepb.Node, f errToText) (ui.Panel, error) {
 	dsp := &errorDisplayer{
 		node: node,
-		root: NewErrorElement(dbd.UI().Owner()),
+		root: NewErrorElement(dbd.UI()),
 	}
-	dsp.root.AppendChild(dbd.UI().Owner().CreateTextNode(f(node)))
+	dsp.root.AppendChild(dbd.UI().Owner().Doc().CreateTextNode(f(node)))
 	desc := dbd.NewDescriptor(node, nil, node.Path)
 	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
 }

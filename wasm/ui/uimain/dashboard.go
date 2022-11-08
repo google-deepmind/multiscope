@@ -22,19 +22,22 @@ type Dashboard struct {
 	panels   map[ui.PanelID]ui.Panel
 	layout   dblayout.Layout
 	root     dom.Node
+
+	lastFromServer *rootpb.RootInfo
 }
 
 func newDashboard(main *UI, rootInfo *rootpb.RootInfo) (*Dashboard, error) {
 	const dashboardClass = "container__middle"
-	elements := main.Owner().GetElementsByClassName(dashboardClass)
+	elements := main.Owner().Doc().GetElementsByClassName(dashboardClass)
 	if len(elements) != 1 {
 		return nil, errors.Errorf("wrong number of elements of class %q: got %d but want 1", dashboardClass, len(elements))
 	}
 	dbd := &Dashboard{
-		ui:       main,
-		pathToID: make(map[core.Key]ui.PanelID),
-		panels:   make(map[ui.PanelID]ui.Panel),
-		root:     elements[0],
+		ui:             main,
+		pathToID:       make(map[core.Key]ui.PanelID),
+		panels:         make(map[ui.PanelID]ui.Panel),
+		root:           elements[0],
+		lastFromServer: &rootpb.RootInfo{},
 	}
 
 	var layoutSettings rootpb.Layout
@@ -87,25 +90,37 @@ func (dbd *Dashboard) refreshFromServer(data *treepb.NodeData) error {
 	if pb == nil {
 		return nil
 	}
-	root := rootpb.RootInfo{}
-	if err := pb.UnmarshalTo(&root); err != nil {
+	if err := pb.UnmarshalTo(dbd.lastFromServer); err != nil {
 		return fmt.Errorf("cannot unmarshal root info: %v", err)
 	}
 
-	dbd.ui.settings.SetDictKey(root.KeySettings)
-	if root.Layout != nil {
+	dbd.ui.settings.SetDictKey(dbd.lastFromServer.KeySettings)
+	if dbd.lastFromServer.Layout != nil {
 		return nil
 	}
-	return dbd.buildLayout(root.Layout)
+	return dbd.refresh()
+}
+
+func (dbd *Dashboard) refresh() error {
+	last := dbd.lastFromServer
+	if last.Layout == nil {
+		dbd.closeAll()
+		return nil
+	}
+	return dbd.buildLayout(last.Layout)
 }
 
 func (dbd *Dashboard) clearLayout() {
+	dbd.closeAll()
+	dbd.root.RemoveChild(dbd.layout.Root())
+}
+
+func (dbd *Dashboard) closeAll() {
 	for _, pnl := range dbd.panels {
 		if err := dbd.ClosePanel(pnl); err != nil {
 			dbd.ui.DisplayErr(err)
 		}
 	}
-	dbd.root.RemoveChild(dbd.layout.Root())
 }
 
 func (dbd *Dashboard) render(displayData *uipb.DisplayData) {

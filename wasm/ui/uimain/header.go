@@ -1,8 +1,6 @@
 package uimain
 
 import (
-	"multiscope/wasm/ui"
-
 	"github.com/pkg/errors"
 	"honnef.co/go/js/dom/v2"
 )
@@ -15,7 +13,8 @@ type Header struct {
 
 func newHeader(mui *UI) (*Header, error) {
 	const headerTag = "header"
-	elements := mui.Owner().GetElementsByTagName(headerTag)
+	owner := mui.Owner()
+	elements := owner.Doc().GetElementsByTagName(headerTag)
 	if len(elements) != 1 {
 		return nil, errors.Errorf("wrong number of elements of tag %q: got %d but want 1", headerTag, len(elements))
 	}
@@ -23,12 +22,30 @@ func newHeader(mui *UI) (*Header, error) {
 		ui:  mui,
 		hdr: elements[0].(dom.HTMLElement),
 	}
-	h1 := mui.Owner().CreateElement("h1")
+	h1 := owner.CreateChild(h.hdr, "h1")
 	h1.Class().Add("toppage")
-	h1.AppendChild(ui.NewButton(mui.Owner(), "☰", h.toggleTreeSideBar))
-	h1.AppendChild(mui.Owner().CreateTextNode("Multiscope"))
-	h.hdr.AppendChild(h1)
+	// Left side.
+	left := owner.CreateChild(h1, "p").(*dom.HTMLParagraphElement)
+	left.Style().SetProperty("text-align", "left", "")
+	owner.NewIconButton(left, "menu", h.toggleTreeSideBar)
+	owner.CreateTextNode(left, "Multiscope")
+
+	// Right side.
+	right := owner.CreateChild(left, "span").(*dom.HTMLSpanElement)
+	right.Style().SetProperty("float", "right", "")
+	owner.NewIconButton(right, "refresh", h.reloadLayout)
+	owner.NewIconButton(right, "close", h.emptyLayout)
 	return h, nil
+}
+
+func (h *Header) reloadLayout(dom.Event) {
+	if err := h.ui.layout.Dashboard().refresh(); err != nil {
+		h.ui.DisplayErr(err)
+	}
+}
+
+func (h *Header) emptyLayout(dom.Event) {
+	h.ui.layout.Dashboard().closeAll()
 }
 
 func (h *Header) toggleTreeSideBar(dom.Event) {
