@@ -72,6 +72,8 @@ message NewWriterRequest {
 // Response after creating a new TensorWriter in the tree.
 message NewWriterResponse {
   Writer writer = 1;
+
+  multiscope.NodePath defaultPanelPath = 2;
 }
 
 // Request to write a tensor.

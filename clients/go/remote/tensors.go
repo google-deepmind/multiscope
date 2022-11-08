@@ -31,10 +31,13 @@ func NewTensorWriter(clt *Client, name string, parent Path) (*TensorWriter, erro
 	if writer == nil {
 		return nil, errors.New("server has returned a nil TensorWriter")
 	}
-	writerPath := toPath(writer)
-	if err := clt.Display().DisplayIfDefault(writerPath); err != nil {
-		return nil, err
+	displayPath := rep.DefaultPanelPath
+	if displayPath != nil && len(displayPath.Path) > 0 {
+		if err := clt.Display().DisplayIfDefault(displayPath.Path); err != nil {
+			return nil, err
+		}
 	}
+	writerPath := toPath(writer)
 	return &TensorWriter{
 		ClientNode: NewClientNode(clt, writerPath),
 		clt:        clttw,

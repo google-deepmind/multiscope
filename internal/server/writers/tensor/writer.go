@@ -57,7 +57,7 @@ type (
 
 // Names of the children to display additional data about the tensors.
 const (
-	NodeNameImage        = "image"
+	NodeNameImage        = "tensor"
 	NodeNameBitPlane     = "bits"
 	NodeNameInfo         = "info"
 	NodeNameMinMax       = "minmax"

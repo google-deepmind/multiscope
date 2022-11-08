@@ -44,6 +44,7 @@ func (srv *Service) NewWriter(ctx context.Context, req *pb.NewWriterRequest) (*p
 		Writer: &pb.Writer{
 			Path: writerPath.PB(),
 		},
+		DefaultPanelPath: writerPath.PathTo(NodeNameImage).PB(),
 	}, nil
 }
 
