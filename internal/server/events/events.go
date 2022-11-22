@@ -42,9 +42,9 @@ func (cb CallbackF) Process(ev *pb.Event) (bool, error) {
 
 // FilterProto returns a callback filtering events only for a given type of protocol buffers.
 func (cb CallbackF) FilterProto(url string) Callback {
-	curl := coreURL(url)
+	curl := CoreURL(url)
 	return CallbackF(func(ev *pb.Event) (bool, error) {
-		if coreURL(ev.GetPayload().GetTypeUrl()) != curl {
+		if CoreURL(ev.GetPayload().GetTypeUrl()) != curl {
 			return false, nil
 		}
 		return cb(ev)
@@ -123,7 +123,7 @@ func (q *EventQueue) Poll() (*pb.Event, error) {
 // called concurrently with Next and other calls to write. Returns true if the
 // write caused an event to be dropped.
 func (q *EventQueue) write(event *pb.Event) bool {
-	if q.typeURLFilter != "" && coreURL(event.GetPayload().GetTypeUrl()) != q.typeURLFilter {
+	if q.typeURLFilter != "" && CoreURL(event.GetPayload().GetTypeUrl()) != q.typeURLFilter {
 		return false
 	}
 	q.mtx.Lock()
@@ -146,7 +146,8 @@ func (q *EventQueue) close() {
 	q.notEmpty.Broadcast()
 }
 
-func coreURL(url string) string {
+// CoreURL extracts the core URL of the proto of an event.
+func CoreURL(url string) string {
 	if !strings.HasPrefix(url, "type.google") {
 		return url
 	}

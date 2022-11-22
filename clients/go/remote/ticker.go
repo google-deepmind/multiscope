@@ -130,8 +130,8 @@ func (t *Ticker) processEvent(event *treepb.Event) (bool, error) {
 	if payload == nil {
 		return false, nil
 	}
-	const typeURL = "type.googleapis.com/deepmind.multiscope.ticker.TickerAction"
-	if payload.GetTypeUrl() != typeURL {
+	const typeURL = "multiscope.ticker.TickerAction"
+	if events.CoreURL(payload.GetTypeUrl()) != typeURL {
 		return false, nil
 	}
 	action := pb.TickerAction{}

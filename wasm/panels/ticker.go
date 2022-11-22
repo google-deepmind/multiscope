@@ -1,12 +1,15 @@
 package panels
 
 import (
+	"context"
 	"fmt"
 	tickerpb "multiscope/protos/ticker_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 	"multiscope/wasm/ui"
 	"path/filepath"
 
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 	"honnef.co/go/js/dom/v2"
 )
 
@@ -15,16 +18,56 @@ func init() {
 }
 
 type ticker struct {
-	pb   tickerpb.TickerData
-	root *dom.HTMLParagraphElement
+	pb      tickerpb.TickerData
+	node    *treepb.Node
+	root    *dom.HTMLParagraphElement
+	display *dom.HTMLParagraphElement
 }
 
 func newTicker(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
-	dsp := &ticker{}
-	dsp.root = dbd.UI().Owner().Doc().CreateElement("p").(*dom.HTMLParagraphElement)
+	dsp := &ticker{node: node}
+	owner := dbd.UI().Owner()
+	dsp.root = owner.Doc().CreateElement("p").(*dom.HTMLParagraphElement)
 	dsp.root.Class().Add("ticker-content")
+	dsp.display = owner.CreateChild(dsp.root, "p").(*dom.HTMLParagraphElement)
+	control := owner.CreateChild(dsp.root, "p").(*dom.HTMLParagraphElement)
+	dsp.createControls(dbd, control)
 	desc := dbd.NewDescriptor(node, nil, node.Path)
 	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
+}
+
+func (t *ticker) createControls(dbd ui.Dashboard, control *dom.HTMLParagraphElement) {
+	owner := dbd.UI().Owner()
+	owner.NewIconButton(control, "play_arrow", func(ev dom.Event) {
+		t.sendAction(dbd, tickerpb.TickerAction_RUN)
+	})
+	owner.NewIconButton(control, "pause", func(ev dom.Event) {
+		t.sendAction(dbd, tickerpb.TickerAction_PAUSE)
+	})
+	owner.NewIconButton(control, "skip_next", func(ev dom.Event) {
+		t.sendAction(dbd, tickerpb.TickerAction_STEP)
+	})
+}
+
+func (t *ticker) sendAction(dbd ui.Dashboard, cmd tickerpb.TickerAction_Command) {
+	clt := dbd.UI().TreeClient()
+	ctx := context.Background()
+	var event anypb.Any
+	if err := anypb.MarshalFrom(&event, &tickerpb.TickerAction{
+		Action: &tickerpb.TickerAction_Command_{Command: cmd},
+	}, proto.MarshalOptions{}); err != nil {
+		dbd.UI().DisplayErr(err)
+		return
+	}
+	_, err := clt.SendEvents(ctx, &treepb.SendEventsRequest{
+		Events: []*treepb.Event{{
+			Path:    t.node.Path,
+			Payload: &event,
+		}},
+	})
+	if err != nil {
+		dbd.UI().DisplayErr(err)
+	}
 }
 
 const tickerHTML = `
@@ -32,8 +75,8 @@ Tick: %d</br>
 Periods:
 <table>
   <tr>
-    <th>total</th>
-    <th>%s</th>
+    <td>total</td>
+    <td>%s</td>
   </tr>
   <tr>
     <td>experiment</td>
@@ -51,16 +94,16 @@ Periods:
 `
 
 // Display the latest data.
-func (dsp *ticker) Display(data *treepb.NodeData) error {
-	if err := data.GetPb().UnmarshalTo(&dsp.pb); err != nil {
+func (t *ticker) Display(data *treepb.NodeData) error {
+	if err := data.GetPb().UnmarshalTo(&t.pb); err != nil {
 		return err
 	}
-	periods := dsp.pb.Periods
+	periods := t.pb.Periods
 	if periods == nil {
 		return nil
 	}
-	dsp.root.SetInnerHTML(fmt.Sprintf(tickerHTML,
-		dsp.pb.Tick,
+	t.display.SetInnerHTML(fmt.Sprintf(tickerHTML,
+		t.pb.Tick,
 		periods.Total.AsDuration(),
 		periods.Experiment.AsDuration(),
 		periods.Callbacks.AsDuration(),
@@ -70,6 +113,6 @@ func (dsp *ticker) Display(data *treepb.NodeData) error {
 }
 
 // Root returns the root element of the ticker.
-func (dsp *ticker) Root() dom.HTMLElement {
-	return dsp.root
+func (t *ticker) Root() dom.HTMLElement {
+	return t.root
 }
