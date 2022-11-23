@@ -125,13 +125,14 @@ func (t *Ticker) processCommand(cmd pb.TickerAction_Command) error {
 	return nil
 }
 
+var tickerActionURL = string(proto.MessageName(&pb.TickerAction{}))
+
 func (t *Ticker) processEvent(event *treepb.Event) (bool, error) {
 	payload := event.GetPayload()
 	if payload == nil {
 		return false, nil
 	}
-	const typeURL = "multiscope.ticker.TickerAction"
-	if events.CoreURL(payload.GetTypeUrl()) != typeURL {
+	if events.CoreURL(payload.GetTypeUrl()) != tickerActionURL {
 		return false, nil
 	}
 	action := pb.TickerAction{}
