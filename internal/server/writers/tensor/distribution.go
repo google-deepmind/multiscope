@@ -4,26 +4,38 @@ import (
 	"math"
 
 	"multiscope/internal/server/core"
-	"multiscope/internal/server/writers/histogram"
-	tablepb "multiscope/protos/table_go_proto"
+	"multiscope/internal/server/writers/plot"
+	plotpb "multiscope/protos/plot_go_proto"
 )
 
-const numBins = 20
+const (
+	numBins        = 20
+	xLabel, yLabel = "values", "nums"
+)
 
 type distributionUpdater struct {
 	parent *Writer
-	writer *histogram.Writer
-	tbl    *tablepb.Series
+	writer *plot.Writer
 	bins   []int
 	key    core.Key
+
+	serie *plotpb.Serie
+	plot  *plotpb.Plot
 }
 
 func newDistribution(parent *Writer) *distributionUpdater {
 	dist := &distributionUpdater{
 		parent: parent,
-		writer: histogram.NewWriter(),
+		writer: plot.NewWriter(),
 		bins:   make([]int, numBins),
-		tbl:    &tablepb.Series{},
+		serie:  &plotpb.Serie{},
+	}
+	dist.plot = &plotpb.Plot{
+		Plotters: []*plotpb.Plotter{
+			{
+				Serie: dist.serie,
+			},
+		},
 	}
 	parent.AddChild(NodeNameDistribution, dist.writer)
 	return dist
@@ -36,8 +48,8 @@ func (u *distributionUpdater) forwardActive(parent *core.Path) {
 }
 
 func (u *distributionUpdater) reset() (err error) {
-	u.tbl.Reset()
-	return u.writer.Write(u.tbl)
+	u.serie.Points = u.serie.Points[:0]
+	return u.writer.Write(u.plot)
 }
 
 func (u *distributionUpdater) update(Tensor) (err error) {
@@ -45,8 +57,7 @@ func (u *distributionUpdater) update(Tensor) (err error) {
 		return nil
 	}
 	if len(u.parent.tensor.Values()) < 2 {
-		u.tbl.Reset()
-		return u.writer.Write(u.tbl)
+		return u.reset()
 	}
 	for i := range u.bins {
 		u.bins[i] = 0
@@ -62,18 +73,14 @@ func (u *distributionUpdater) update(Tensor) (err error) {
 		}
 		u.bins[bucket]++
 	}
-	u.tbl.Reset()
-	serie := tablepb.Serie{}
+	u.serie.Points = u.serie.Points[:0]
 	x := u.parent.m.Min + bucketSize/2
 	for _, bin := range u.bins {
-		serie.Points = append(serie.Points, &tablepb.Point{
+		u.serie.Points = append(u.serie.Points, &plotpb.Point{
 			X: float64(x),
 			Y: float64(bin),
 		})
 		x += bucketSize
 	}
-	u.tbl.LabelToSerie = map[string]*tablepb.Serie{
-		"values": &serie,
-	}
-	return u.writer.Write(u.tbl)
+	return u.writer.Write(u.plot)
 }

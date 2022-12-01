@@ -2,13 +2,16 @@
 package scalar
 
 import (
+	"sort"
 	"sync"
 
 	"multiscope/internal/server/core"
 	"multiscope/internal/server/treeservice"
 	"multiscope/internal/server/writers/base"
-	tablepb "multiscope/protos/table_go_proto"
+	plotpb "multiscope/protos/plot_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
+
+	"golang.org/x/exp/maps"
 )
 
 // Writer writes a time series of scalars.
@@ -16,7 +19,8 @@ type Writer struct {
 	*base.ProtoWriter
 	mut             sync.Mutex
 	defaultTimeStep int
-	data            *tablepb.Series
+	plot            *plotpb.ScalarsPlot
+	plotters        map[string]*plotpb.Plotter
 }
 
 var _ core.Node = (*Writer)(nil)
@@ -29,9 +33,17 @@ var historyLength = 200
 // NewWriter returns a writer collecting data to be plotted.
 func NewWriter() *Writer {
 	w := &Writer{}
-	w.ProtoWriter = base.NewProtoWriter(w.data)
 	w.Reset()
+	w.ProtoWriter = base.NewProtoWriter(w.plot)
 	return w
+}
+
+// Reset resets the writer data.
+func (w *Writer) Reset() {
+	w.mut.Lock()
+	defer w.mut.Unlock()
+	w.plot = &plotpb.ScalarsPlot{Plot: &plotpb.Plot{}}
+	w.plotters = make(map[string]*plotpb.Plotter)
 }
 
 // AddToTree adds the writer to a stream tree.
@@ -42,20 +54,12 @@ func (w *Writer) AddToTree(state treeservice.State, path *treepb.NodePath) (*cor
 
 // removeHead makes we only remember the last w.historyLength elements.
 func (w *Writer) removeHeads() {
-	for _, serie := range w.data.LabelToSerie {
+	for _, pltr := range w.plotters {
+		serie := pltr.Serie
 		if len(serie.Points) <= historyLength {
 			continue
 		}
 		serie.Points = serie.Points[len(serie.Points)-historyLength:]
-	}
-}
-
-// Reset resets the writer data.
-func (w *Writer) Reset() {
-	w.mut.Lock()
-	defer w.mut.Unlock()
-	w.data = &tablepb.Series{
-		LabelToSerie: make(map[string]*tablepb.Serie),
 	}
 }
 
@@ -68,19 +72,31 @@ func (w *Writer) Write(d map[string]float64) error {
 		time = float64(w.defaultTimeStep)
 		defer func() { w.defaultTimeStep++ }()
 	}
-	for key, value := range d {
+	keys := maps.Keys(d)
+	sort.Strings(keys)
+	for _, key := range keys {
 		if key == TimeLabel {
 			continue
 		}
-		serie := w.data.LabelToSerie[key]
-		if serie == nil {
-			serie = &tablepb.Serie{}
-			w.data.LabelToSerie[key] = serie
+		value := d[key]
+		pltr := w.plotters[key]
+		if pltr == nil {
+			pltr = w.newPlotter(key)
 		}
-		serie.Points = append(serie.Points, &tablepb.Point{X: time, Y: value})
+		pltr.Serie.Points = append(pltr.Serie.Points, &plotpb.Point{X: time, Y: value})
 	}
 	w.removeHeads()
-	return w.ProtoWriter.Write(w.data)
+	return w.ProtoWriter.Write(w.plot)
+}
+
+func (w *Writer) newPlotter(key string) *plotpb.Plotter {
+	pltr := &plotpb.Plotter{
+		Serie:  &plotpb.Serie{},
+		Legend: key,
+	}
+	w.plotters[key] = pltr
+	w.plot.Plot.Plotters = append(w.plot.Plot.Plotters, pltr)
+	return pltr
 }
 
 // SetHistoryLength sets how much historical data to keep around.

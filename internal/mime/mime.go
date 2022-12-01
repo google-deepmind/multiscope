@@ -4,6 +4,7 @@ package mime
 import (
 	"fmt"
 
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
@@ -62,4 +63,9 @@ func NamedProtobuf(name string) string {
 func AnyToMIME(any *anypb.Any) string {
 	name := string(any.MessageName())
 	return NamedProtobuf(name)
+}
+
+// ProtoToMIME returns the MIME type of a protocol message.
+func ProtoToMIME(msg proto.Message) string {
+	return NamedProtobuf(string(proto.MessageName(msg)))
 }

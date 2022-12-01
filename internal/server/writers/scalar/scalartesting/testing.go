@@ -8,7 +8,7 @@ import (
 	"multiscope/internal/grpc/client"
 	"multiscope/internal/mime"
 	"multiscope/internal/server/writers/scalar"
-	tablepb "multiscope/protos/table_go_proto"
+	plotpb "multiscope/protos/plot_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
 
 	"github.com/google/go-cmp/cmp"
@@ -31,21 +31,23 @@ var Scalar01Data = []map[string]float64{
 	{"a": 5, "b": 6},
 }
 
-func buildWant() *tablepb.Series {
-	return &tablepb.Series{LabelToSerie: map[string]*tablepb.Serie{
-		"a": {
-			Points: []*tablepb.Point{
+func buildWant() *plotpb.ScalarsPlot {
+	return &plotpb.ScalarsPlot{Plot: &plotpb.Plot{Plotters: []*plotpb.Plotter{
+		{
+			Legend: "a",
+			Serie: &plotpb.Serie{Points: []*plotpb.Point{
 				{X: 1, Y: 3},
 				{X: 2, Y: 5},
-			},
+			}},
 		},
-		"b": {
-			Points: []*tablepb.Point{
+		{
+			Legend: "b",
+			Serie: &plotpb.Serie{Points: []*plotpb.Point{
 				{X: 1, Y: 4},
 				{X: 2, Y: 6},
-			},
+			}},
 		},
-	}}
+	}}}
 }
 
 // CheckScalar01 checks the data that can be read from the scalar01 node.
@@ -56,7 +58,8 @@ func CheckScalar01(clt pbgrpc.TreeClient, path []string) error {
 	if err != nil {
 		return err
 	}
-	if diff := cmp.Diff(nodes[0].GetMime(), mime.NamedProtobuf(string(proto.MessageName(&tablepb.Series{})))); len(diff) > 0 {
+	tsGot := &plotpb.ScalarsPlot{}
+	if diff := cmp.Diff(nodes[0].GetMime(), mime.NamedProtobuf(string(proto.MessageName(tsGot)))); len(diff) > 0 {
 		return fmt.Errorf("mime type error: %s", diff)
 	}
 
@@ -65,7 +68,6 @@ func CheckScalar01(clt pbgrpc.TreeClient, path []string) error {
 	if err != nil {
 		return err
 	}
-	tsGot := &tablepb.Series{}
 	err = client.ToProto(data[0], tsGot)
 	if err != nil {
 		return err

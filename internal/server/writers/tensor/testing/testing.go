@@ -14,14 +14,13 @@ import (
 	"multiscope/internal/mime"
 	"multiscope/internal/server/writers/tensor"
 	scopetesting "multiscope/internal/testing"
-	tablepb "multiscope/protos/table_go_proto"
+	plotpb "multiscope/protos/plot_go_proto"
 	pb "multiscope/protos/tree_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
 
 	"github.com/google/go-cmp/cmp"
 	"go.uber.org/multierr"
 	"google.golang.org/protobuf/encoding/prototext"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/testing/protocmp"
 )
 
@@ -50,23 +49,29 @@ type testData struct {
 	Min, Max           float32
 	ScaleMin, ScaleMax float32
 	L1Norm, L2Norm     float32
-	Dist               *tablepb.Series
+	Dist               *plotpb.Plot
 	Info               string
 }
 
-func buildDistribution(dist [][]float32) *tablepb.Series {
+func distributionToSerie(dist [][]float32) *plotpb.Serie {
+	serie := &plotpb.Serie{}
 	if len(dist) == 0 {
-		return &tablepb.Series{}
+		return serie
 	}
-	serie := &tablepb.Serie{}
 	for _, row := range dist {
-		serie.Points = append(serie.Points, &tablepb.Point{
+		serie.Points = append(serie.Points, &plotpb.Point{
 			X: float64(row[0]), Y: float64(row[1]),
 		})
 	}
-	return &tablepb.Series{
-		LabelToSerie: map[string]*tablepb.Serie{
-			"values": serie,
+	return serie
+}
+
+func buildDistribution(dist [][]float32) *plotpb.Plot {
+	return &plotpb.Plot{
+		Plotters: []*plotpb.Plotter{
+			{
+				Serie: distributionToSerie(dist),
+			},
 		},
 	}
 }
@@ -392,47 +397,60 @@ func checkRenderedImage(clt pbgrpc.TreeClient, path []string, nodeName string, t
 	return nil
 }
 
-var tableMime = mime.NamedProtobuf(string(proto.MessageName(&tablepb.Series{})))
-
-func extractData(data *pb.NodeData) (*tablepb.Series, map[string]float32, error) {
-	tbl := tablepb.Series{}
-	if err := client.ToProto(data, &tbl); err != nil {
+func extractPlotData(data *pb.NodeData) (*plotpb.Plot, map[string]float32, error) {
+	plt := plotpb.Plot{}
+	if err := client.ToProto(data, &plt); err != nil {
 		return nil, nil, err
 	}
-	vals := make(map[string]float32)
-	for key, serie := range tbl.LabelToSerie {
-		vals[key] = float32(serie.Points[len(serie.Points)-1].Y)
+	return extractDataFromPlot(&plt)
+}
+
+func extractScalarPlotData(data *pb.NodeData) (*plotpb.Plot, map[string]float32, error) {
+	plt := plotpb.ScalarsPlot{}
+	if err := client.ToProto(data, &plt); err != nil {
+		return nil, nil, err
 	}
-	return &tbl, vals, nil
+	return extractDataFromPlot(plt.Plot)
+}
+
+func extractDataFromPlot(plt *plotpb.Plot) (*plotpb.Plot, map[string]float32, error) {
+	vals := make(map[string]float32)
+	for _, plotter := range plt.Plotters {
+		serie := plotter.Serie
+		vals[plotter.Legend] = float32(serie.Points[len(serie.Points)-1].Y)
+	}
+	return plt, vals, nil
 }
 
 func checkMetrics(clt pbgrpc.TreeClient, path []string, test *testData) error {
 	ctx := context.Background()
-	minmaxPath := append(append([]string{}, path...), tensor.NodeNameMinMax)
-	normsPath := append(append([]string{}, path...), tensor.NodeNameNorms)
-	// Get the nodes and check their types.
-	nodes, err := client.PathToNodes(ctx, clt, minmaxPath, normsPath)
+	paths := [][]string{
+		append(append([]string{}, path...), tensor.NodeNameMinMax),
+		append(append([]string{}, path...), tensor.NodeNameNorms),
+	}
+	nodes, err := client.PathToNodes(ctx, clt, paths...)
 	if err != nil {
 		return err
 	}
 	if err := scopetesting.CheckNodePaths(nodes); err != nil {
 		return err
 	}
-	if err := scopetesting.CheckMIME(nodes[0].GetMime(), tableMime); err != nil {
-		return err
+	var wantMIME = mime.ProtoToMIME(&plotpb.ScalarsPlot{})
+	if err := scopetesting.CheckMIME(nodes[0].GetMime(), wantMIME); err != nil {
+		return fmt.Errorf("incorrect MIME type for node %v: %v", paths[0], err)
 	}
-	if err := scopetesting.CheckMIME(nodes[1].GetMime(), tableMime); err != nil {
-		return err
+	if err := scopetesting.CheckMIME(nodes[1].GetMime(), wantMIME); err != nil {
+		return fmt.Errorf("incorrect MIME type for node %v: %v", paths[1], err)
 	}
 	// Fetch data returned by the server.
 	data, err := client.NodesData(ctx, clt, nodes)
 	if err != nil {
 		return fmt.Errorf("error while fetching the data: %s", err)
 	}
-	tbl, vals, dErr := extractData(data[0])
+	tbl, vals, dErr := extractScalarPlotData(data[0])
 	// Check that the table is empty after the writer has been reset.
 	if test == &resetData {
-		if len(tbl.LabelToSerie) > 0 {
+		if len(tbl.Plotters) > 0 {
 			return fmt.Errorf("data table should be empty but it is not:\n%v", tbl)
 		}
 		return nil
@@ -445,7 +463,7 @@ func checkMetrics(clt pbgrpc.TreeClient, path []string, test *testData) error {
 	if dErr == nil && vals["max"] != test.Max {
 		err = multierr.Append(err, fmt.Errorf("wrong max value: got %f, want %f. Table:\n%v", vals["max"], test.Max, tbl))
 	}
-	tbl, vals, dErr = extractData(data[1])
+	tbl, vals, dErr = extractScalarPlotData(data[1])
 	err = multierr.Append(err, dErr)
 	if dErr == nil && vals["l1norm"] != test.L1Norm {
 		err = multierr.Append(err, fmt.Errorf("wrong l1norm value: got %f, want %f. Table:\n%v", vals["l1norm"], test.L1Norm, tbl))
@@ -466,7 +484,8 @@ func checkDistribution(clt pbgrpc.TreeClient, path []string, test *testData) err
 	if err := scopetesting.CheckNodePaths(nodes); err != nil {
 		return err
 	}
-	if err := scopetesting.CheckMIME(nodes[0].GetMime(), tableMime); err != nil {
+	var wantMIME = mime.ProtoToMIME(&plotpb.Plot{})
+	if err := scopetesting.CheckMIME(nodes[0].GetMime(), wantMIME); err != nil {
 		return err
 	}
 	// Check the data returned by the server.
@@ -474,15 +493,15 @@ func checkDistribution(clt pbgrpc.TreeClient, path []string, test *testData) err
 	if err != nil {
 		return err
 	}
-	tbl := tablepb.Series{}
-	if err := client.ToProto(data[0], &tbl); err != nil {
+	plt := plotpb.Plot{}
+	if err := client.ToProto(data[0], &plt); err != nil {
 		return err
 	}
-	if tbl.LabelToSerie == nil && test.Dist == nil {
+	if len(plt.Plotters) == 0 {
 		return nil
 	}
-	if diff := cmp.Diff(&tbl, test.Dist, protocmp.Transform()); diff != "" {
-		return fmt.Errorf("wrong distribution: %s\ngot:\n%v\nbut want:\n%v", diff, prototext.Format(&tbl), test.Dist)
+	if diff := cmp.Diff(&plt, test.Dist, protocmp.Transform()); diff != "" {
+		return fmt.Errorf("wrong distribution: %s\ngot:\n%v\nbut want:\n%v", diff, prototext.Format(&plt), test.Dist)
 	}
 	return nil
 }

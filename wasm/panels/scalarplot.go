@@ -1,7 +1,7 @@
 package panels
 
 import (
-	tablepb "multiscope/protos/table_go_proto"
+	plotpb "multiscope/protos/plot_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 	"multiscope/wasm/renderers"
 	"multiscope/wasm/ui"
@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	ui.RegisterBuilderPB(&tablepb.Series{}, newScalarPlot)
+	ui.RegisterBuilderPB(&plotpb.ScalarsPlot{}, newScalarPlot)
 }
 
 type scalarPlot struct {
@@ -23,7 +23,7 @@ func newScalarPlot(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp.canvas = dbd.UI().Owner().Doc().CreateElement("canvas").(*dom.HTMLCanvasElement)
 	dsp.canvas.SetHeight(400)
 	dsp.canvas.SetWidth(800)
-	desc := dbd.NewDescriptor(node, renderers.NewPlotScalar, node.Path)
+	desc := dbd.NewDescriptor(node, renderers.NewScalarPlot, node.Path)
 	desc.AddTransferable("offscreen", dsp.canvas.Call("transferControlToOffscreen"))
 	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
 }

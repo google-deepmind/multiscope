@@ -117,7 +117,6 @@ func (p *Puller) processUnregisterPanel(pbPanel *uipb.Panel, aux js.Value) error
 func renderData(rdr renderers.Renderer, data *treepb.NodeData) (rendered *treepb.NodeData, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			rendered = nil
 			err = errors.Errorf("renderer %T generated the following rendering error:\n%q\n for the following treepb.NodeData:\n%s", rdr, r, prototext.Format(data))
 		}
 	}()
@@ -140,7 +139,7 @@ func (p *Puller) processPullQuery(pull *uipb.Pull) error {
 		p.req.setLastTick(nodeData.Path, nodeData.Tick)
 		for _, panel := range p.req.panels(nodeData.Path) {
 			renderedData, err := renderData(panel.rdr, nodeData)
-			if renderedData == nil {
+			if renderedData == nil || err != nil {
 				renderedData = &treepb.NodeData{}
 			}
 			if err != nil {
@@ -151,7 +150,7 @@ func (p *Puller) processPullQuery(pull *uipb.Pull) error {
 				panelData = &uipb.PanelData{}
 				displayData.Data[panel.pb.Id] = panelData
 			}
-			panelData.Nodes = append(panelData.Nodes, nodeData)
+			panelData.Nodes = append(panelData.Nodes, renderedData)
 		}
 	}
 	return p.messager.Send(displayData, nil)

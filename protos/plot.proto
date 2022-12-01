@@ -1,0 +1,50 @@
+// Protocol buffer to stream text data.
+syntax = "proto3";
+
+package multiscope.plot;
+
+option go_package = "multiscope/protos/plot_go_proto";
+
+message ScalarsPlot {
+  Plot plot = 1;
+}
+
+message Plot {
+  repeated Plotter plotters = 2;
+
+  Axis x = 3;
+  Axis y = 4;
+}
+
+message Plotter {
+  Serie serie = 1;
+  string legend = 2;
+
+  oneof drawer {
+    LineDrawer lineDrawer = 10;
+    BarDrawer barDrawer = 11;
+  }
+}
+
+message Serie {
+  repeated Point points = 2;
+}
+
+message Point {
+  double x = 1;
+  double y = 2;
+}
+
+message Axis {
+  AxisProperties properties = 10;
+}
+
+message AxisProperties {
+  string label = 1;
+  double minValue = 2;
+  double maxValue = 3;
+}
+
+message LineDrawer {}
+
+message BarDrawer {}
