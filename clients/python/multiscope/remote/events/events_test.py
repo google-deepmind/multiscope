@@ -8,6 +8,7 @@ from multiscope.protos import tree_pb2 as pb
 
 from multiscope import remote as multiscope
 from multiscope.remote import stream_client
+from multiscope.remote.events import events
 
 
 def _to_event_pb(path, msg):
@@ -28,7 +29,7 @@ class EventsTest(absltest.TestCase):
 
     # Register the callback
     path = ["this", "is", "a", "path"]
-    queue = multiscope.events.subscribe_ticker_events(path)
+    queue = events.subscribe_ticker_events(path)
 
     # Create an event
     data = ticker_pb2.TickerAction()

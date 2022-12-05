@@ -94,8 +94,9 @@ def register_callback(gen: Generator[Tuple[_Path, T], None, None],
   threading.Thread(target=_handler, daemon=True).start()
 
 
-def register_ticker_callback(cb: Callable[[_TickerPayload], None],
-                            path: Optional[_Path] = None):
+def register_ticker_callback(
+  cb: Callable[[Tuple[_Path, ticker_pb2.TickerAction]], None],
+  path: Optional[_Path] = None):
   """Calls the provided cb with every mouse event at the provided path in a separate thread."""
   if path is None:
     path = []
