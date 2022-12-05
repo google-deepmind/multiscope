@@ -93,6 +93,28 @@ Run the following command from the top:
 go generate protos/generate.go
 ```
 
+### To modify a commit in the history
+
+From [How do I modify a specific
+commit?](https://stackoverflow.com/questions/1186535/how-do-i-modify-a-specific-commit)
+on stackoverflow.
+
+1. Rewrite the history with:
+```
+$ git rebase --interactive 'bbc643cd^'
+```
+(with `^` at the end)
+3. Modify `pick` to `edit` for the `bbc643cd` line. Save and exit the editor.
+4. Modify the code, then amend the commit with:
+```
+git commit --all --amend --no-edit
+```
+5. Return back to HEAD with:
+```
+$ git rebase --continue
+```
+6. Push commits to the main repository (see above).
+
 ### Troubleshooting
 
 Encountered problems and their solutions:
