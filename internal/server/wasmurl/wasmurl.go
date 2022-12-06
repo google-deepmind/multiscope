@@ -1,7 +1,7 @@
 // Package wasmurl provides the URL for the Multiscope WASM file.
 package wasmurl
 
-var url = "/res/multiscope.wasm"
+var url = "/res/multiscope.wasm.gz"
 
 // Set the URL for the WASM file.
 func Set(u string) {

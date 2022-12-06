@@ -1,11 +1,9 @@
 "use strict";
 
-function loadAndRunGoWasm(wasmURL) {
+async function loadAndRunGoWasm(wasmURL) {
   const go = new Go();
-  return WebAssembly.instantiateStreaming(fetch(wasmURL), go.importObject).then(
-    (result) => {
-      go.run(result.instance);
-    }
-  );
+  const buffer = pako.ungzip(await (await fetch(wasmURL)).arrayBuffer());
+  const result = await WebAssembly.instantiate(buffer, go.importObject);
+  go.run(result.instance);
 }
 
