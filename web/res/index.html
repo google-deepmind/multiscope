@@ -7,14 +7,9 @@
     <link rel="stylesheet" href="res/style.css" />
     <link rel="stylesheet" href="res/layout.css" />
     <script src="res/wasm_exec.js"></script>
+    <script src="res/wasm.js"></script>
     <script>
-      const wasmURL = "{{.wasmURL}}";
-      const go = new Go();
-      WebAssembly.instantiateStreaming(fetch(wasmURL), go.importObject).then(
-        (result) => {
-          go.run(result.instance);
-        }
-      );
+    loadAndRunGoWasm("{{.wasmURL}}");
     </script>
   </head>
   <body>
