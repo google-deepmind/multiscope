@@ -17,22 +17,12 @@ message Plot {
 }
 
 message Plotter {
-  Serie serie = 1;
-  string legend = 2;
+  string legend = 1;
 
   oneof drawer {
     LineDrawer lineDrawer = 10;
-    BarDrawer barDrawer = 11;
+    HistogramDrawer histogramDrawer = 11;
   }
-}
-
-message Serie {
-  repeated Point points = 2;
-}
-
-message Point {
-  double x = 1;
-  double y = 2;
 }
 
 message Axis {
@@ -45,6 +35,21 @@ message AxisProperties {
   double maxValue = 3;
 }
 
-message LineDrawer {}
+// LineDraw draws points as a sequence of lines and dots.
+message LineDrawer {
+  message Point {
+    double x = 1;
+    double y = 2;
+  }
+  repeated Point points = 2;
+}
 
-message BarDrawer {}
+// HistogramDrawer draws bins on a plot.
+message HistogramDrawer {
+  message Bin {
+    double min = 1;
+    double max = 2;
+    double weight = 3;
+  }
+  repeated Bin bins = 2;
+}

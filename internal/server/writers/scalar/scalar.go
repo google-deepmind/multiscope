@@ -52,14 +52,18 @@ func (w *Writer) AddToTree(state treeservice.State, path *treepb.NodePath) (*cor
 	return core.SetNodeAt(state.Root(), path, w)
 }
 
+func drawer(plotter *plotpb.Plotter) *plotpb.LineDrawer {
+	return plotter.Drawer.(*plotpb.Plotter_LineDrawer).LineDrawer
+}
+
 // removeHead makes we only remember the last w.historyLength elements.
 func (w *Writer) removeHeads() {
 	for _, pltr := range w.plotters {
-		serie := pltr.Serie
-		if len(serie.Points) <= historyLength {
+		drawer := drawer(pltr)
+		if len(drawer.Points) <= historyLength {
 			continue
 		}
-		serie.Points = serie.Points[len(serie.Points)-historyLength:]
+		drawer.Points = drawer.Points[len(drawer.Points)-historyLength:]
 	}
 }
 
@@ -83,7 +87,8 @@ func (w *Writer) Write(d map[string]float64) error {
 		if pltr == nil {
 			pltr = w.newPlotter(key)
 		}
-		pltr.Serie.Points = append(pltr.Serie.Points, &plotpb.Point{X: time, Y: value})
+		drawer := drawer(pltr)
+		drawer.Points = append(drawer.Points, &plotpb.LineDrawer_Point{X: time, Y: value})
 	}
 	w.removeHeads()
 	return w.ProtoWriter.Write(w.plot)
@@ -91,7 +96,9 @@ func (w *Writer) Write(d map[string]float64) error {
 
 func (w *Writer) newPlotter(key string) *plotpb.Plotter {
 	pltr := &plotpb.Plotter{
-		Serie:  &plotpb.Serie{},
+		Drawer: &plotpb.Plotter_LineDrawer{
+			LineDrawer: &plotpb.LineDrawer{},
+		},
 		Legend: key,
 	}
 	w.plotters[key] = pltr

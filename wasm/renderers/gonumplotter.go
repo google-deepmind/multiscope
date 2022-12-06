@@ -13,6 +13,7 @@ import (
 
 	"github.com/pkg/errors"
 	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
 )
 
@@ -69,13 +70,16 @@ func (rdr *gonumPlot) renderPlot(pbPlot *plotpb.Plot) (*treepb.NodeData, error) 
 	}
 	nextColor := 0
 	for _, pbPlotter := range pbPlot.Plotters {
-		if pbPlotter == nil || pbPlotter.Serie == nil {
+		if pbPlotter == nil {
 			continue
 		}
 		plotterColor := colors[nextColor%len(colors)]
-		pltr, err := rdr.toPlotter(pbPlotter.Serie, plotterColor)
+		pltr, err := rdr.toPlotter(pbPlotter, plotterColor)
 		if err != nil {
 			return nil, errors.Errorf("cannot plot %q: %v", pbPlotter.Legend, err)
+		}
+		if pltr == nil {
+			continue
 		}
 		plt.Add(pbPlotter.Legend, pltr)
 		nextColor++
@@ -84,9 +88,27 @@ func (rdr *gonumPlot) renderPlot(pbPlot *plotpb.Plot) (*treepb.NodeData, error) 
 	return nil, nil
 }
 
-func (rdr *gonumPlot) toPlotter(serie *plotpb.Serie, plotterColor color.Color) (wplot.Plotter, error) {
+func (rdr *gonumPlot) toPlotter(pbPlotter *plotpb.Plotter, plotterColor color.Color) (pltr wplot.Plotter, err error) {
+	if pbPlotter.Drawer == nil {
+		return nil, errors.Errorf("no drawer specified")
+	}
+	switch drw := pbPlotter.Drawer.(type) {
+	case *plotpb.Plotter_LineDrawer:
+		pltr, err = buildLineDrawer(pbPlotter, drw.LineDrawer, plotterColor)
+	case *plotpb.Plotter_HistogramDrawer:
+		pltr, err = buildHistogramDrawer(pbPlotter, drw.HistogramDrawer, plotterColor)
+	default:
+		return nil, errors.Errorf("drawer %T not supported", drw)
+	}
+	return
+}
+
+func buildLineDrawer(pbPlotter *plotpb.Plotter, drw *plotpb.LineDrawer, plotterColor color.Color) (wplot.Plotter, error) {
+	if len(drw.Points) == 0 {
+		return nil, nil
+	}
 	xys := plotter.XYs{}
-	for _, point := range serie.Points {
+	for _, point := range drw.Points {
 		if point == nil {
 			continue
 		}
@@ -102,4 +124,35 @@ func (rdr *gonumPlot) toPlotter(serie *plotpb.Serie, plotterColor color.Color) (
 	pltr.Width = 3
 	pltr.Color = plotterColor
 	return pltr, nil
+}
+
+var histogramLineStyle = draw.LineStyle{
+	Color:    color.Black,
+	Width:    vg.Points(0),
+	Dashes:   []vg.Length{},
+	DashOffs: 0,
+}
+
+func buildHistogramDrawer(pbPlotter *plotpb.Plotter, drw *plotpb.HistogramDrawer, plotterColor color.Color) (wplot.Plotter, error) {
+	if len(drw.Bins) == 0 {
+		return nil, nil
+	}
+	n := len(drw.Bins)
+	bins := make([]plotter.HistogramBin, n)
+	for i, pbBin := range drw.Bins {
+		bins[i].Min = pbBin.Min
+		bins[i].Max = pbBin.Max
+		bins[i].Weight = pbBin.Weight
+	}
+	xmin, xmax := bins[0].Min, bins[n-1].Max
+	width := (xmax - xmin) / float64(n)
+	if width == 0 {
+		width = 1
+	}
+	return &plotter.Histogram{
+		Bins:      bins,
+		Width:     width,
+		FillColor: plotterColor,
+		LineStyle: histogramLineStyle,
+	}, nil
 }

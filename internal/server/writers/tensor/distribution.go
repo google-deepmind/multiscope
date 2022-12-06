@@ -19,8 +19,8 @@ type distributionUpdater struct {
 	bins   []int
 	key    core.Key
 
-	serie *plotpb.Serie
-	plot  *plotpb.Plot
+	plot   *plotpb.Plot
+	drawer *plotpb.HistogramDrawer
 }
 
 func newDistribution(parent *Writer) *distributionUpdater {
@@ -28,12 +28,14 @@ func newDistribution(parent *Writer) *distributionUpdater {
 		parent: parent,
 		writer: plot.NewWriter(),
 		bins:   make([]int, numBins),
-		serie:  &plotpb.Serie{},
+		drawer: &plotpb.HistogramDrawer{},
 	}
 	dist.plot = &plotpb.Plot{
 		Plotters: []*plotpb.Plotter{
 			{
-				Serie: dist.serie,
+				Drawer: &plotpb.Plotter_HistogramDrawer{
+					HistogramDrawer: dist.drawer,
+				},
 			},
 		},
 	}
@@ -48,7 +50,7 @@ func (u *distributionUpdater) forwardActive(parent *core.Path) {
 }
 
 func (u *distributionUpdater) reset() (err error) {
-	u.serie.Points = u.serie.Points[:0]
+	u.drawer.Bins = u.drawer.Bins[:0]
 	return u.writer.Write(u.plot)
 }
 
@@ -73,14 +75,17 @@ func (u *distributionUpdater) update(Tensor) (err error) {
 		}
 		u.bins[bucket]++
 	}
-	u.serie.Points = u.serie.Points[:0]
-	x := u.parent.m.Min + bucketSize/2
-	for _, bin := range u.bins {
-		u.serie.Points = append(u.serie.Points, &plotpb.Point{
-			X: float64(x),
-			Y: float64(bin),
-		})
-		x += bucketSize
+	if len(u.drawer.Bins) != len(u.bins) {
+		u.drawer.Bins = make([]*plotpb.HistogramDrawer_Bin, len(u.bins))
+		for i := range u.drawer.Bins {
+			u.drawer.Bins[i] = &plotpb.HistogramDrawer_Bin{}
+		}
+	}
+	for i, bin := range u.bins {
+		iF32 := float32(i)
+		u.drawer.Bins[i].Min = float64(u.parent.m.Min + (bucketSize * iF32))
+		u.drawer.Bins[i].Max = float64(u.parent.m.Min + (bucketSize * (iF32 + 1)))
+		u.drawer.Bins[i].Weight = float64(bin)
 	}
 	return u.writer.Write(u.plot)
 }

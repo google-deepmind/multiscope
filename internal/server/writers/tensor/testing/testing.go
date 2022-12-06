@@ -15,7 +15,6 @@ import (
 	"multiscope/internal/server/writers/tensor"
 	scopetesting "multiscope/internal/testing"
 	plotpb "multiscope/protos/plot_go_proto"
-	pb "multiscope/protos/tree_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
 
 	"github.com/google/go-cmp/cmp"
@@ -53,26 +52,30 @@ type testData struct {
 	Info               string
 }
 
-func distributionToSerie(dist [][]float32) *plotpb.Serie {
-	serie := &plotpb.Serie{}
+func distributionToSerie(dist [][]float64) []*plotpb.HistogramDrawer_Bin {
+	bins := []*plotpb.HistogramDrawer_Bin{}
 	if len(dist) == 0 {
-		return serie
+		return bins
 	}
-	for _, row := range dist {
-		serie.Points = append(serie.Points, &plotpb.Point{
-			X: float64(row[0]), Y: float64(row[1]),
+	for i := range dist {
+		bins = append(bins, &plotpb.HistogramDrawer_Bin{
+			Min:    dist[i][0],
+			Max:    dist[i][1],
+			Weight: dist[i][2],
 		})
 	}
-	return serie
+	return bins
 }
 
-func buildDistribution(dist [][]float32) *plotpb.Plot {
+func buildDistribution(dist [][]float64) *plotpb.Plot {
 	return &plotpb.Plot{
-		Plotters: []*plotpb.Plotter{
-			{
-				Serie: distributionToSerie(dist),
+		Plotters: []*plotpb.Plotter{{
+			Drawer: &plotpb.Plotter_HistogramDrawer{
+				HistogramDrawer: &plotpb.HistogramDrawer{
+					Bins: distributionToSerie(dist),
+				},
 			},
-		},
+		}},
 	}
 }
 
@@ -184,27 +187,27 @@ var (
 			L2Norm:   float32(math.Sqrt(1 + 4 + 9 + 16 + 25 + 36)),
 			ScaleMin: 1,
 			ScaleMax: 200,
-			Dist: buildDistribution([][]float32{
-				{1.125, 1},
-				{1.375, 0},
-				{1.625, 0},
-				{1.875, 0},
-				{2.125, 1},
-				{2.375, 0},
-				{2.625, 0},
-				{2.875, 0},
-				{3.125, 1},
-				{3.375, 0},
-				{3.625, 0},
-				{3.875, 0},
-				{4.125, 1},
-				{4.375, 0},
-				{4.625, 0},
-				{4.875, 0},
-				{5.125, 1},
-				{5.375, 0},
-				{5.625, 0},
-				{5.875, 1},
+			Dist: buildDistribution([][]float64{
+				{1.000000, 1.250000, 1.000000},
+				{1.250000, 1.500000, 0.000000},
+				{1.500000, 1.750000, 0.000000},
+				{1.750000, 2.000000, 0.000000},
+				{2.000000, 2.250000, 1.000000},
+				{2.250000, 2.500000, 0.000000},
+				{2.500000, 2.750000, 0.000000},
+				{2.750000, 3.000000, 0.000000},
+				{3.000000, 3.250000, 1.000000},
+				{3.250000, 3.500000, 0.000000},
+				{3.500000, 3.750000, 0.000000},
+				{3.750000, 4.000000, 0.000000},
+				{4.000000, 4.250000, 1.000000},
+				{4.250000, 4.500000, 0.000000},
+				{4.500000, 4.750000, 0.000000},
+				{4.750000, 5.000000, 0.000000},
+				{5.000000, 5.250000, 1.000000},
+				{5.250000, 5.500000, 0.000000},
+				{5.500000, 5.750000, 0.000000},
+				{5.750000, 6.000000, 1.000000},
 			}),
 			Info: `<ul>
 <li><strong>Shape</strong>: [1 2 3]</li>
@@ -244,27 +247,27 @@ var (
 			L2Norm:   float32(math.Sqrt(1 + 4 + 9 + 16 + 25 + 36)),
 			ScaleMin: -6,
 			ScaleMax: 200,
-			Dist: buildDistribution([][]float32{
-				{-5.875, 1},
-				{-5.625, 0},
-				{-5.375, 0},
-				{-5.125, 0},
-				{-4.875, 1},
-				{-4.625, 0},
-				{-4.375, 0},
-				{-4.125, 0},
-				{-3.875, 1},
-				{-3.625, 0},
-				{-3.375, 0},
-				{-3.125, 0},
-				{-2.875, 1},
-				{-2.625, 0},
-				{-2.375, 0},
-				{-2.125, 0},
-				{-1.875, 1},
-				{-1.625, 0},
-				{-1.375, 0},
-				{-1.125, 1},
+			Dist: buildDistribution([][]float64{
+				{-6.000000, -5.750000, 1.000000},
+				{-5.750000, -5.500000, 0.000000},
+				{-5.500000, -5.250000, 0.000000},
+				{-5.250000, -5.000000, 0.000000},
+				{-5.000000, -4.750000, 1.000000},
+				{-4.750000, -4.500000, 0.000000},
+				{-4.500000, -4.250000, 0.000000},
+				{-4.250000, -4.000000, 0.000000},
+				{-4.000000, -3.750000, 1.000000},
+				{-3.750000, -3.500000, 0.000000},
+				{-3.500000, -3.250000, 0.000000},
+				{-3.250000, -3.000000, 0.000000},
+				{-3.000000, -2.750000, 1.000000},
+				{-2.750000, -2.500000, 0.000000},
+				{-2.500000, -2.250000, 0.000000},
+				{-2.250000, -2.000000, 0.000000},
+				{-2.000000, -1.750000, 1.000000},
+				{-1.750000, -1.500000, 0.000000},
+				{-1.500000, -1.250000, 0.000000},
+				{-1.250000, -1.000000, 1.000000},
 			}),
 			Info: `<ul>
 <li><strong>Shape</strong>: [1 2 3]</li>
@@ -304,27 +307,27 @@ var (
 			L2Norm:   float32(math.Sqrt(1 + 4 + 9 + 0 + 25 + 36)),
 			ScaleMin: -6,
 			ScaleMax: 200,
-			Dist: buildDistribution([][]float32{
-				{-5.725, 1},
-				{-5.1749997, 0},
-				{-4.6249995, 0},
-				{-4.0749993, 0},
-				{-3.5249994, 0},
-				{-2.9749994, 0},
-				{-2.4249995, 0},
-				{-1.8749995, 1},
-				{-1.3249996, 0},
-				{-0.77499956, 0},
-				{-0.22499955, 1},
-				{0.32500046, 0},
-				{0.8750005, 1},
-				{1.4250004, 0},
-				{1.9750004, 0},
-				{2.5250003, 0},
-				{3.0750003, 1},
-				{3.6250002, 0},
-				{4.175, 0},
-				{4.7250004, 1},
+			Dist: buildDistribution([][]float64{
+				{-6, -5.44999980926513671875, 1},
+				{-5.44999980926513671875, -4.90000009536743164062, 0},
+				{-4.90000009536743164062, -4.34999990463256835938, 0},
+				{-4.34999990463256835938, -3.79999995231628417969, 0},
+				{-3.79999995231628417969, -3.25, 0},
+				{-3.25, -2.69999980926513671875, 0},
+				{-2.69999980926513671875, -2.14999985694885253906, 0},
+				{-2.14999985694885253906, -1.59999990463256835938, 1},
+				{-1.59999990463256835938, -1.04999971389770507812, 0},
+				{-1.04999971389770507812, -0.5, 0},
+				{-0.5, 0.05000019073486328125, 1},
+				{0.05000019073486328125, 0.60000038146972656250, 0},
+				{0.60000038146972656250, 1.15000009536743164062, 1},
+				{1.15000009536743164062, 1.70000028610229492188, 0},
+				{1.70000028610229492188, 2.25, 0},
+				{2.25, 2.80000019073486328125, 0},
+				{2.80000019073486328125, 3.35000038146972656250, 1},
+				{3.35000038146972656250, 3.90000057220458984375, 0},
+				{3.90000057220458984375, 4.44999980926513671875, 0},
+				{4.44999980926513671875, 5., 1},
 			}),
 			Info: `<ul>
 <li><strong>Shape</strong>: [1 2 3]</li>
@@ -397,29 +400,17 @@ func checkRenderedImage(clt pbgrpc.TreeClient, path []string, nodeName string, t
 	return nil
 }
 
-func extractPlotData(data *pb.NodeData) (*plotpb.Plot, map[string]float32, error) {
-	plt := plotpb.Plot{}
-	if err := client.ToProto(data, &plt); err != nil {
-		return nil, nil, err
-	}
-	return extractDataFromPlot(&plt)
-}
-
-func extractScalarPlotData(data *pb.NodeData) (*plotpb.Plot, map[string]float32, error) {
+func extractScalarPlotData(data *pbgrpc.NodeData) (*plotpb.Plot, map[string]float32, error) {
 	plt := plotpb.ScalarsPlot{}
 	if err := client.ToProto(data, &plt); err != nil {
 		return nil, nil, err
 	}
-	return extractDataFromPlot(plt.Plot)
-}
-
-func extractDataFromPlot(plt *plotpb.Plot) (*plotpb.Plot, map[string]float32, error) {
 	vals := make(map[string]float32)
-	for _, plotter := range plt.Plotters {
-		serie := plotter.Serie
-		vals[plotter.Legend] = float32(serie.Points[len(serie.Points)-1].Y)
+	for _, pltr := range plt.Plot.Plotters {
+		drawer := pltr.Drawer.(*plotpb.Plotter_LineDrawer).LineDrawer
+		vals[pltr.Legend] = float32(drawer.Points[len(drawer.Points)-1].Y)
 	}
-	return plt, vals, nil
+	return plt.Plot, vals, nil
 }
 
 func checkMetrics(clt pbgrpc.TreeClient, path []string, test *testData) error {

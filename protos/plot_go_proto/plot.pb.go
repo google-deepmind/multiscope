@@ -137,11 +137,10 @@ type Plotter struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Serie  *Serie `protobuf:"bytes,1,opt,name=serie,proto3" json:"serie,omitempty"`
-	Legend string `protobuf:"bytes,2,opt,name=legend,proto3" json:"legend,omitempty"`
+	Legend string `protobuf:"bytes,1,opt,name=legend,proto3" json:"legend,omitempty"`
 	// Types that are assignable to Drawer:
 	//	*Plotter_LineDrawer
-	//	*Plotter_BarDrawer
+	//	*Plotter_HistogramDrawer
 	Drawer isPlotter_Drawer `protobuf_oneof:"drawer"`
 }
 
@@ -177,13 +176,6 @@ func (*Plotter) Descriptor() ([]byte, []int) {
 	return file_plot_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Plotter) GetSerie() *Serie {
-	if x != nil {
-		return x.Serie
-	}
-	return nil
-}
-
 func (x *Plotter) GetLegend() string {
 	if x != nil {
 		return x.Legend
@@ -205,9 +197,9 @@ func (x *Plotter) GetLineDrawer() *LineDrawer {
 	return nil
 }
 
-func (x *Plotter) GetBarDrawer() *BarDrawer {
-	if x, ok := x.GetDrawer().(*Plotter_BarDrawer); ok {
-		return x.BarDrawer
+func (x *Plotter) GetHistogramDrawer() *HistogramDrawer {
+	if x, ok := x.GetDrawer().(*Plotter_HistogramDrawer); ok {
+		return x.HistogramDrawer
 	}
 	return nil
 }
@@ -220,115 +212,13 @@ type Plotter_LineDrawer struct {
 	LineDrawer *LineDrawer `protobuf:"bytes,10,opt,name=lineDrawer,proto3,oneof"`
 }
 
-type Plotter_BarDrawer struct {
-	BarDrawer *BarDrawer `protobuf:"bytes,11,opt,name=barDrawer,proto3,oneof"`
+type Plotter_HistogramDrawer struct {
+	HistogramDrawer *HistogramDrawer `protobuf:"bytes,11,opt,name=histogramDrawer,proto3,oneof"`
 }
 
 func (*Plotter_LineDrawer) isPlotter_Drawer() {}
 
-func (*Plotter_BarDrawer) isPlotter_Drawer() {}
-
-type Serie struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Points []*Point `protobuf:"bytes,2,rep,name=points,proto3" json:"points,omitempty"`
-}
-
-func (x *Serie) Reset() {
-	*x = Serie{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_plot_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *Serie) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Serie) ProtoMessage() {}
-
-func (x *Serie) ProtoReflect() protoreflect.Message {
-	mi := &file_plot_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Serie.ProtoReflect.Descriptor instead.
-func (*Serie) Descriptor() ([]byte, []int) {
-	return file_plot_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *Serie) GetPoints() []*Point {
-	if x != nil {
-		return x.Points
-	}
-	return nil
-}
-
-type Point struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	X float64 `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`
-	Y float64 `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`
-}
-
-func (x *Point) Reset() {
-	*x = Point{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_plot_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *Point) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Point) ProtoMessage() {}
-
-func (x *Point) ProtoReflect() protoreflect.Message {
-	mi := &file_plot_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Point.ProtoReflect.Descriptor instead.
-func (*Point) Descriptor() ([]byte, []int) {
-	return file_plot_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *Point) GetX() float64 {
-	if x != nil {
-		return x.X
-	}
-	return 0
-}
-
-func (x *Point) GetY() float64 {
-	if x != nil {
-		return x.Y
-	}
-	return 0
-}
+func (*Plotter_HistogramDrawer) isPlotter_Drawer() {}
 
 type Axis struct {
 	state         protoimpl.MessageState
@@ -341,7 +231,7 @@ type Axis struct {
 func (x *Axis) Reset() {
 	*x = Axis{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_plot_proto_msgTypes[5]
+		mi := &file_plot_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -354,7 +244,7 @@ func (x *Axis) String() string {
 func (*Axis) ProtoMessage() {}
 
 func (x *Axis) ProtoReflect() protoreflect.Message {
-	mi := &file_plot_proto_msgTypes[5]
+	mi := &file_plot_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -367,7 +257,7 @@ func (x *Axis) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Axis.ProtoReflect.Descriptor instead.
 func (*Axis) Descriptor() ([]byte, []int) {
-	return file_plot_proto_rawDescGZIP(), []int{5}
+	return file_plot_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Axis) GetProperties() *AxisProperties {
@@ -390,7 +280,7 @@ type AxisProperties struct {
 func (x *AxisProperties) Reset() {
 	*x = AxisProperties{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_plot_proto_msgTypes[6]
+		mi := &file_plot_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -403,7 +293,7 @@ func (x *AxisProperties) String() string {
 func (*AxisProperties) ProtoMessage() {}
 
 func (x *AxisProperties) ProtoReflect() protoreflect.Message {
-	mi := &file_plot_proto_msgTypes[6]
+	mi := &file_plot_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -416,7 +306,7 @@ func (x *AxisProperties) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AxisProperties.ProtoReflect.Descriptor instead.
 func (*AxisProperties) Descriptor() ([]byte, []int) {
-	return file_plot_proto_rawDescGZIP(), []int{6}
+	return file_plot_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *AxisProperties) GetLabel() string {
@@ -444,12 +334,14 @@ type LineDrawer struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Points []*LineDrawer_Point `protobuf:"bytes,2,rep,name=points,proto3" json:"points,omitempty"`
 }
 
 func (x *LineDrawer) Reset() {
 	*x = LineDrawer{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_plot_proto_msgTypes[7]
+		mi := &file_plot_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -462,7 +354,7 @@ func (x *LineDrawer) String() string {
 func (*LineDrawer) ProtoMessage() {}
 
 func (x *LineDrawer) ProtoReflect() protoreflect.Message {
-	mi := &file_plot_proto_msgTypes[7]
+	mi := &file_plot_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -475,17 +367,130 @@ func (x *LineDrawer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LineDrawer.ProtoReflect.Descriptor instead.
 func (*LineDrawer) Descriptor() ([]byte, []int) {
-	return file_plot_proto_rawDescGZIP(), []int{7}
+	return file_plot_proto_rawDescGZIP(), []int{5}
 }
 
-type BarDrawer struct {
+func (x *LineDrawer) GetPoints() []*LineDrawer_Point {
+	if x != nil {
+		return x.Points
+	}
+	return nil
+}
+
+type HistogramDrawer struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Bins []*HistogramDrawer_Bin `protobuf:"bytes,2,rep,name=bins,proto3" json:"bins,omitempty"`
 }
 
-func (x *BarDrawer) Reset() {
-	*x = BarDrawer{}
+func (x *HistogramDrawer) Reset() {
+	*x = HistogramDrawer{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_plot_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HistogramDrawer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HistogramDrawer) ProtoMessage() {}
+
+func (x *HistogramDrawer) ProtoReflect() protoreflect.Message {
+	mi := &file_plot_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HistogramDrawer.ProtoReflect.Descriptor instead.
+func (*HistogramDrawer) Descriptor() ([]byte, []int) {
+	return file_plot_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *HistogramDrawer) GetBins() []*HistogramDrawer_Bin {
+	if x != nil {
+		return x.Bins
+	}
+	return nil
+}
+
+type LineDrawer_Point struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	X float64 `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`
+	Y float64 `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`
+}
+
+func (x *LineDrawer_Point) Reset() {
+	*x = LineDrawer_Point{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_plot_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *LineDrawer_Point) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LineDrawer_Point) ProtoMessage() {}
+
+func (x *LineDrawer_Point) ProtoReflect() protoreflect.Message {
+	mi := &file_plot_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LineDrawer_Point.ProtoReflect.Descriptor instead.
+func (*LineDrawer_Point) Descriptor() ([]byte, []int) {
+	return file_plot_proto_rawDescGZIP(), []int{5, 0}
+}
+
+func (x *LineDrawer_Point) GetX() float64 {
+	if x != nil {
+		return x.X
+	}
+	return 0
+}
+
+func (x *LineDrawer_Point) GetY() float64 {
+	if x != nil {
+		return x.Y
+	}
+	return 0
+}
+
+type HistogramDrawer_Bin struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Min    float64 `protobuf:"fixed64,1,opt,name=min,proto3" json:"min,omitempty"`
+	Max    float64 `protobuf:"fixed64,2,opt,name=max,proto3" json:"max,omitempty"`
+	Weight float64 `protobuf:"fixed64,3,opt,name=weight,proto3" json:"weight,omitempty"`
+}
+
+func (x *HistogramDrawer_Bin) Reset() {
+	*x = HistogramDrawer_Bin{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_plot_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -493,13 +498,13 @@ func (x *BarDrawer) Reset() {
 	}
 }
 
-func (x *BarDrawer) String() string {
+func (x *HistogramDrawer_Bin) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*BarDrawer) ProtoMessage() {}
+func (*HistogramDrawer_Bin) ProtoMessage() {}
 
-func (x *BarDrawer) ProtoReflect() protoreflect.Message {
+func (x *HistogramDrawer_Bin) ProtoReflect() protoreflect.Message {
 	mi := &file_plot_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -511,9 +516,30 @@ func (x *BarDrawer) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use BarDrawer.ProtoReflect.Descriptor instead.
-func (*BarDrawer) Descriptor() ([]byte, []int) {
-	return file_plot_proto_rawDescGZIP(), []int{8}
+// Deprecated: Use HistogramDrawer_Bin.ProtoReflect.Descriptor instead.
+func (*HistogramDrawer_Bin) Descriptor() ([]byte, []int) {
+	return file_plot_proto_rawDescGZIP(), []int{6, 0}
+}
+
+func (x *HistogramDrawer_Bin) GetMin() float64 {
+	if x != nil {
+		return x.Min
+	}
+	return 0
+}
+
+func (x *HistogramDrawer_Bin) GetMax() float64 {
+	if x != nil {
+		return x.Max
+	}
+	return 0
+}
+
+func (x *HistogramDrawer_Bin) GetWeight() float64 {
+	if x != nil {
+		return x.Weight
+	}
+	return 0
 }
 
 var File_plot_proto protoreflect.FileDescriptor
@@ -533,41 +559,47 @@ var file_plot_proto_rawDesc = []byte{
 	0x6c, 0x6f, 0x74, 0x2e, 0x41, 0x78, 0x69, 0x73, 0x52, 0x01, 0x78, 0x12, 0x23, 0x0a, 0x01, 0x79,
 	0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x15, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63,
 	0x6f, 0x70, 0x65, 0x2e, 0x70, 0x6c, 0x6f, 0x74, 0x2e, 0x41, 0x78, 0x69, 0x73, 0x52, 0x01, 0x79,
-	0x22, 0xd4, 0x01, 0x0a, 0x07, 0x50, 0x6c, 0x6f, 0x74, 0x74, 0x65, 0x72, 0x12, 0x2c, 0x0a, 0x05,
-	0x73, 0x65, 0x72, 0x69, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x6d, 0x75,
-	0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e, 0x70, 0x6c, 0x6f, 0x74, 0x2e, 0x53, 0x65,
-	0x72, 0x69, 0x65, 0x52, 0x05, 0x73, 0x65, 0x72, 0x69, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x6c, 0x65,
-	0x67, 0x65, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6c, 0x65, 0x67, 0x65,
-	0x6e, 0x64, 0x12, 0x3d, 0x0a, 0x0a, 0x6c, 0x69, 0x6e, 0x65, 0x44, 0x72, 0x61, 0x77, 0x65, 0x72,
-	0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63,
-	0x6f, 0x70, 0x65, 0x2e, 0x70, 0x6c, 0x6f, 0x74, 0x2e, 0x4c, 0x69, 0x6e, 0x65, 0x44, 0x72, 0x61,
-	0x77, 0x65, 0x72, 0x48, 0x00, 0x52, 0x0a, 0x6c, 0x69, 0x6e, 0x65, 0x44, 0x72, 0x61, 0x77, 0x65,
-	0x72, 0x12, 0x3a, 0x0a, 0x09, 0x62, 0x61, 0x72, 0x44, 0x72, 0x61, 0x77, 0x65, 0x72, 0x18, 0x0b,
-	0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70,
-	0x65, 0x2e, 0x70, 0x6c, 0x6f, 0x74, 0x2e, 0x42, 0x61, 0x72, 0x44, 0x72, 0x61, 0x77, 0x65, 0x72,
-	0x48, 0x00, 0x52, 0x09, 0x62, 0x61, 0x72, 0x44, 0x72, 0x61, 0x77, 0x65, 0x72, 0x42, 0x08, 0x0a,
-	0x06, 0x64, 0x72, 0x61, 0x77, 0x65, 0x72, 0x22, 0x37, 0x0a, 0x05, 0x53, 0x65, 0x72, 0x69, 0x65,
-	0x12, 0x2e, 0x0a, 0x06, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b,
-	0x32, 0x16, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e, 0x70, 0x6c,
-	0x6f, 0x74, 0x2e, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x52, 0x06, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73,
-	0x22, 0x23, 0x0a, 0x05, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x12, 0x0c, 0x0a, 0x01, 0x78, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x01, 0x52, 0x01, 0x78, 0x12, 0x0c, 0x0a, 0x01, 0x79, 0x18, 0x02, 0x20, 0x01,
-	0x28, 0x01, 0x52, 0x01, 0x79, 0x22, 0x47, 0x0a, 0x04, 0x41, 0x78, 0x69, 0x73, 0x12, 0x3f, 0x0a,
-	0x0a, 0x70, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x18, 0x0a, 0x20, 0x01, 0x28,
-	0x0b, 0x32, 0x1f, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e, 0x70,
-	0x6c, 0x6f, 0x74, 0x2e, 0x41, 0x78, 0x69, 0x73, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69,
-	0x65, 0x73, 0x52, 0x0a, 0x70, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x22, 0x5e,
-	0x0a, 0x0e, 0x41, 0x78, 0x69, 0x73, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73,
-	0x12, 0x14, 0x0a, 0x05, 0x6c, 0x61, 0x62, 0x65, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x05, 0x6c, 0x61, 0x62, 0x65, 0x6c, 0x12, 0x1a, 0x0a, 0x08, 0x6d, 0x69, 0x6e, 0x56, 0x61, 0x6c,
-	0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x01, 0x52, 0x08, 0x6d, 0x69, 0x6e, 0x56, 0x61, 0x6c,
-	0x75, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x6d, 0x61, 0x78, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x03,
-	0x20, 0x01, 0x28, 0x01, 0x52, 0x08, 0x6d, 0x61, 0x78, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x0c,
-	0x0a, 0x0a, 0x4c, 0x69, 0x6e, 0x65, 0x44, 0x72, 0x61, 0x77, 0x65, 0x72, 0x22, 0x0b, 0x0a, 0x09,
-	0x42, 0x61, 0x72, 0x44, 0x72, 0x61, 0x77, 0x65, 0x72, 0x42, 0x21, 0x5a, 0x1f, 0x6d, 0x75, 0x6c,
-	0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x70,
-	0x6c, 0x6f, 0x74, 0x5f, 0x67, 0x6f, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x22, 0xb8, 0x01, 0x0a, 0x07, 0x50, 0x6c, 0x6f, 0x74, 0x74, 0x65, 0x72, 0x12, 0x16, 0x0a, 0x06,
+	0x6c, 0x65, 0x67, 0x65, 0x6e, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6c, 0x65,
+	0x67, 0x65, 0x6e, 0x64, 0x12, 0x3d, 0x0a, 0x0a, 0x6c, 0x69, 0x6e, 0x65, 0x44, 0x72, 0x61, 0x77,
+	0x65, 0x72, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69,
+	0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e, 0x70, 0x6c, 0x6f, 0x74, 0x2e, 0x4c, 0x69, 0x6e, 0x65, 0x44,
+	0x72, 0x61, 0x77, 0x65, 0x72, 0x48, 0x00, 0x52, 0x0a, 0x6c, 0x69, 0x6e, 0x65, 0x44, 0x72, 0x61,
+	0x77, 0x65, 0x72, 0x12, 0x4c, 0x0a, 0x0f, 0x68, 0x69, 0x73, 0x74, 0x6f, 0x67, 0x72, 0x61, 0x6d,
+	0x44, 0x72, 0x61, 0x77, 0x65, 0x72, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x20, 0x2e, 0x6d,
+	0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e, 0x70, 0x6c, 0x6f, 0x74, 0x2e, 0x48,
+	0x69, 0x73, 0x74, 0x6f, 0x67, 0x72, 0x61, 0x6d, 0x44, 0x72, 0x61, 0x77, 0x65, 0x72, 0x48, 0x00,
+	0x52, 0x0f, 0x68, 0x69, 0x73, 0x74, 0x6f, 0x67, 0x72, 0x61, 0x6d, 0x44, 0x72, 0x61, 0x77, 0x65,
+	0x72, 0x42, 0x08, 0x0a, 0x06, 0x64, 0x72, 0x61, 0x77, 0x65, 0x72, 0x22, 0x47, 0x0a, 0x04, 0x41,
+	0x78, 0x69, 0x73, 0x12, 0x3f, 0x0a, 0x0a, 0x70, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65,
+	0x73, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73,
+	0x63, 0x6f, 0x70, 0x65, 0x2e, 0x70, 0x6c, 0x6f, 0x74, 0x2e, 0x41, 0x78, 0x69, 0x73, 0x50, 0x72,
+	0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x52, 0x0a, 0x70, 0x72, 0x6f, 0x70, 0x65, 0x72,
+	0x74, 0x69, 0x65, 0x73, 0x22, 0x5e, 0x0a, 0x0e, 0x41, 0x78, 0x69, 0x73, 0x50, 0x72, 0x6f, 0x70,
+	0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x61, 0x62, 0x65, 0x6c, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x6c, 0x61, 0x62, 0x65, 0x6c, 0x12, 0x1a, 0x0a, 0x08,
+	0x6d, 0x69, 0x6e, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x01, 0x52, 0x08,
+	0x6d, 0x69, 0x6e, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x6d, 0x61, 0x78, 0x56,
+	0x61, 0x6c, 0x75, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x08, 0x6d, 0x61, 0x78, 0x56,
+	0x61, 0x6c, 0x75, 0x65, 0x22, 0x6c, 0x0a, 0x0a, 0x4c, 0x69, 0x6e, 0x65, 0x44, 0x72, 0x61, 0x77,
+	0x65, 0x72, 0x12, 0x39, 0x0a, 0x06, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x18, 0x02, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x21, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e,
+	0x70, 0x6c, 0x6f, 0x74, 0x2e, 0x4c, 0x69, 0x6e, 0x65, 0x44, 0x72, 0x61, 0x77, 0x65, 0x72, 0x2e,
+	0x50, 0x6f, 0x69, 0x6e, 0x74, 0x52, 0x06, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x1a, 0x23, 0x0a,
+	0x05, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x12, 0x0c, 0x0a, 0x01, 0x78, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x01, 0x52, 0x01, 0x78, 0x12, 0x0c, 0x0a, 0x01, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x01, 0x52,
+	0x01, 0x79, 0x22, 0x8e, 0x01, 0x0a, 0x0f, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x67, 0x72, 0x61, 0x6d,
+	0x44, 0x72, 0x61, 0x77, 0x65, 0x72, 0x12, 0x38, 0x0a, 0x04, 0x62, 0x69, 0x6e, 0x73, 0x18, 0x02,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x24, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70,
+	0x65, 0x2e, 0x70, 0x6c, 0x6f, 0x74, 0x2e, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x67, 0x72, 0x61, 0x6d,
+	0x44, 0x72, 0x61, 0x77, 0x65, 0x72, 0x2e, 0x42, 0x69, 0x6e, 0x52, 0x04, 0x62, 0x69, 0x6e, 0x73,
+	0x1a, 0x41, 0x0a, 0x03, 0x42, 0x69, 0x6e, 0x12, 0x10, 0x0a, 0x03, 0x6d, 0x69, 0x6e, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x01, 0x52, 0x03, 0x6d, 0x69, 0x6e, 0x12, 0x10, 0x0a, 0x03, 0x6d, 0x61, 0x78,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x01, 0x52, 0x03, 0x6d, 0x61, 0x78, 0x12, 0x16, 0x0a, 0x06, 0x77,
+	0x65, 0x69, 0x67, 0x68, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x06, 0x77, 0x65, 0x69,
+	0x67, 0x68, 0x74, 0x42, 0x21, 0x5a, 0x1f, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70,
+	0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x70, 0x6c, 0x6f, 0x74, 0x5f, 0x67, 0x6f,
+	0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -584,26 +616,26 @@ func file_plot_proto_rawDescGZIP() []byte {
 
 var file_plot_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_plot_proto_goTypes = []interface{}{
-	(*ScalarsPlot)(nil),    // 0: multiscope.plot.ScalarsPlot
-	(*Plot)(nil),           // 1: multiscope.plot.Plot
-	(*Plotter)(nil),        // 2: multiscope.plot.Plotter
-	(*Serie)(nil),          // 3: multiscope.plot.Serie
-	(*Point)(nil),          // 4: multiscope.plot.Point
-	(*Axis)(nil),           // 5: multiscope.plot.Axis
-	(*AxisProperties)(nil), // 6: multiscope.plot.AxisProperties
-	(*LineDrawer)(nil),     // 7: multiscope.plot.LineDrawer
-	(*BarDrawer)(nil),      // 8: multiscope.plot.BarDrawer
+	(*ScalarsPlot)(nil),         // 0: multiscope.plot.ScalarsPlot
+	(*Plot)(nil),                // 1: multiscope.plot.Plot
+	(*Plotter)(nil),             // 2: multiscope.plot.Plotter
+	(*Axis)(nil),                // 3: multiscope.plot.Axis
+	(*AxisProperties)(nil),      // 4: multiscope.plot.AxisProperties
+	(*LineDrawer)(nil),          // 5: multiscope.plot.LineDrawer
+	(*HistogramDrawer)(nil),     // 6: multiscope.plot.HistogramDrawer
+	(*LineDrawer_Point)(nil),    // 7: multiscope.plot.LineDrawer.Point
+	(*HistogramDrawer_Bin)(nil), // 8: multiscope.plot.HistogramDrawer.Bin
 }
 var file_plot_proto_depIdxs = []int32{
 	1, // 0: multiscope.plot.ScalarsPlot.plot:type_name -> multiscope.plot.Plot
 	2, // 1: multiscope.plot.Plot.plotters:type_name -> multiscope.plot.Plotter
-	5, // 2: multiscope.plot.Plot.x:type_name -> multiscope.plot.Axis
-	5, // 3: multiscope.plot.Plot.y:type_name -> multiscope.plot.Axis
-	3, // 4: multiscope.plot.Plotter.serie:type_name -> multiscope.plot.Serie
-	7, // 5: multiscope.plot.Plotter.lineDrawer:type_name -> multiscope.plot.LineDrawer
-	8, // 6: multiscope.plot.Plotter.barDrawer:type_name -> multiscope.plot.BarDrawer
-	4, // 7: multiscope.plot.Serie.points:type_name -> multiscope.plot.Point
-	6, // 8: multiscope.plot.Axis.properties:type_name -> multiscope.plot.AxisProperties
+	3, // 2: multiscope.plot.Plot.x:type_name -> multiscope.plot.Axis
+	3, // 3: multiscope.plot.Plot.y:type_name -> multiscope.plot.Axis
+	5, // 4: multiscope.plot.Plotter.lineDrawer:type_name -> multiscope.plot.LineDrawer
+	6, // 5: multiscope.plot.Plotter.histogramDrawer:type_name -> multiscope.plot.HistogramDrawer
+	4, // 6: multiscope.plot.Axis.properties:type_name -> multiscope.plot.AxisProperties
+	7, // 7: multiscope.plot.LineDrawer.points:type_name -> multiscope.plot.LineDrawer.Point
+	8, // 8: multiscope.plot.HistogramDrawer.bins:type_name -> multiscope.plot.HistogramDrawer.Bin
 	9, // [9:9] is the sub-list for method output_type
 	9, // [9:9] is the sub-list for method input_type
 	9, // [9:9] is the sub-list for extension type_name
@@ -654,30 +686,6 @@ func file_plot_proto_init() {
 			}
 		}
 		file_plot_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Serie); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_plot_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Point); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_plot_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Axis); i {
 			case 0:
 				return &v.state
@@ -689,7 +697,7 @@ func file_plot_proto_init() {
 				return nil
 			}
 		}
-		file_plot_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_plot_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*AxisProperties); i {
 			case 0:
 				return &v.state
@@ -701,7 +709,7 @@ func file_plot_proto_init() {
 				return nil
 			}
 		}
-		file_plot_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+		file_plot_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*LineDrawer); i {
 			case 0:
 				return &v.state
@@ -713,8 +721,32 @@ func file_plot_proto_init() {
 				return nil
 			}
 		}
+		file_plot_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HistogramDrawer); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_plot_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*LineDrawer_Point); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 		file_plot_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BarDrawer); i {
+			switch v := v.(*HistogramDrawer_Bin); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -728,7 +760,7 @@ func file_plot_proto_init() {
 	}
 	file_plot_proto_msgTypes[2].OneofWrappers = []interface{}{
 		(*Plotter_LineDrawer)(nil),
-		(*Plotter_BarDrawer)(nil),
+		(*Plotter_HistogramDrawer)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
