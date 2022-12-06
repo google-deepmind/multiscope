@@ -74,6 +74,18 @@ class TickerTest(parameterized.TestCase):
         ticker.tick()
         mock_write.assert_called()
 
+class TimerTest(parameterized.TestCase):
+    def testDifference(self):
+        limit = 0.1
+        timer = clock.Timer(ema_sample_weight=1.0)
+        timer.start()
+        samples = [timer.sample().total_seconds() for i in range(20)]
+        if any([s > limit for s in samples]):
+            self.fail(
+                "Some time differences are higher than the limit "
+                f"({limit}): {samples}."
+            )
+
 
 if __name__ == "__main__":
     absltest.main()

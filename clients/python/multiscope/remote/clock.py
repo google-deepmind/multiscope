@@ -207,7 +207,7 @@ class Ticker(group.ParentNode):
         self._resume.set()
 
 
-class _Timer:
+class Timer:
     """Measures time between samples. Can provide an EMA average of it."""
 
     def __init__(self, ema_sample_weight: float):
@@ -222,7 +222,7 @@ class _Timer:
             return datetime.timedelta()
 
         cur_time = timeit.default_timer()
-        diff = datetime.timedelta(cur_time - self._last_sample)
+        diff = datetime.timedelta(seconds=(cur_time - self._last_sample))
         self._last_sample = cur_time
 
         self._average = (
@@ -238,4 +238,4 @@ class _Timer:
 
     @property
     def average(self):
-        return datetime.timedelta(self._average)
+        return datetime.timedelta(seconds=self._average)
