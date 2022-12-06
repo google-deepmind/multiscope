@@ -51,7 +51,9 @@ class Ticker(group.ParentNode):
         self._listeners: Sequence[Callable[[], None]] = []
 
         # Use timers to ensure the correct period and collect stats.
-        self._tick_timer = _Timer(TIMER_AVERAGE_STEPSIZE)
+        self._total_timer = Timer(TIMER_AVERAGE_STEPSIZE)
+        self._experiment_timer = Timer(TIMER_AVERAGE_STEPSIZE)
+        self._callback_timer = Timer(TIMER_AVERAGE_STEPSIZE)
 
         # Make the connection to the multiscope server.
         self._client = ticker_pb2_grpc.TickersStub(stream_client.channel)
@@ -78,20 +80,36 @@ class Ticker(group.ParentNode):
 
     def _call_listeners(self) -> None:
         """Calls all listeners."""
-        # TODO: collect statistics about how long these calls take.
         # TODO: collect and surface errors from these calls in a good way.
+        self._callback_timer.start()
         for fn in self._listeners:
             fn()
+        self._callback_timer.sample()
 
     def _write_data(self) -> None:
         """Writes `TickerData`."""
         data = ticker_pb2.TickerData()
         data.tick = self._tick_num
-        # TODO: write real data.
-        data.periods.total.CopyFrom(duration_pb2.Duration(seconds=12))
-        data.periods.experiment.CopyFrom(duration_pb2.Duration(seconds=1))
-        data.periods.callbacks.CopyFrom(duration_pb2.Duration(seconds=4))
-        data.periods.idle.CopyFrom(duration_pb2.Duration(seconds=10))
+
+        # Timer info:
+        total_ms = int(self._total_timer.average.total_seconds() * 1e3)
+        exp_ms = int(self._experiment_timer.average.total_seconds() * 1e3)
+        callbacks_ms = int(self._callback_timer.average.total_seconds() * 1e3)
+        idle_ms = total_ms - exp_ms - callbacks_ms
+        total_d = duration_pb2.Duration()
+        total_d.FromMilliseconds(total_ms)
+        exp_d = duration_pb2.Duration()
+        exp_d.FromMilliseconds(exp_ms)
+        callbacks_d = duration_pb2.Duration()
+        callbacks_d.FromMilliseconds(callbacks_ms)
+        idle_d = duration_pb2.Duration()
+        idle_d.FromMilliseconds(idle_ms)
+
+        data.periods.total.CopyFrom(total_d)
+        data.periods.experiment.CopyFrom(exp_d)
+        data.periods.callbacks.CopyFrom(callbacks_d)
+        data.periods.idle.CopyFrom(idle_d)
+
         req = ticker_pb2.WriteRequest()
         req.ticker.CopyFrom(self._ticker)
         req.data.CopyFrom(data)
@@ -99,7 +117,7 @@ class Ticker(group.ParentNode):
 
     def tick(self) -> None:
         """Waits until it's time to continue running."""
-        since_last_tick = self._tick_timer.sample()
+        since_last_tick = self._experiment_timer.sample()
 
         if since_last_tick < self._period:
             time.sleep((self._period - since_last_tick).total_seconds)
@@ -111,24 +129,21 @@ class Ticker(group.ParentNode):
             self._resume.wait()
             self._resume.clear()
 
-        self._tick_timer.start()  # Measure the period from here.
-        # Note: the go implementation only starts measuring time after calling
-        # the listeners.
         self._tick_num += 1
-        self._call_listeners()
+        self._total_timer.sample()
 
-    @control.method
+        self._call_listeners()
+        self._experiment_timer.start()  # Measure the exp period from here.
+
     def register_listener(self, fn: Callable[[], None]):
         """Registers `fn` to be called everytime Tick is called."""
         self._listeners.append(fn)
 
     @property
-    @control.method
     def current_tick(self) -> int:
         """Returns the current tick of the clock."""
         return self._tick_num
 
-    # @control.method
     def _register_event_listener(self, fn: Callable[[], None]):
         """Registers `fn` to be called everytime an event is received."""
         self._event_listeners.append(fn)
@@ -148,7 +163,7 @@ class Ticker(group.ParentNode):
             raise ValueError("Unexpected `action` of `TickerAction`.")
 
         for fn in self._event_listeners:
-            fn(action)
+              fn(action)
 
     def _process_control_cmd(self, command: ticker_pb2.TickerAction.Command) -> None:
         if command == ticker_pb2.TickerAction.Command.NONE:
