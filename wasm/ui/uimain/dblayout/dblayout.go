@@ -10,6 +10,11 @@ import (
 	"honnef.co/go/js/dom/v2"
 )
 
+const (
+	defaultPanelWidth  = 640
+	defaultPanelHeight = 480
+)
+
 // SettingKey is the key used in the settings to store the layout.
 const SettingKey = "layout"
 

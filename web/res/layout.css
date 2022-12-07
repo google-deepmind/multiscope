@@ -3,7 +3,8 @@
   flex-direction: column;
 }
 
-.container__main {
+/* Layout of the full page */
+.container_main {
   /* Take the remaining height */
   flex-grow: 1;
 
@@ -12,15 +13,33 @@
   flex-direction: row;
 }
 
-.container__left {
+/* Left tree */
+.container_left {
   width: 25%;
 }
 
-.container__middle {
+/* Dashboard displaying all the panels. */
+.container_middle {
   /* Take the remaining width */
   flex-grow: 1;
 }
 
-.container__right {
-  width: 20%;
+/* Not used at the moment */
+.container_right {
+  width: 0%;
 }
+
+/* Layout for a list of panels */
+.panels_layout_list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* Class for a panel */
+.panel {
+  border: 0px solid red;
+  overflow:auto;
+  width: fit-content;
+  height: fit-content;
+}
+

@@ -43,6 +43,7 @@ func NewPanel(title string, desc ui.Descriptor, dsp Displayer) (ui.Panel, error)
 		dsp:  dsp,
 	}
 	pnl.root = dbd.UI().Owner().Doc().CreateElement("div").(*dom.HTMLDivElement)
+	pnl.root.Class().Add("panel")
 	pnl.appendTitle(title)
 	pnl.appendErr()
 	pnl.root.AppendChild(dsp.Root())

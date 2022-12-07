@@ -5,7 +5,7 @@
 
 body {
   font-family: "Noto Sans";
-  font-size: 14pt;
+  font-size: 12pt;
 }
 
 /* Style for the page. */
@@ -19,32 +19,6 @@ body {
   position: sticky;
   left: 0;
   bottom: 0;
-}
-
-/*
-   Style for the dashboard containing all the panels
-   and the left and right sidebars.
-*/
-.dashboard {
-  display: flex;
-  flex-direction: column;
-}
-.dashboard-main {
-  /* Take the remaining height */
-  flex-grow: 1;
-  /* Layout the left sidebar, main content and right sidebar */
-  display: flex;
-  flex-direction: row;
-}
-.dashboard-left {
-  width: 25%;
-}
-.dashboard-right {
-  width: 20%;
-}
-.dashboard-middle {
-  /* Take the remaining width */
-  flex-grow: 1;
 }
 
 /* Generic style for widgets */
@@ -63,8 +37,6 @@ body {
 }
 
 .toppage a.icon {
-  padding: 0px 0px;
-  line-height: 0.5em;
   font-size: 140%;
 }
 

@@ -330,6 +330,7 @@ func (x *AxisProperties) GetMaxValue() float64 {
 	return 0
 }
 
+// LineDraw draws points as a sequence of lines and dots.
 type LineDrawer struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -377,6 +378,7 @@ func (x *LineDrawer) GetPoints() []*LineDrawer_Point {
 	return nil
 }
 
+// HistogramDrawer draws bins on a plot.
 type HistogramDrawer struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

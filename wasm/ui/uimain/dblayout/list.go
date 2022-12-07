@@ -20,10 +20,26 @@ type list struct {
 func newList(dbd ui.Dashboard) Layout {
 	lyt := &list{
 		dbd:  dbd,
-		pb:   &rootpb.LayoutList{},
 		root: dbd.UI().Owner().Doc().CreateElement("div").(*dom.HTMLDivElement),
 	}
+	lyt.root.Class().Add("panels_layout_list")
+	lyt.fixProto()
 	return lyt
+}
+
+func (lyt *list) fixProto() {
+	if lyt.pb == nil {
+		lyt.pb = &rootpb.LayoutList{}
+	}
+	if lyt.pb.DefaultPanelSize == nil {
+		lyt.pb.DefaultPanelSize = &rootpb.LayoutList_Size{}
+	}
+	if lyt.pb.DefaultPanelSize.Width == 0 {
+		lyt.pb.DefaultPanelSize.Width = defaultPanelWidth
+	}
+	if lyt.pb.DefaultPanelSize.Height == 0 {
+		lyt.pb.DefaultPanelSize.Height = defaultPanelHeight
+	}
 }
 
 func (lyt *list) Load(gLayout *rootpb.Layout) error {
@@ -31,6 +47,9 @@ func (lyt *list) Load(gLayout *rootpb.Layout) error {
 	if layout == nil {
 		return nil
 	}
+	lyt.pb.DefaultPanelSize = layout.DefaultPanelSize
+	lyt.fixProto()
+
 	nodes, err := lyt.dbd.UI().TreeClient().GetNodeStruct(context.Background(), &treepb.NodeStructRequest{
 		Paths: layout.Displayed,
 	})
@@ -57,7 +76,15 @@ func (lyt *list) store() {
 	})
 }
 
+func (lyt *list) format(div *dom.HTMLDivElement) {
+	height := fmt.Sprintf("%dpx", lyt.pb.DefaultPanelSize.Height)
+	div.Style().SetProperty("height", height, "")
+	width := fmt.Sprintf("%dpx", lyt.pb.DefaultPanelSize.Width)
+	div.Style().SetProperty("width", width, "")
+}
+
 func (lyt *list) Append(pnl ui.Panel) {
+	// lyt.format(pnl.Root())
 	lyt.Root().AppendChild(pnl.Root())
 	path := pnl.Desc().Path()
 	if path != nil {
