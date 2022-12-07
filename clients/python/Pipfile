@@ -9,6 +9,7 @@ protobuf = "*"
 absl-py = "*"
 grpcio-tools = "*"
 grpcio = "*"
+numpy = "*"
 
 [dev-packages]
 black = "*"
