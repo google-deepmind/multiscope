@@ -8,6 +8,8 @@ from multiscope.remote.control.control import DISABLE_MULTISCOPE
 from multiscope.remote.server import start_server
 from multiscope.remote.server import reset
 from multiscope.remote.writers.text import TextWriter
+from multiscope.remote.writers.scalar import ScalarWriter
+
 
 flags.DEFINE_bool(
     "multiscope_strict_mode",
