@@ -10,7 +10,15 @@
     <script src="res/wasm_exec.js"></script>
     <script src="res/wasm.js"></script>
     <script>
-    loadAndRunGoWasm("{{.wasmURL}}");
+var globalWASMBuffer;
+
+async function loadWASM(wasmURL) {
+  globalWASMBuffer = pako.ungzip(await (await fetch(wasmURL)).arrayBuffer());
+}
+
+loadWASM("{{.wasmURL}}").then(function () {
+  runWASM(globalWASMBuffer);
+});
     </script>
   </head>
   <body>
