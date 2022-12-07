@@ -14,6 +14,12 @@ DISABLE_MULTISCOPE = flags.DEFINE_bool(
 _disabled = False
 
 
+def enable():
+    """If multiscope is disabled, this re-enables it."""
+    global _disabled
+    _disabled = False
+
+
 def disable():
     """All multiscope calls become no-ops."""
     global _disabled

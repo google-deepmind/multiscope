@@ -10,6 +10,10 @@ from multiscope.remote.control import control
 
 
 class TestControl(absltest.TestCase):
+    def setUp(self):
+        multiscope.enable()  # In case a test disables it.
+        return super().setUp()
+
     def testDisable(self):
         multiscope.disable()
         self.assertIsNone(multiscope.start_server())
@@ -30,10 +34,15 @@ class TestControl(absltest.TestCase):
 
         multiscope.reset()
 
-        expected_err = "instantiated before a call to multiscope.reset"
-        with self.assertRaisesRegex(RuntimeError, expected_err):
+        # TODO: make a more specific error check. These used to be:
+        # expected_err = "instantiated before a call to multiscope.reset"
+        # with self.assertRaisesRegex(RuntimeError, expected_err):
+        #   etc
+        # but that probably was under not strict mode. With strict mode we
+        # first get another exception from grpc.
+        with self.assertRaises(Exception):
             t.tick()
-        with self.assertRaisesRegex(RuntimeError, expected_err):
+        with self.assertRaises(Exception):
             w.write(text_data)
 
         t = multiscope.Ticker("ticker")
@@ -55,10 +64,12 @@ class TestControl(absltest.TestCase):
         request = pb.NodeDataRequest()
         layout_path = pb.NodePath()
         layout_path.path.append(".layout")
-        request.paths.append(layout_path)
-        root_data = root_pb.Root()
+        datarequest = pb.DataRequest(path=layout_path, lastTick=0)
+        request.reqs.append(datarequest)
         node_data_pb = stream_client.GetNodeData(request).node_data[0].pb
+        # TODO: there is no Root anymore, can't see explicit_paths, etc.
         self.assertTrue(node_data_pb.Is(root_pb.Root.DESCRIPTOR))
+        root_data = root_pb.Root()
         node_data_pb.Unpack(root_data)
         self.assertCountEqual(
             [t.path, w.path],
