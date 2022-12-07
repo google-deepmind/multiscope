@@ -11,6 +11,7 @@ import subprocess
 
 from absl import flags
 
+from multiscope.protos import tree_pb2 as pb
 from multiscope.remote import active_paths
 from multiscope.remote import control
 from multiscope.remote import stream_client
@@ -132,3 +133,10 @@ def get_dashboard_url(port: int) -> str:
     else:
         # TODO: implement.
         raise NotImplementedError("Figure the base out?")
+
+
+def reset():
+    """Resets the multiscope server state by removing all nodes."""
+    if control.disabled():
+        return
+    stream_client.ResetState(pb.ResetStateRequest())

@@ -1,5 +1,12 @@
 # Generates all the python proto files.
 
+PIPENV=`which pipenv`
+
+if [[ ! -x "$PIPENV" ]]; then
+  printf "\t\033[41mPlease install pipenv (https://pipenv.pypa.io/en/latest/install/).\033[0m"
+  exit 1
+fi
+
 # Step 1: Find the base directory (where this script is).
 BASE=$( dirname -- "$( readlink -f -- "$0"; )"; )
 cd "$BASE"

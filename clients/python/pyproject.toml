@@ -1,3 +1,14 @@
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta:__legacy__"
+
+[tool.black]
+extend-exclude = '''
+# Exclude proto generated files, exclude the original source.
+# See https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#configuration-format
+# for how to configure this.
+(
+  .*_pb2.py | .*_pb2_grpc.py
+  | ^/orig_source
+)
+'''

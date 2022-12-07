@@ -16,6 +16,13 @@ if [[ ! -x "$REVIVE" ]]; then
   exit 1
 fi
 
+PIPENV=`which pipenv`
+
+if [[ ! -x "$PIPENV" ]]; then
+  printf "\t\033[41mPlease install pipenv (https://pipenv.pypa.io/en/latest/install/).\033[0m"
+  exit 1
+fi
+
 
 FOLDERS=`find . -type f -name "*.go" -exec dirname "{}" \; | awk -F "/" '{print $2}' | awk 'NF' | sort -u`
 
@@ -62,6 +69,30 @@ do
     PASS=false
   fi
 done
+
+# Check the python client for formatting, and in the future for tests.
+# First, we need to enter the correct pipenv shell.
+
+# Step 1: Find the base directory (where this script is).
+BASE=$( dirname -- "$( readlink -f -- "$0"; )"; )
+cd "$BASE"
+
+# Step 2: Fetch the python virtual environment used for development.
+cd clients/python
+source $(pipenv --venv)/bin/activate
+
+# Step 3: use the formatter to check all files are correctly formatted.
+black . --check
+
+if [[ $? == 0 ]]; then
+  printf "\033[32mPython black formatter.\033[0m \033[0;30m\033[42mPASS\033[0m\n"
+else
+  printf "\033[31mPython black formatter.\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+  PASS=false
+fi
+
+# Step Final: cleanup.
+deactivate
 
 if ! $PASS; then
   printf "\033[0;30m\033[41mPRE-COMMIT HOOK FAILED\033[0m\n"
