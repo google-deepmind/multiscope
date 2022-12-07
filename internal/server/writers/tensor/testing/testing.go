@@ -16,6 +16,7 @@ import (
 	scopetesting "multiscope/internal/testing"
 	plotpb "multiscope/protos/plot_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
+	treepb "multiscope/protos/tree_go_proto"
 
 	"github.com/google/go-cmp/cmp"
 	"go.uber.org/multierr"
@@ -400,7 +401,7 @@ func checkRenderedImage(clt pbgrpc.TreeClient, path []string, nodeName string, t
 	return nil
 }
 
-func extractScalarPlotData(data *pbgrpc.NodeData) (*plotpb.Plot, map[string]float32, error) {
+func extractScalarPlotData(data *treepb.NodeData) (*plotpb.Plot, map[string]float32, error) {
 	plt := plotpb.ScalarsPlot{}
 	if err := client.ToProto(data, &plt); err != nil {
 		return nil, nil, err
