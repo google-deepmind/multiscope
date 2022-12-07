@@ -163,7 +163,7 @@ class Ticker(group.ParentNode):
             raise ValueError("Unexpected `action` of `TickerAction`.")
 
         for fn in self._event_listeners:
-              fn(action)
+            fn(action)
 
     def _process_control_cmd(self, command: ticker_pb2.TickerAction.Command) -> None:
         if command == ticker_pb2.TickerAction.Command.NONE:

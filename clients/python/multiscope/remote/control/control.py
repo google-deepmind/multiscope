@@ -3,8 +3,10 @@
 from absl import flags
 
 DISABLE_MULTISCOPE = flags.DEFINE_bool(
-    "multiscope_disable", False,
-    "Globally disable multiscope and cause its calls to become no-ops.")
+    "multiscope_disable",
+    False,
+    "Globally disable multiscope and cause its calls to become no-ops.",
+)
 
 
 # Module local variable that controls whether all calls to multiscope are
@@ -13,11 +15,11 @@ _disabled = False
 
 
 def disable():
-  """All multiscope calls become no-ops."""
-  global _disabled
-  _disabled = True
+    """All multiscope calls become no-ops."""
+    global _disabled
+    _disabled = True
 
 
 def disabled():
-  """Returns true if multiscope is disabled."""
-  return _disabled or DISABLE_MULTISCOPE.value
+    """Returns true if multiscope is disabled."""
+    return _disabled or DISABLE_MULTISCOPE.value

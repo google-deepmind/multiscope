@@ -74,6 +74,7 @@ class TickerTest(parameterized.TestCase):
         ticker.tick()
         mock_write.assert_called()
 
+
 class TimerTest(parameterized.TestCase):
     def testDifference(self):
         limit = 0.1
