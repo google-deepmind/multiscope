@@ -8,14 +8,14 @@ from setuptools import setup
 
 
 setup(
-    name='multiscope-client',
-    version='0.1.0',
-    description='A Python client to Multiscope.',
-    author='DeepMind',
-    license='BSD-3-Clause License',
-    keywords='analysis visualization python reinforcement-learning machine learning',
-    packages=find_packages(exclude=['examples']),
-    python_requires='>=3.7, <4',
+    name="multiscope-client",
+    version="0.1.0",
+    description="A Python client to Multiscope.",
+    author="DeepMind",
+    license="BSD-3-Clause License",
+    keywords="analysis visualization python reinforcement-learning machine learning",
+    packages=find_packages(exclude=["examples"]),
+    python_requires=">=3.7, <4",
     install_requires=[
         # TODO(dsz): fill out later.
     ],
