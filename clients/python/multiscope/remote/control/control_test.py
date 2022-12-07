@@ -14,20 +14,17 @@ class TestControl(absltest.TestCase):
         multiscope.disable()
         self.assertIsNone(multiscope.start_server())
         # Strict mode is enabled in BUILD rule for all tests.
-        # TODO(b/253546431): re-enable once ScalarWriter exists.
-        # s = multiscope.ScalarWriter('scalar')
+        s = multiscope.ScalarWriter("scalar")
         t = multiscope.TextWriter("text")
         t.write("some text")
         if t.should_write:
             t.write("some more text")
-        # TODO(b/253546431): re-enable once ScalarWriter exists.
-        # s.write({})
+        s.write({})
         control._disabled = False
 
     def testReset(self):
         text_data = "foo"
         multiscope.start_server()
-        # TODO(b/253546434): fails on ticker not existing.
         t = multiscope.Ticker("ticker")
         w = multiscope.TextWriter("text", t)
 
