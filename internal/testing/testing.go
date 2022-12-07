@@ -3,6 +3,7 @@ package testing
 
 import (
 	"fmt"
+	"math"
 	pb "multiscope/protos/tree_go_proto"
 
 	"github.com/google/go-cmp/cmp"
@@ -26,4 +27,11 @@ func CheckNodePaths(nodes []*pb.Node) error {
 		}
 	}
 	return err
+}
+
+// Tolerance returns a cmp options to compare vectors approximately equal.
+func Tolerance(epsilon float32) cmp.Option {
+	return cmp.Comparer(func(x, y float32) bool {
+		return float32(math.Abs(float64(x-y))) < epsilon
+	})
 }

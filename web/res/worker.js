@@ -1,17 +1,16 @@
 "use strict";
 
 importScripts('/res/wasm_exec.js');
+importScripts('/res/wasm.js');
 
-onmessage = function(e) {
-  console.warn('message received before the worker setup a handler:', e);
+onmessage = function(ev) {
+  const data = ev.data;
+  if (data.type != "wasmbuffer") {
+    console.warn('message received before the worker has been setup:', e);
+    return;
+  }
+  runWASM(data.buffer).then(function () {
+    runWorker("{{.funcName}}");
+  });
 }
-
-const goWorker = new Go();
-WebAssembly.instantiateStreaming(
-  fetch("{{.wasmURL}}"),
-  goWorker.importObject
-).then((result) => {
-  goWorker.run(result.instance);
-  runWorker("{{.funcName}}");
-});
 

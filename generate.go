@@ -5,4 +5,4 @@ package multiscope
 
 // Generate web-assembly client.
 
-//go:generate zsh -c "GOOS=js GOARCH=wasm go build -o web/res/multiscope.wasm wasm/mains/multiscope/main.go"
+//go:generate zsh -c "GOOS=js GOARCH=wasm go build -o web/res/multiscope.wasm wasm/mains/multiscope/main.go && gzip -9 -f web/res/multiscope.wasm"

@@ -34,6 +34,15 @@ func run(this js.Value, args []js.Value) any {
 	return nil
 }
 
+func sendWASMToWorker(wkr *Worker) error {
+	wasmBuffer := js.Global().Get("globalWASMBuffer")
+	wkr.val.Call("postMessage", map[string]any{
+		"type":   "wasmbuffer",
+		"buffer": wasmBuffer,
+	})
+	return nil
+}
+
 // Go starts a function in a web worker.
 func Go(f MainFunc) (wkr *Worker, err error) {
 	defer func() {
@@ -44,6 +53,9 @@ func Go(f MainFunc) (wkr *Worker, err error) {
 	workers := js.Global().Get("Worker")
 	val := workers.New("worker/" + f.name())
 	wkr = newWorker("main", val)
+	if err := sendWASMToWorker(wkr); err != nil {
+		return nil, fmt.Errorf("cannot send WASM buffer to worker: %v", err)
+	}
 	m := &pb.WorkerAck{}
 	if _, err := wkr.Recv(m); err != nil {
 		return nil, fmt.Errorf("cannot receive acknowledgement from worker: %v", err)

@@ -35,17 +35,19 @@ func buildWant() *plotpb.ScalarsPlot {
 	return &plotpb.ScalarsPlot{Plot: &plotpb.Plot{Plotters: []*plotpb.Plotter{
 		{
 			Legend: "a",
-			Serie: &plotpb.Serie{Points: []*plotpb.Point{
-				{X: 1, Y: 3},
-				{X: 2, Y: 5},
-			}},
+			Drawer: &plotpb.Plotter_LineDrawer{LineDrawer: &plotpb.LineDrawer{
+				Points: []*plotpb.LineDrawer_Point{
+					{X: 1, Y: 3},
+					{X: 2, Y: 5},
+				}}},
 		},
 		{
 			Legend: "b",
-			Serie: &plotpb.Serie{Points: []*plotpb.Point{
-				{X: 1, Y: 4},
-				{X: 2, Y: 6},
-			}},
+			Drawer: &plotpb.Plotter_LineDrawer{LineDrawer: &plotpb.LineDrawer{
+				Points: []*plotpb.LineDrawer_Point{
+					{X: 1, Y: 4},
+					{X: 2, Y: 6},
+				}}},
 		},
 	}}}
 }
