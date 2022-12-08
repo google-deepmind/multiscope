@@ -14,8 +14,8 @@ DISABLE_MULTISCOPE = flags.DEFINE_bool(
 _disabled = False
 
 
-def enable():
-    """If multiscope is disabled, this re-enables it."""
+def undo_disable():
+    """If the `multiscope_disable` flag is not set, this re-enables multiscope."""
     global _disabled
     _disabled = False
 

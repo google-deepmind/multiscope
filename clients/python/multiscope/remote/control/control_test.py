@@ -51,7 +51,7 @@ def _list_subtree(root):
 
 class TestControl(absltest.TestCase):
     def setUp(self):
-        multiscope.enable()  # In case a test disables it.
+        multiscope.undo_disable()  # In case a test disables it.
         return super().setUp()
 
     def testDisable(self):
