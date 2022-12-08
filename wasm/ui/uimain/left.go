@@ -19,7 +19,7 @@ type LeftBar struct {
 const settingLeftBarVisible = "leftbar_visible"
 
 func newLeftBar(ui *UI) (*LeftBar, error) {
-	const leftClass = "container__left"
+	const leftClass = "container_left"
 	elements := ui.Owner().Doc().GetElementsByClassName(leftClass)
 	if len(elements) != 1 {
 		return nil, errors.Errorf("wrong number of elements of class %q: got %d but want 1", leftClass, len(elements))

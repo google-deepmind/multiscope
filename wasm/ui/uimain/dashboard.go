@@ -27,7 +27,7 @@ type Dashboard struct {
 }
 
 func newDashboard(main *UI, rootInfo *rootpb.RootInfo) (*Dashboard, error) {
-	const dashboardClass = "container__middle"
+	const dashboardClass = "container_middle"
 	elements := main.Owner().Doc().GetElementsByClassName(dashboardClass)
 	if len(elements) != 1 {
 		return nil, errors.Errorf("wrong number of elements of class %q: got %d but want 1", dashboardClass, len(elements))
