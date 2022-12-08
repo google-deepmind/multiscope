@@ -109,7 +109,7 @@ def register_callback(
 
 
 def register_ticker_callback(
-    cb: Callable[[Tuple[_Path, ticker_pb2.TickerAction]], None],
+    cb: Callable[[_Path, ticker_pb2.TickerAction], None],
     path: Optional[_Path] = None,
 ):
     """Calls the provided cb with every mouse event at the provided path in a separate thread."""
