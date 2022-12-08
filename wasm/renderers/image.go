@@ -38,8 +38,11 @@ func (rdr *imageRenderer) Render(data *treepb.NodeData) (*treepb.NodeData, error
 	height, ratioHeight := computeRatio(imageBitmap.Height(), rdr.offscreen.Height())
 	imageRatio := math.Min(ratioWidth, ratioHeight)
 
+	finalWidth := int(width * imageRatio)
+	finalHeight := int(height * imageRatio)
+
 	ctx := rdr.offscreen.GetContext2d()
 	ctx.Value.Set("imageSmoothingEnabled", false)
-	ctx.Value.Call("drawImage", imageBitmap.Value, 0, 0, int(width*imageRatio), int(height*imageRatio))
+	ctx.Value.Call("drawImage", imageBitmap.Value, 0, 0, finalWidth, finalHeight)
 	return nil, nil
 }

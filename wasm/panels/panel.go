@@ -5,6 +5,7 @@ import (
 	"fmt"
 	treepb "multiscope/protos/tree_go_proto"
 	"multiscope/wasm/ui"
+	"syscall/js"
 
 	"honnef.co/go/js/dom/v2"
 )
@@ -36,7 +37,7 @@ type (
 )
 
 // NewPanel returns a new container panel to show a displayer on the UI.
-func NewPanel(title string, desc ui.Descriptor, dsp Displayer) (ui.Panel, error) {
+func NewPanel(title string, desc ui.Descriptor, dsp Displayer) (*Panel, error) {
 	dbd := desc.Dashboard()
 	pnl := &Panel{
 		desc: desc,
@@ -98,6 +99,24 @@ func (pnl *Panel) processCloseEvent(ev dom.Event) {
 	if err := pnl.Desc().Dashboard().ClosePanel(pnl); err != nil {
 		pnl.desc.Dashboard().UI().DisplayErr(err)
 	}
+}
+
+// OnResize calls a function everytime an element is resized.
+func (pnl *Panel) OnResize(f func(*Panel)) {
+	listener := func(this js.Value, args []js.Value) any {
+		f(pnl)
+		return nil
+	}
+	observer := js.Global().Get("ResizeObserver").New(js.FuncOf(listener))
+	observer.Call("observe", pnl.root.Underlying())
+}
+
+func (pnl *Panel) width() int {
+	return pnl.root.Get("offsetWidth").Int()
+}
+
+func (pnl *Panel) height() int {
+	return pnl.root.Get("offsetHeight").Int()
 }
 
 // Root returns the root node of a panel.

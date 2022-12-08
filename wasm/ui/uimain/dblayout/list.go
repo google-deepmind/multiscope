@@ -84,7 +84,7 @@ func (lyt *list) format(div *dom.HTMLDivElement) {
 }
 
 func (lyt *list) Append(pnl ui.Panel) {
-	// lyt.format(pnl.Root())
+	lyt.format(pnl.Root())
 	lyt.Root().AppendChild(pnl.Root())
 	path := pnl.Desc().Path()
 	if path != nil {

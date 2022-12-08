@@ -37,7 +37,7 @@
 
 /* Class for a panel */
 .panel {
-  border: 0px solid red;
+  border: 1px solid red;
   overflow:auto;
   width: fit-content;
   height: fit-content;
