@@ -11,7 +11,7 @@ from multiscope.protos import tree_pb2 as pb
 from multiscope.remote import stream_client
 
 path_to_callables: Mapping[
-    Tuple[str], List[Callable[[bool], None]]
+    Tuple[str, ...], List[Callable[[bool], None]]
 ] = collections.defaultdict(list)
 main_lock = threading.Lock()
 
@@ -44,7 +44,7 @@ def run_updates():
         last_active = current_active
 
 
-def register_callback(path: Tuple[str], callback: Callable[[bool], None]):
+def register_callback(path: Tuple[str, ...], callback: Callable[[bool], None]):
     """Register a callback for a given path."""
     with main_lock:
         path_to_callables[path].append(callback)

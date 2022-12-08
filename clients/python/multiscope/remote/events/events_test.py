@@ -31,8 +31,7 @@ class EventsTest(absltest.TestCase):
         queue = events.subscribe_ticker_events(path)
 
         # Create an event
-        data = ticker_pb2.TickerAction()
-        data.command = ticker_pb2.TickerAction.Command.RUN
+        data = ticker_pb2.TickerAction(command=ticker_pb2.TickerAction.Command.RUN)
         event = _to_event_pb(path, data)
         req = pb.SendEventsRequest()
         req.events.append(event)

@@ -18,7 +18,6 @@ from typing import (
     Generic,
     Optional,
     Sequence,
-    Text,
     Tuple,
     Type,
     TypeVar,
@@ -34,7 +33,7 @@ from multiscope.remote import stream_client
 # _keyboard_filter = userinputs_pb2.KeyboardEvent.DESCRIPTOR.full_name
 _ticker_filter = ticker_pb2.TickerAction.DESCRIPTOR.full_name
 
-_Path = Sequence[Text]
+_Path = Sequence[str]
 _EventPayload = Tuple[_Path, bytes]
 # _MousePayload = Tuple[_Path, userinputs_pb2.MouseEvent]
 # _KeyboardPayload = Tuple[_Path, userinputs_pb2.KeyboardEvent]
@@ -53,8 +52,8 @@ class EventSubscription(Generic[T], Generator[T, None, None]):
 
     def __init__(
         self,
-        path: Sequence[Text],
-        type_url_filter: Text,
+        path: Sequence[str],
+        type_url_filter: str,
         process: Callable[[_EventPayload], T],
     ):
         self._process = process
@@ -82,7 +81,7 @@ class EventSubscription(Generic[T], Generator[T, None, None]):
         raise StopIteration
 
 
-def subscribe_ticker_events(path: Sequence[Text]) -> EventSubscription[_TickerPayload]:
+def subscribe_ticker_events(path: Sequence[str]) -> EventSubscription[_TickerPayload]:
     """Returns a blocking generator of mouse events for the given path."""
 
     def process(payload: _EventPayload) -> _TickerPayload:

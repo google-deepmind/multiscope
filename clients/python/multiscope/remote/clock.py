@@ -1,5 +1,5 @@
 """A Multiscope clock/ticker for synchronizing writes."""
-from typing import Any, Callable, List, Optional, Sequence, Text
+from typing import Any, Callable, List, Optional, Sequence
 
 import datetime
 import time
@@ -45,7 +45,7 @@ class Ticker(group.ParentNode):
     """
 
     @control.init
-    def __init__(self, name: Text, parent: Optional[group.ParentNode] = None):
+    def __init__(self, name: str, parent: Optional[group.ParentNode] = None):
         self._tick_num: int = 0
         # listeners are called on each tick.
         self._listeners: Sequence[Callable[[], None]] = []
@@ -88,8 +88,7 @@ class Ticker(group.ParentNode):
 
     def _write_data(self) -> None:
         """Writes `TickerData`."""
-        data = ticker_pb2.TickerData()
-        data.tick = self._tick_num
+        data = ticker_pb2.TickerData(tick=self._tick_num)
 
         # Timer info:
         total_ms = int(self._total_timer.average.total_seconds() * 1e3)

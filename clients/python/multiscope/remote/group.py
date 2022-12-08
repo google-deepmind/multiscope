@@ -1,7 +1,7 @@
 """A Multiscope Group is directory of Multiscope nodes in the tree."""
 
 import abc
-from typing import Optional, Text, Tuple
+from typing import Optional, Tuple
 
 import six
 
@@ -24,9 +24,7 @@ def join_path(parent: ParentNode, name: str) -> Tuple[str, ...]:
 
 
 def join_path_pb(parent: ParentNode, name: str) -> tree_pb2.NodePath:
-    node_path = tree_pb2.NodePath()
-    node_path.path.extend(join_path(parent, name))
-    return node_path
+    return tree_pb2.NodePath(path=join_path(parent, name))
 
 
 class Group(ParentNode):

@@ -62,7 +62,7 @@ def _normalize_tensor_dtype(
     return tensor, tensor_pb2.DataType.DT_FLOAT32
 
 
-def _add_tensor_shape(tensor: tensor_pb2.Tensor, shape: Tuple[int]) -> None:
+def _add_tensor_shape(tensor: tensor_pb2.Tensor, shape: Tuple[int, ...]) -> None:
     """Modifies the tensor in place to add the shape."""
     for axis_len in shape:
         tensor.shape.dim.append(tensor_pb2.Shape.Dim(size=axis_len))
