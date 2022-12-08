@@ -9,6 +9,46 @@ from multiscope.remote import stream_client
 from multiscope.remote.control import control
 
 
+def _list_all_nodes():
+    """Lists all nodes (including the root) in the tree. Not optimized."""
+    req = pb.NodeStructRequest()
+    req.paths.append(pb.NodePath())
+    nodes = stream_client.GetNodeStruct(req).nodes
+    if nodes:
+        # This needs to be the root node, that's what we requested.
+        if len(nodes) != 1 or len(nodes[0].path.path) != 0:
+            raise RuntimeError(
+                f"We requested the node structure from the root node, but the root "
+                f"of the returned tree has {len(nodes)} elements and the first node "
+                f"has a non-empty path: {nodes[0].path.path}."
+            )
+    else:
+        return []
+
+    all_nodes = [nodes[0]]
+    all_nodes.extend(_list_subtree(nodes[0]))
+    return all_nodes
+
+
+def _list_subtree(root):
+    """Returns all nodes in the subtree below the root, not including root."""
+    if not root.has_children:
+        return []
+
+    if len(root.children) == 0:
+        # Request them.
+        req = pb.NodeStructRequest()
+        req.paths.append(root.path)
+        nodes = stream_client.GetNodeStruct(req).nodes
+        assert nodes[0].path == root.path
+        root = nodes[0]
+
+    all_nodes = [n for n in root.children]
+    for n in root.children:
+        all_nodes.extend(_list_subtree(n))
+    return all_nodes
+
+
 class TestControl(absltest.TestCase):
     def setUp(self):
         multiscope.enable()  # In case a test disables it.
@@ -60,29 +100,20 @@ class TestControl(absltest.TestCase):
             ),
         )
 
-        # Make sure there are only 2 nodes present.
-        request = pb.NodeDataRequest()
-        layout_path = pb.NodePath()
-        layout_path.path.append(".layout")
-        datarequest = pb.DataRequest(path=layout_path, lastTick=0)
-        request.reqs.append(datarequest)
-        node_data_pb = stream_client.GetNodeData(request).node_data[0].pb
-        # TODO: there is no Root anymore, can't see explicit_paths, etc.
-        self.assertTrue(node_data_pb.Is(root_pb.Root.DESCRIPTOR))
-        root_data = root_pb.Root()
-        node_data_pb.Unpack(root_data)
-        self.assertCountEqual(
-            [t.path, w.path],
-            [tuple(p.path) for p in root_data.explicit_paths],
-            "layout did not contain expected nodes",
-        )
+        # Make sure there are only 2 nodes + the root present on the server.
+        all_nodes = _list_all_nodes()
+        self.assertLen(all_nodes, len(["root", t, w]))
 
         # We can read the data written.
-        request = pb.NodeDataRequest()
-        writer_path = pb.NodePath()
-        writer_path.path.extend(w.path)
-        request.paths.append(writer_path)
-        got_text = stream_client.GetNodeData(request).node_data[0].raw.decode("utf-8")
+        node_data_request = pb.NodeDataRequest()
+        data_req = pb.DataRequest(lastTick=0)
+        data_req.path.path.extend(w.path)
+        node_data_request.reqs.append(data_req)
+        got_text = (
+            stream_client.GetNodeData(node_data_request)
+            .node_data[0]
+            .raw.decode("utf-8")
+        )
         self.assertEqual(got_text, text_data)
 
 
