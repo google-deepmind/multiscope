@@ -41,6 +41,12 @@ def start_server(connection_timeout_secs: int = 15) -> Optional[int]:
     started once. No exceptions will be thrown even if we fail to start unless the
     `multiscope_strict_mode` flag is enabled.
 
+    THE ARGUMENT LIST BELOW IS OUT OF DATE.
+
+    # TODO: update the code below to support the original arguments if possible,
+    # and if keeping the `connection_timeout_secs` argument, then put it in
+    # the args list.
+
     Args:
       port: requested port for the multiscope web server
       experiment_path: unique identifier used to persist per-experiment settings

@@ -41,8 +41,6 @@ message Shape {
   // The first entry in "dim" is the outermost dimension used to layout the
   // values, the last entry is the innermost dimension.  This matches the
   // in-memory layout of RowMajor Eigen tensors.
-  //
-  // If "dim.size()" > 0, "unknown_rank" must be false.
   repeated Dim dim = 2;
 };
 
