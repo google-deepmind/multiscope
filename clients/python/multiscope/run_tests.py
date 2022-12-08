@@ -8,7 +8,7 @@ def main(argv):
     if not tests:
         raise RuntimeError("Could not find any tests!")
 
-    testRunner = unittest.runner.TextTestRunner()
+    testRunner = unittest.runner.TextTestRunner(verbosity=2)
     testRunner.run(tests)
 
 
