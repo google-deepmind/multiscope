@@ -42,7 +42,7 @@ class TensorWriter(base.Writer):
 
     @control.method
     def reset(self):
-        req = tensor_pb2.ResetTensorWriterRequest()
+        req = tensor_pb2.ResetWriterRequest()
         req.writer.path.path.extend(self.path)
         self._client.ResetWriter(req)
 
