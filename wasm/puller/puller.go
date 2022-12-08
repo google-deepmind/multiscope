@@ -156,9 +156,14 @@ func (p *Puller) processPullQuery(pull *uipb.Pull) error {
 	return p.messager.Send(displayData, nil)
 }
 
-func (p *Puller) processTheme(stl *uipb.StyleChange) error {
-	p.style.Set(stl.Theme, stl.FontFamily, font.Length(stl.FontSize))
-	return nil
+func (p *Puller) processInternalUIEvent(uiEvent *uipb.UIEvent) error {
+	switch event := uiEvent.Event.(type) {
+	case *uipb.UIEvent_Style:
+		stl := event.Style
+		p.style.Set(stl.Theme, stl.FontFamily, font.Length(stl.FontSize))
+		return nil
+	}
+	return errors.Errorf("internal UI event of type %T not supported in puller worker", uiEvent.Event)
 }
 
 // Pull data from the server forever.
@@ -172,8 +177,8 @@ func (p *Puller) Pull() {
 			err = p.processUnregisterPanel(query.UnregisterPanel, q.aux)
 		case *uipb.ToPuller_Pull:
 			err = p.processPullQuery(query.Pull)
-		case *uipb.ToPuller_Style:
-			err = p.processTheme(query.Style)
+		case *uipb.ToPuller_Event:
+			err = p.processInternalUIEvent(query.Event)
 		default:
 			err = errors.Errorf("query of type %T not supported in puller worker", q.pb.Query)
 		}

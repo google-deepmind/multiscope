@@ -42,7 +42,7 @@ type UI struct {
 }
 
 // NewUI returns a new user interface mananing the main page.
-func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
+func NewUI(pullerWorker *worker.Worker, c *uipb.Connect) *UI {
 	gui := &UI{
 		addr:   c,
 		window: dom.GetWindow(),
@@ -66,7 +66,7 @@ func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 	})
 
 	gui.treeClient = treepb.NewTreeClient(conn)
-	gui.puller = newPuller(gui, puller)
+	gui.puller = newPuller(gui, pullerWorker)
 	if gui.layout, err = newLayout(gui, rootInfo); err != nil {
 		gui.DisplayErr(err)
 		return gui
@@ -75,7 +75,20 @@ func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 		gui.DisplayErr(err)
 		return gui
 	}
+	gui.style.OnChange(gui.onStyleChange)
 	return gui
+}
+
+func (gui *UI) onStyleChange(s *style.Style) {
+	gui.puller.toRenderers(&uipb.UIEvent{
+		Event: &uipb.UIEvent_Style{
+			Style: &uipb.StyleChange{
+				Theme:      s.Theme().Name,
+				FontSize:   float64(s.FontSize()),
+				FontFamily: s.FontFamily(),
+			},
+		},
+	})
 }
 
 func fetchRootInfo(conn grpc.ClientConnInterface) (*rootpb.RootInfo, error) {
