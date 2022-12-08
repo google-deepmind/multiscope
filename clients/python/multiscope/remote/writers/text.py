@@ -29,6 +29,8 @@ class TextWriter(base.Writer):
     def write(self, data: str):
         request = text_pb2.WriteRequest(
             writer=self.writer,
-            text=data.encode("utf-8"),
+            # type-error suggest that we should pass `str` not `bytes` here,
+            # ignoring for now.
+            text=data.encode("utf-8"),  # pytype: disable=wrong-arg-types
         )
         self._client.Write(request)

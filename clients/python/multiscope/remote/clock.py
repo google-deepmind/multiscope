@@ -1,5 +1,5 @@
 """A Multiscope clock/ticker for synchronizing writes."""
-from typing import Any, Callable, List, Optional, Sequence
+from typing import Any, Callable, List, Optional
 
 import datetime
 import time
@@ -48,7 +48,7 @@ class Ticker(group.ParentNode):
     def __init__(self, name: str, parent: Optional[group.ParentNode] = None):
         self._tick_num: int = 0
         # listeners are called on each tick.
-        self._listeners: Sequence[Callable[[], None]] = []
+        self._listeners: List[Callable[[], None]] = []
 
         # Use timers to ensure the correct period and collect stats.
         self._total_timer = Timer(TIMER_AVERAGE_STEPSIZE)
@@ -119,7 +119,7 @@ class Ticker(group.ParentNode):
         since_last_tick = self._experiment_timer.sample()
 
         if since_last_tick < self._period:
-            time.sleep((self._period - since_last_tick).total_seconds)
+            time.sleep((self._period - since_last_tick).total_seconds())
 
         with self._pause_lock:
             should_pause = self._pause_next_step
@@ -143,7 +143,7 @@ class Ticker(group.ParentNode):
         """Returns the current tick of the clock."""
         return self._tick_num
 
-    def _register_event_listener(self, fn: Callable[[], None]):
+    def _register_event_listener(self, fn: Callable[[ticker_pb2.TickerAction], None]):
         """Registers `fn` to be called everytime an event is received."""
         self._event_listeners.append(fn)
 
@@ -225,7 +225,7 @@ class Timer:
     """Measures time between samples. Can provide an EMA average of it."""
 
     def __init__(self, ema_sample_weight: float):
-        self._last_sample: Optional[timeit.Timer] = None
+        self._last_sample: Optional[float] = None
         self._ema_sample_weight = ema_sample_weight
         self._average: float = 0.0  # TODO: there are smarter ways to set this.
 
