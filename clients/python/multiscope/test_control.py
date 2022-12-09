@@ -3,7 +3,7 @@
 # How to use:
 #
 # If you have a slow test, add the
-# @absltest.skipIf(not test_control.only_fast, "Only running fast tests.")
+# @absltest.skipIf(test_control.only_fast, "Only running fast tests.")
 # decorator on it. See `multiscope/remote/server_test.py` for an example.
 #
 # When running a test suite, if you only want to run fast tests, change this
