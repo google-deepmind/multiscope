@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"multiscope/internal/httpgrpc"
+	"multiscope/internal/server/httphooks"
 	"multiscope/internal/server/treeservice"
 	"multiscope/internal/server/wasmurl"
 	"multiscope/internal/server/worker"
@@ -17,9 +18,6 @@ import (
 )
 
 const logQuery = false
-
-// Custom is a function to customize the http server.
-var Custom func(*chi.Mux) error
 
 func wErrf(w http.ResponseWriter, format string, a ...any) {
 	fmt.Println("error:", fmt.Sprintf(format, a...))
@@ -55,10 +53,8 @@ func RunHTTP(srv *treeservice.TreeServer, wg *sync.WaitGroup, addr string) error
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "multiscope", 301)
 	})
-	if Custom != nil {
-		if err := Custom(r); err != nil {
-			return err
-		}
+	if err := httphooks.RunAll(r); err != nil {
+		return err
 	}
 	wg.Add(1)
 	go func() {
