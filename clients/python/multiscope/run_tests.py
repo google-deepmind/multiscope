@@ -1,4 +1,6 @@
 import unittest
+import sys
+
 from absl import app
 
 from multiscope import test_control
@@ -19,7 +21,12 @@ def main(argv):
         raise RuntimeError("Could not find any tests!")
 
     testRunner = unittest.runner.TextTestRunner(verbosity=2)
-    testRunner.run(tests)
+    results = testRunner.run(tests)
+
+    if results.wasSuccessful():
+        return sys.exit(0)
+    else:
+        return sys.exit(1)
 
 
 if __name__ == "__main__":

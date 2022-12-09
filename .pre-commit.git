@@ -70,24 +70,34 @@ do
   fi
 done
 
-# Check the python client for formatting, and in the future for tests.
-# First, we need to enter the correct pipenv shell.
+# Check the python client for formatting and run the fast tests.
+# This all needs to happen inside the pipenv shell (managed environment).
 
-# Step 1: Find the base directory (where this script is).
+# Step: Find the base directory (where this script is).
 BASE=$( dirname -- "$( readlink -f -- "$0"; )"; )
 cd "$BASE"
 
-# Step 2: Fetch the python virtual environment used for development.
+# Step: Fetch the python virtual environment used for development.
 cd clients/python
 source $(pipenv --venv)/bin/activate
 
-# Step 3: use the formatter to check all files are correctly formatted.
+# Step: use the formatter to check all files are correctly formatted.
 black . --check
 
 if [[ $? == 0 ]]; then
   printf "\033[32mPython black formatter.\033[0m \033[0;30m\033[42mPASS\033[0m\n"
 else
   printf "\033[31mPython black formatter.\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+  PASS=false
+fi
+
+# Step: run the tests.
+python multiscope/run_tests.py --only_fast_tests=True
+
+if [[ $? == 0 ]]; then
+  printf "\033[32mPython tests.\033[0m \033[0;30m\033[42mPASS\033[0m\n"
+else
+  printf "\033[31mPython tests.\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
   PASS=false
 fi
 
