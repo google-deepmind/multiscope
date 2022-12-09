@@ -98,12 +98,9 @@ def start_server_unsafe(connection_timeout_secs) -> Tuple[int, str]:
     server_process = subprocess.Popen(
         [
             os.path.expanduser(_MULTISCOPE_BINARY_PATH.value),
-            "--http_port",
-            str(_HTTP_PORT.value),
-            "--grpc_port",
-            str(_GRPC_PORT.value),
-            "--local",
-            str(_LOCAL.value),
+            "--http_port=" + str(_HTTP_PORT.value),
+            "--grpc_port=" + str(_GRPC_PORT.value),
+            "--local=" + str(_LOCAL.value),
         ]
     )
 
@@ -112,11 +109,7 @@ def start_server_unsafe(connection_timeout_secs) -> Tuple[int, str]:
 
     atexit.register(close_server)
 
-    if _LOCAL.value:
-        grpc_url = f"localhost:{_GRPC_PORT.value}"
-    else:
-        # TODO: implement.
-        raise NotImplementedError("Figure out the grpc_url.")
+    grpc_url = f"localhost:{_GRPC_PORT.value}"
 
     logging.info("Connecting grp_url: %s", grpc_url)
     stream_client.InitializeStub(grpc_url)

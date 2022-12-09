@@ -22,10 +22,22 @@ def InitializeStub(url: Text) -> None:
     global _stub
     if _stub is not None:
         raise AssertionError("GRPC stub already initialized")
-    # TODO: Use authenticated channels.
+
     global channel
-    logging.warning("Using an unsecure gRPC channel!")
-    channel = grpc.insecure_channel(url)
+    creds = grpc.local_channel_credentials(grpc.LocalConnectionType.LOCAL_TCP)
+    channel = grpc.secure_channel(
+        url,
+        credentials=creds,
+        # Remove all grpc limits on max message size to support writing very
+        # large messages (eg the mujoco scene init message).
+        #
+        # This effectively limits the message to the default protobuf max message
+        # size. See also http://yaqs/5863428325507072.
+        options=[
+            ("grpc.max_send_message_length", -1),
+            ("grpc.max_receive_message_length", -1),
+        ],
+    )
     _stub = pb_grpc.TreeStub(channel)
 
 
