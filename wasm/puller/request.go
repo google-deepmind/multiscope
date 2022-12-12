@@ -4,17 +4,10 @@ import (
 	"fmt"
 	"multiscope/internal/server/core"
 	treepb "multiscope/protos/tree_go_proto"
-	uipb "multiscope/protos/ui_go_proto"
-	"multiscope/wasm/renderers"
 	"multiscope/wasm/ui"
 )
 
 type (
-	panelS struct {
-		pb  *uipb.Panel
-		rdr renderers.Renderer
-	}
-
 	pathPointers struct {
 		req    *treepb.DataRequest
 		panels map[ui.PanelID]*panelS

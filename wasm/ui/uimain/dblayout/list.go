@@ -6,10 +6,13 @@ import (
 	"multiscope/internal/server/core"
 	rootpb "multiscope/protos/root_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
+	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/ui"
 
 	"honnef.co/go/js/dom/v2"
 )
+
+const defaultRowHeight = 480
 
 type list struct {
 	dbd  ui.Dashboard
@@ -31,14 +34,15 @@ func (lyt *list) fixProto() {
 	if lyt.pb == nil {
 		lyt.pb = &rootpb.LayoutList{}
 	}
-	if lyt.pb.DefaultPanelSize == nil {
-		lyt.pb.DefaultPanelSize = &rootpb.LayoutList_Size{}
+	if lyt.pb.DefaultRowHeight == 0 {
+		lyt.pb.DefaultRowHeight = defaultRowHeight
 	}
-	if lyt.pb.DefaultPanelSize.Width == 0 {
-		lyt.pb.DefaultPanelSize.Width = defaultPanelWidth
-	}
-	if lyt.pb.DefaultPanelSize.Height == 0 {
-		lyt.pb.DefaultPanelSize.Height = defaultPanelHeight
+}
+
+func (lyt *list) PreferredSize() *uipb.ElementSize {
+	return &uipb.ElementSize{
+		Height: lyt.pb.DefaultRowHeight,
+		Width:  0,
 	}
 }
 
@@ -47,7 +51,7 @@ func (lyt *list) Load(gLayout *rootpb.Layout) error {
 	if layout == nil {
 		return nil
 	}
-	lyt.pb.DefaultPanelSize = layout.DefaultPanelSize
+	lyt.pb.DefaultRowHeight = layout.DefaultRowHeight
 	lyt.fixProto()
 
 	nodes, err := lyt.dbd.UI().TreeClient().GetNodeStruct(context.Background(), &treepb.NodeStructRequest{
@@ -77,10 +81,8 @@ func (lyt *list) store() {
 }
 
 func (lyt *list) format(div *dom.HTMLDivElement) {
-	height := fmt.Sprintf("%dpx", lyt.pb.DefaultPanelSize.Height)
+	height := fmt.Sprintf("%dpx", lyt.pb.DefaultRowHeight)
 	div.Style().SetProperty("height", height, "")
-	width := fmt.Sprintf("%dpx", lyt.pb.DefaultPanelSize.Width)
-	div.Style().SetProperty("width", width, "")
 }
 
 func (lyt *list) Append(pnl ui.Panel) {

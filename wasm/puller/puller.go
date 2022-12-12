@@ -36,7 +36,9 @@ type (
 		settings   settings.Settings
 		style      *style.Style
 		treeClient treepb.TreeClient
-		req        *request
+
+		reg *panelRegistry
+		req *request
 	}
 )
 
@@ -46,6 +48,7 @@ func New(messager *worker.Worker) *Puller {
 		queries:  make(chan queryS, 1),
 		messager: messager,
 		req:      newRequest(),
+		reg:      newPanelRegistry(),
 	}
 	if err := p.init(); err != nil {
 		p.sendError(err)
@@ -91,12 +94,12 @@ func (p *Puller) receiveQuery() {
 	}
 }
 
-func (p *Puller) processRegisterPanel(pbPanel *uipb.Panel, aux js.Value) error {
-	rdr, err := renderers.New(p.style, pbPanel, aux)
+func (p *Puller) processRegisterPanel(regPanel *uipb.RegisterPanel, aux js.Value) error {
+	rdr, err := renderers.New(p.style, regPanel, aux)
 	if err != nil {
 		return err
 	}
-	panel := &panelS{pbPanel, rdr}
+	panel := p.reg.register(regPanel.Panel, rdr)
 	for _, path := range panel.pb.Paths {
 		p.req.registerPath(panel, path)
 	}
@@ -105,6 +108,7 @@ func (p *Puller) processRegisterPanel(pbPanel *uipb.Panel, aux js.Value) error {
 
 func (p *Puller) processUnregisterPanel(pbPanel *uipb.Panel, aux js.Value) error {
 	id := ui.PanelID(pbPanel.Id)
+	defer p.reg.unregister(id)
 	var gErr error
 	for _, path := range pbPanel.Paths {
 		if err := p.req.unregisterPath(id, path); err != nil {
@@ -162,6 +166,9 @@ func (p *Puller) processInternalUIEvent(uiEvent *uipb.UIEvent) error {
 		stl := event.Style
 		p.style.Set(stl.Theme, stl.FontFamily, font.Length(stl.FontSize))
 		return nil
+	case *uipb.UIEvent_Resize:
+		rdr := p.reg.renderer(ui.PanelID(event.Resize.PanelID))
+		return renderers.Resize(rdr, event.Resize)
 	}
 	return errors.Errorf("internal UI event of type %T not supported in puller worker", uiEvent.Event)
 }

@@ -40,12 +40,6 @@ body {
   font-size: 140%;
 }
 
-/* Style for the panel */
-.panel-title {
-  display: block;
-  align: left;
-}
-
 /* Style for the tree */
 .tree-list {
   list-style-type: none;

@@ -37,9 +37,21 @@
 
 /* Class for a panel */
 .panel {
-  border: 1px solid red;
-  overflow:auto;
+  border: 0 solid red;
+
+  display: flex;
+  flex-direction: column;
   width: fit-content;
-  height: fit-content;
 }
 
+.panel-title {
+  display: block;
+  height: 1.4em;
+  align: left;
+  width: 100%;
+}
+
+.panel-content {
+  overflow: auto;
+  flex-grow: 1;
+}

@@ -18,7 +18,7 @@ func init() {
 }
 
 // NewImageRenderer creates a new renderer to display images on a canvas.
-func NewImageRenderer(stl *style.Style, panel *uipb.Panel, aux js.Value) Renderer {
+func NewImageRenderer(stl *style.Style, regPanel *uipb.RegisterPanel, aux js.Value) Renderer {
 	return &imageRenderer{
 		offscreen: &canvas.OffscreenCanvas{Value: aux.Get("offscreen")},
 	}
@@ -45,4 +45,10 @@ func (rdr *imageRenderer) Render(data *treepb.NodeData) (*treepb.NodeData, error
 	ctx.Value.Set("imageSmoothingEnabled", false)
 	ctx.Value.Call("drawImage", imageBitmap.Value, 0, 0, finalWidth, finalHeight)
 	return nil, nil
+}
+
+func (rdr *imageRenderer) Resize(resize *uipb.ParentResize) {
+	// Remove 5 pixels to avoid triggering a resize on the parent.
+	rdr.offscreen.SetHeight(int(resize.ChildSize.Height) - 5)
+	rdr.offscreen.SetWidth(int(resize.ChildSize.Width))
 }

@@ -26,14 +26,14 @@ func init() {
 	Register(NewGonumPlot)
 }
 
-func newGonumPlot(stl *style.Style, panel *uipb.Panel, aux js.Value) *gonumPlot {
+func newGonumPlot(stl *style.Style, regPanel *uipb.RegisterPanel, aux js.Value) *gonumPlot {
 	offscreen := canvas.OffscreenCanvas{Value: aux.Get("offscreen")}
 	return &gonumPlot{canvas.New(offscreen), stl}
 }
 
 // NewGonumPlot returns a renderer to plot on a canvas using gonum/plot.
-func NewGonumPlot(stl *style.Style, panel *uipb.Panel, aux js.Value) Renderer {
-	return newGonumPlot(stl, panel, aux)
+func NewGonumPlot(stl *style.Style, regPanel *uipb.RegisterPanel, aux js.Value) Renderer {
+	return newGonumPlot(stl, regPanel, aux)
 }
 
 func (rdr *gonumPlot) Render(data *treepb.NodeData) (*treepb.NodeData, error) {

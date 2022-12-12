@@ -71,7 +71,8 @@ func NewUI(pullerWorker *worker.Worker, c *uipb.Connect) *UI {
 		gui.DisplayErr(err)
 		return gui
 	}
-	if err := gui.puller.registerPanel(gui.layout.Dashboard().descriptor()); err != nil {
+	dbd := gui.layout.Dashboard()
+	if err := gui.puller.registerPanel(dbd.descriptor(), dbd.layout); err != nil {
 		gui.DisplayErr(err)
 		return gui
 	}
@@ -79,8 +80,15 @@ func NewUI(pullerWorker *worker.Worker, c *uipb.Connect) *UI {
 	return gui
 }
 
+// SendToRenderers sends an event to renderers.
+func (gui *UI) SendToRenderers(ev *uipb.UIEvent) {
+	if err := gui.puller.toRenderers(ev); err != nil {
+		gui.DisplayErr(err)
+	}
+}
+
 func (gui *UI) onStyleChange(s *style.Style) {
-	gui.puller.toRenderers(&uipb.UIEvent{
+	gui.SendToRenderers(&uipb.UIEvent{
 		Event: &uipb.UIEvent_Style{
 			Style: &uipb.StyleChange{
 				Theme:      s.Theme().Name,

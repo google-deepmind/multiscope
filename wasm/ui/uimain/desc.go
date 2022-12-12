@@ -48,7 +48,8 @@ func (dsc *Descriptor) AddTransferable(name string, v js.Value) {
 	dsc.transferables[name] = v
 }
 
-func (dsc *Descriptor) id() ui.PanelID {
+// ID returns the ID of the panel.
+func (dsc *Descriptor) ID() ui.PanelID {
 	return ui.PanelID(dsc.pb.Id)
 }
 

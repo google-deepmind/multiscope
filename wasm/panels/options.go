@@ -24,9 +24,11 @@ func ForwardResizeToRenderer(pnl *Panel) error {
 		pnl.ui.SendToRenderers(&uipb.UIEvent{
 			Event: &uipb.UIEvent_Resize{
 				Resize: &uipb.ParentResize{
-					PanelID:     uint32(pnl.Desc().ID()),
-					ChildWidth:  int32(width),
-					ChildHeight: int32(height),
+					PanelID: uint32(pnl.Desc().ID()),
+					ChildSize: &uipb.ElementSize{
+						Width:  int32(width),
+						Height: int32(height),
+					},
 				},
 			},
 		})

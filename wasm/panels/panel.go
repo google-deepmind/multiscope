@@ -26,10 +26,12 @@ type (
 	// Panel is the window containing the display and some additional info.
 	// It also manages the interaction with the user.
 	Panel struct {
+		ui   ui.UI
 		desc ui.Descriptor
 		dsp  Displayer
 
-		root *dom.HTMLDivElement
+		root    *dom.HTMLDivElement
+		content *dom.HTMLDivElement
 		// err is a paragraph to display an error.
 		err     dom.HTMLElement
 		lastErr string
@@ -37,19 +39,25 @@ type (
 )
 
 // NewPanel returns a new container panel to show a displayer on the UI.
-func NewPanel(title string, desc ui.Descriptor, dsp Displayer) (*Panel, error) {
+func NewPanel(title string, desc ui.Descriptor, dsp Displayer, opts ...Option) (*Panel, error) {
 	dbd := desc.Dashboard()
 	pnl := &Panel{
+		ui:   dbd.UI(),
 		desc: desc,
 		dsp:  dsp,
 	}
 	pnl.root = dbd.UI().Owner().Doc().CreateElement("div").(*dom.HTMLDivElement)
 	pnl.root.Class().Add("panel")
+
 	pnl.appendTitle(title)
 	pnl.appendErr()
-	pnl.root.AppendChild(dsp.Root())
-	pnl.refreshErrorPanel("")
-	return pnl, nil
+	defer pnl.refreshErrorPanel("")
+
+	pnl.content = dbd.UI().Owner().CreateChild(pnl.root, "div").(*dom.HTMLDivElement)
+	pnl.content.Class().Add("panel-content")
+	pnl.content.AppendChild(dsp.Root())
+
+	return pnl, runAll(opts, pnl)
 }
 
 func (pnl *Panel) appendTitle(title string) {
@@ -75,7 +83,8 @@ const errorMessage = `
 `
 
 func (pnl *Panel) refreshErrorPanel(err string) {
-	child := pnl.dsp.Root()
+	// child := pnl.dsp.Root()
+	child := pnl.content
 	pnl.lastErr = err
 	if pnl.lastErr == "" {
 		pnl.err.Style().SetProperty("display", "none", "")
@@ -111,12 +120,10 @@ func (pnl *Panel) OnResize(f func(*Panel)) {
 	observer.Call("observe", pnl.root.Underlying())
 }
 
-func (pnl *Panel) width() int {
-	return pnl.root.Get("offsetWidth").Int()
-}
-
-func (pnl *Panel) height() int {
-	return pnl.root.Get("offsetHeight").Int()
+func (pnl *Panel) size() (int, int) {
+	width := pnl.content.Get("offsetWidth").Int()
+	height := pnl.content.Get("offsetHeight").Int()
+	return width, height
 }
 
 // Root returns the root node of a panel.

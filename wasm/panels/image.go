@@ -23,17 +23,7 @@ func newImagePanel(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp.canvas = dbd.UI().Owner().Doc().CreateElement("canvas").(*dom.HTMLCanvasElement)
 	desc := dbd.NewDescriptor(node, renderers.NewImageRenderer, node.Path)
 	desc.AddTransferable("offscreen", dsp.canvas.Call("transferControlToOffscreen"))
-	pnl, err := NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
-	if err != nil {
-		return nil, err
-	}
-	pnl.OnResize(dsp.onResize)
-	return pnl, nil
-}
-
-func (dsp *imagePanel) onResize(pnl *Panel) {
-	dsp.canvas.SetWidth(pnl.width())
-	dsp.canvas.SetHeight(pnl.height())
+	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
 }
 
 // Display the latest data.

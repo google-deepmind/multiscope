@@ -4,6 +4,7 @@ import (
 	"fmt"
 	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/ui"
+	"multiscope/wasm/ui/uimain/dblayout"
 	"multiscope/wasm/worker"
 )
 
@@ -55,11 +56,14 @@ func (p *puller) unregisterPanel(desc *Descriptor) error {
 	return nil
 }
 
-func (p *puller) registerPanel(desc *Descriptor) error {
+func (p *puller) registerPanel(desc *Descriptor, layout dblayout.Layout) error {
 	info, aux := desc.PanelPB()
 	toPuller := &uipb.ToPuller{
 		Query: &uipb.ToPuller_RegisterPanel{
-			RegisterPanel: info,
+			RegisterPanel: &uipb.RegisterPanel{
+				Panel:         info,
+				PreferredSize: layout.PreferredSize(),
+			},
 		},
 	}
 	transferables := []any{}
