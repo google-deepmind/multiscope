@@ -12,7 +12,7 @@ import (
 	"honnef.co/go/js/dom/v2"
 )
 
-const defaultRowHeight = 480
+const defaultRowHeight = 300
 
 type list struct {
 	dbd  ui.Dashboard
@@ -80,13 +80,7 @@ func (lyt *list) store() {
 	})
 }
 
-func (lyt *list) format(div *dom.HTMLDivElement) {
-	height := fmt.Sprintf("%dpx", lyt.pb.DefaultRowHeight)
-	div.Style().SetProperty("height", height, "")
-}
-
 func (lyt *list) Append(pnl ui.Panel) {
-	lyt.format(pnl.Root())
 	lyt.Root().AppendChild(pnl.Root())
 	path := pnl.Desc().Path()
 	if path != nil {

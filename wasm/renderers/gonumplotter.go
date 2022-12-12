@@ -26,8 +26,15 @@ func init() {
 	Register(NewGonumPlot)
 }
 
+const (
+	defaultRatio     = float32(defaultHeight) / float32(defaultWidth)
+	defaultLineWidth = 1
+)
+
 func newGonumPlot(stl *style.Style, regPanel *uipb.RegisterPanel, aux js.Value) *gonumPlot {
 	offscreen := canvas.OffscreenCanvas{Value: aux.Get("offscreen")}
+	width, height := computePreferredSize(regPanel.PreferredSize, defaultRatio)
+	offscreen.SetSize(width, height)
 	return &gonumPlot{canvas.New(offscreen), stl}
 }
 
@@ -51,7 +58,7 @@ func (rdr *gonumPlot) renderPlot(pbPlot *plotpb.Plot) (*treepb.NodeData, error) 
 	plt := wplot.New()
 	plt.SetLineStyles(func(s *draw.LineStyle) {
 		s.Color = rdr.style.Foreground()
-		s.Width = 2
+		s.Width = defaultLineWidth
 	})
 	plt.SetTextStyles(func(s *draw.TextStyle) {
 		s.Color = rdr.style.Foreground()
@@ -121,7 +128,7 @@ func buildLineDrawer(pbPlotter *plotpb.Plotter, drw *plotpb.LineDrawer, plotterC
 	if err != nil {
 		return nil, err
 	}
-	pltr.Width = 3
+	pltr.Width = defaultLineWidth
 	pltr.Color = plotterColor
 	return pltr, nil
 }

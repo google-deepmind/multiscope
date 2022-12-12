@@ -77,3 +77,24 @@ func Resize(rdr Renderer, resize *uipb.ParentResize) error {
 	resizer.Resize(resize)
 	return nil
 }
+
+const (
+	defaultWidth  = 640
+	defaultHeight = 480
+)
+
+func computePreferredSize(size *uipb.ElementSize, ratio float32) (width, height int) {
+	if size.Height == 0 && size.Width == 0 {
+		size.Width = defaultWidth
+		size.Height = defaultHeight
+	}
+	width = int(size.Width)
+	if width == 0 {
+		width = int(float32(size.Height) / ratio)
+	}
+	height = int(size.Height)
+	if height == 0 {
+		height = int(float32(size.Width) * ratio)
+	}
+	return width, height
+}
