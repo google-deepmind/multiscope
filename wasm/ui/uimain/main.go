@@ -42,7 +42,7 @@ type UI struct {
 }
 
 // NewUI returns a new user interface mananing the main page.
-func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
+func NewUI(pullerWorker *worker.Worker, c *uipb.Connect) *UI {
 	gui := &UI{
 		addr:   c,
 		window: dom.GetWindow(),
@@ -66,16 +66,37 @@ func NewUI(puller *worker.Worker, c *uipb.Connect) *UI {
 	})
 
 	gui.treeClient = treepb.NewTreeClient(conn)
-	gui.puller = newPuller(gui, puller)
+	gui.puller = newPuller(gui, pullerWorker)
 	if gui.layout, err = newLayout(gui, rootInfo); err != nil {
 		gui.DisplayErr(err)
 		return gui
 	}
-	if err := gui.puller.registerPanel(gui.layout.Dashboard().descriptor()); err != nil {
+	dbd := gui.layout.Dashboard()
+	if err := gui.puller.registerPanel(dbd.descriptor(), dbd.layout); err != nil {
 		gui.DisplayErr(err)
 		return gui
 	}
+	gui.style.OnChange(gui.onStyleChange)
 	return gui
+}
+
+// SendToRenderers sends an event to renderers.
+func (gui *UI) SendToRenderers(ev *uipb.UIEvent) {
+	if err := gui.puller.toRenderers(ev); err != nil {
+		gui.DisplayErr(err)
+	}
+}
+
+func (gui *UI) onStyleChange(s *style.Style) {
+	gui.SendToRenderers(&uipb.UIEvent{
+		Event: &uipb.UIEvent_Style{
+			Style: &uipb.StyleChange{
+				Theme:      s.Theme().Name,
+				FontSize:   float64(s.FontSize()),
+				FontFamily: s.FontFamily(),
+			},
+		},
+	})
 }
 
 func fetchRootInfo(conn grpc.ClientConnInterface) (*rootpb.RootInfo, error) {

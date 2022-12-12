@@ -15,7 +15,8 @@
 
 /* Left tree */
 .container_left {
-  width: 25%;
+  flex-basis: auto;
+  margin-right: 1em;
 }
 
 /* Dashboard displaying all the panels. */
@@ -37,9 +38,24 @@
 
 /* Class for a panel */
 .panel {
-  border: 0px solid red;
-  overflow:auto;
+  border: 0 solid red;
+
+  display: flex;
+  flex-direction: column;
   width: fit-content;
-  height: fit-content;
 }
 
+.panel-title {
+  display: block;
+  height: 1.4em;
+  width: 100%;
+}
+
+.panel-text-title{
+  vertical-align:top;
+}
+
+.panel-content {
+  overflow: auto;
+  flex-grow: 1;
+}

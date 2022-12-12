@@ -2,8 +2,9 @@ package uimain
 
 import (
 	"fmt"
-	"multiscope/internal/style"
 	uipb "multiscope/protos/ui_go_proto"
+	"multiscope/wasm/ui"
+	"multiscope/wasm/ui/uimain/dblayout"
 	"multiscope/wasm/worker"
 )
 
@@ -22,7 +23,6 @@ func newPuller(ui *UI, wkr *worker.Worker) *puller {
 	if err := p.wkr.Send(ui.addr, nil); err != nil {
 		ui.DisplayErr(err)
 	}
-	ui.style.OnChange(p.onPaletteChange)
 	go p.run()
 	return p
 }
@@ -31,17 +31,16 @@ func errorF(s string, args ...any) *uipb.DisplayData {
 	return &uipb.DisplayData{Err: fmt.Sprintf(s, args...)}
 }
 
-func (p *puller) onPaletteChange(s *style.Style) {
-	if err := p.wkr.Send(&uipb.ToPuller{Query: &uipb.ToPuller_Style{
-		Style: &uipb.StyleChange{
-			Theme:      s.Theme().Name,
-			FontSize:   float64(s.FontSize()),
-			FontFamily: s.FontFamily(),
+func (p *puller) toRenderers(event *uipb.UIEvent, panels ...ui.Panel) error {
+	toPuller := &uipb.ToPuller{
+		Query: &uipb.ToPuller_Event{
+			Event: event,
 		},
-	},
-	}, nil); err != nil {
-		p.ui.DisplayErr(err)
 	}
+	if err := p.wkr.Send(toPuller, nil); err != nil {
+		return fmt.Errorf("cannot unregister panel to pull worker: %w", err)
+	}
+	return nil
 }
 
 func (p *puller) unregisterPanel(desc *Descriptor) error {
@@ -57,11 +56,14 @@ func (p *puller) unregisterPanel(desc *Descriptor) error {
 	return nil
 }
 
-func (p *puller) registerPanel(desc *Descriptor) error {
+func (p *puller) registerPanel(desc *Descriptor, layout dblayout.Layout) error {
 	info, aux := desc.PanelPB()
 	toPuller := &uipb.ToPuller{
 		Query: &uipb.ToPuller_RegisterPanel{
-			RegisterPanel: info,
+			RegisterPanel: &uipb.RegisterPanel{
+				Panel:         info,
+				PreferredSize: layout.PreferredSize(),
+			},
 		},
 	}
 	transferables := []any{}

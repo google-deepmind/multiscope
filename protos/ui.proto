@@ -17,7 +17,9 @@ message Connect {
 }
 
 // Message to pull data from the server.
-message Pull { repeated uint32 actives = 1; }
+message Pull {
+  repeated uint32 actives = 1;
+}
 
 // Panel registers a panel in the puller webworker.
 message Panel {
@@ -34,13 +36,38 @@ message StyleChange {
   double fontSize = 3;
 }
 
+message ElementSize {
+  int32 width = 10;
+  int32 height = 11;
+}
+
+// ParentResize is sent when the parent of a renderer is changing its size.
+message ParentResize {
+  uint32 panelID = 1;
+
+  ElementSize childSize = 10;
+}
+
+// Event dispatched from the main thread to the renderers.
+message UIEvent {
+  oneof event {
+    StyleChange style = 10;
+    ParentResize resize = 11;
+  }
+}
+
+message RegisterPanel {
+  Panel panel = 1;
+  ElementSize preferredSize = 2;
+}
+
 // ToPuller is the message sent to the puller webworker.
 message ToPuller {
   oneof query {
     Pull pull = 1;
-    Panel registerPanel = 2;
+    RegisterPanel registerPanel = 2;
     Panel unregisterPanel = 3;
-    StyleChange style = 4;
+    UIEvent event = 4;
   }
 }
 

@@ -18,8 +18,8 @@ func init() {
 }
 
 // NewScalarPlot returns a renderer to plot on a canvas using gonum/plot.
-func NewScalarPlot(stl *style.Style, panel *uipb.Panel, aux js.Value) Renderer {
-	return &scalarPlot{gplot: newGonumPlot(stl, panel, aux)}
+func NewScalarPlot(stl *style.Style, regPanel *uipb.RegisterPanel, aux js.Value) Renderer {
+	return &scalarPlot{gplot: newGonumPlot(stl, regPanel, aux)}
 }
 
 func (rdr *scalarPlot) Render(data *treepb.NodeData) (*treepb.NodeData, error) {

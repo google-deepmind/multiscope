@@ -14,11 +14,8 @@ message RootInfo {
 }
 
 message LayoutList {
-  message Size {
-    int32 width = 1;
-    int32 height = 2;
-  }
-  Size defaultPanelSize = 1;
+  // Default height of a row.
+  int32 defaultRowHeight = 1;
 
   // Paths to be displayed.
   repeated multiscope.NodePath displayed = 2;

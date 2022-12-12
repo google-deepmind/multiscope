@@ -26,9 +26,10 @@ func newHeader(mui *UI) (*Header, error) {
 	h1.Class().Add("toppage")
 	// Left side.
 	left := owner.CreateChild(h1, "p").(*dom.HTMLParagraphElement)
-	left.Style().SetProperty("text-align", "left", "")
 	owner.NewIconButton(left, "menu", h.toggleTreeSideBar)
-	owner.CreateTextNode(left, "Multiscope")
+	mainTitle := owner.CreateChild(left, "span").(*dom.HTMLSpanElement)
+	mainTitle.Class().Add("toppage-main-title")
+	mui.Owner().CreateTextNode(mainTitle, "Multiscope")
 
 	// Right side.
 	right := owner.CreateChild(left, "span").(*dom.HTMLSpanElement)

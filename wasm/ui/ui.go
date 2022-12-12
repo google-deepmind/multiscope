@@ -3,6 +3,7 @@ package ui
 
 import (
 	treepb "multiscope/protos/tree_go_proto"
+	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/renderers"
 	"multiscope/wasm/settings"
 	"syscall/js"
@@ -36,6 +37,9 @@ type (
 		// Use this function to process an event and to avoid a deadlock
 		// when the call includes gRPC calls.
 		Run(func() error)
+
+		// SendToRenderers sends an event to renderers.
+		SendToRenderers(*uipb.UIEvent)
 	}
 
 	// Dashboard displaying all the panels.
@@ -51,6 +55,9 @@ type (
 
 	// Descriptor enables the communication between a panel and the web worker to get the data.
 	Descriptor interface {
+		// ID returns the ID of the panel.
+		ID() PanelID
+
 		// Path returns the path of the node that the descriptor stores data about.
 		// Returns nil if the descriptor does correspond to a path in the tree.
 		Path() *treepb.NodePath

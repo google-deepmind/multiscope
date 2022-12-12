@@ -40,7 +40,7 @@ func (el *Element) newNode(parent *Node, name string) (*Node, error) {
 	}
 	owner := el.ui.Owner()
 	n.item = owner.Doc().CreateElement("li").(dom.HTMLElement)
-	n.item.Class().Add("tree-list")
+	n.item.Class().Add(toStyleClass(path))
 	if node.HasChildren {
 		n.caret = owner.NewTextButton(n.item, "▶ ", func(ev dom.Event) {
 			if err := n.expand(); err != nil {
@@ -66,6 +66,13 @@ func (n *Node) openPanel(dom.Event) {
 	}
 }
 
+func toStyleClass(path []string) string {
+	if len(path) <= 1 {
+		return "tree-root"
+	}
+	return "tree-list"
+}
+
 func (n *Node) expand() error {
 	if !n.node.HasChildren {
 		return nil
@@ -80,7 +87,7 @@ func (n *Node) expand() error {
 	}
 	n.children = make(map[string]*Node)
 	n.childrenList = n.el.ui.Owner().CreateChild(n.item, "ul").(*dom.HTMLUListElement)
-	n.childrenList.Class().Add("tree-list")
+	n.childrenList.Class().Add(toStyleClass(n.node.Path.Path))
 	for _, child := range n.node.Children {
 		childNode, err := n.el.newNode(n, child.Name)
 		if err != nil {

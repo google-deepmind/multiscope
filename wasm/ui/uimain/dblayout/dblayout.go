@@ -5,29 +5,34 @@ import (
 	"multiscope/wasm/ui"
 
 	rootpb "multiscope/protos/root_go_proto"
+	uipb "multiscope/protos/ui_go_proto"
 
 	"github.com/pkg/errors"
 	"honnef.co/go/js/dom/v2"
 )
 
-const (
-	defaultPanelWidth  = 640
-	defaultPanelHeight = 480
-)
-
 // SettingKey is the key used in the settings to store the layout.
 const SettingKey = "layout"
 
-// Layout within the dashboard organizing the display of the panels.
-type Layout interface {
-	Root() dom.Node
+type (
+	// Layout within the dashboard organizing the display of the panels.
+	Layout interface {
+		PreferredSize() *uipb.ElementSize
 
-	Load(lyt *rootpb.Layout) error
+		Root() dom.Node
 
-	Append(ui.Panel)
+		Load(lyt *rootpb.Layout) error
 
-	Remove(ui.Panel)
-}
+		Append(ui.Panel)
+
+		Remove(ui.Panel)
+	}
+
+	// Size represents the size of a panel.
+	Size struct {
+		Width, Height int
+	}
+)
 
 // New returns a new layout given a protocol buffer description.
 func New(dbd ui.Dashboard, lyt *rootpb.Layout) (Layout, error) {

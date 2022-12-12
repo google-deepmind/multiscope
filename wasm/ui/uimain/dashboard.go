@@ -175,17 +175,17 @@ func (dbd *Dashboard) registerPanel(pnl ui.Panel) error {
 	desc := pnl.Desc().(*Descriptor)
 	path := desc.Path()
 	if path != nil {
-		dbd.pathToID[core.ToKey(path.Path)] = desc.id()
+		dbd.pathToID[core.ToKey(path.Path)] = desc.ID()
 	}
-	dbd.panels[desc.id()] = pnl
-	return dbd.ui.puller.registerPanel(desc)
+	dbd.panels[desc.ID()] = pnl
+	return dbd.ui.puller.registerPanel(desc, dbd.layout)
 }
 
 // ClosePanel closes a panel on the dashboard.
 func (dbd *Dashboard) ClosePanel(pnl ui.Panel) error {
 	desc := pnl.Desc().(*Descriptor)
 	err := dbd.ui.puller.unregisterPanel(desc)
-	delete(dbd.panels, desc.id())
+	delete(dbd.panels, desc.ID())
 	path := desc.Path()
 	if path != nil {
 		delete(dbd.pathToID, core.ToKey(path.Path))
