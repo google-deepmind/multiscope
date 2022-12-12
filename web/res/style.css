@@ -22,6 +22,9 @@ body {
 }
 
 /* Generic style for widgets */
+.icon {
+  vertical-align: top;
+}
 
 .button {
   cursor: pointer;
@@ -31,19 +34,28 @@ body {
 }
 
 /* Style for the header */
-.toppage {
+.h1.toppage {
   overflow: hidden;
   position: relative;
+  vertical-align: top;
+  text-align: left;
 }
 
-.toppage a.icon {
-  font-size: 140%;
+.toppage-main-title {
+  vertical-align: top;
 }
 
 /* Style for the tree */
+.tree-root {
+  list-style-type: none;
+  padding-left: 0;
+  white-space: nowrap;
+}
+
 .tree-list {
   list-style-type: none;
   padding-left: .8em;
+  white-space: nowrap;
 }
 
 .tree-item {

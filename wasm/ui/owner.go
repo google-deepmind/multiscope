@@ -25,7 +25,7 @@ func (o *Owner) Doc() dom.HTMLDocument {
 }
 
 // NewTextButton creates a new button with an event listener associated with it.
-func (o *Owner) NewTextButton(parent dom.HTMLElement, text string, f func(ev dom.Event)) *dom.HTMLAnchorElement {
+func (o *Owner) NewTextButton(parent dom.Element, text string, f func(ev dom.Event)) *dom.HTMLAnchorElement {
 	el := o.CreateChild(parent, "a").(*dom.HTMLAnchorElement)
 	el.Class().Add("icon")
 	el.Class().Add("button")
@@ -38,7 +38,7 @@ func (o *Owner) NewTextButton(parent dom.HTMLElement, text string, f func(ev dom
 
 // NewIconButton creates a new button with an event listener associated with it.
 // See https://fonts.google.com/icons for the list of available icons.
-func (o *Owner) NewIconButton(parent dom.HTMLElement, text string, f func(ev dom.Event)) *dom.HTMLAnchorElement {
+func (o *Owner) NewIconButton(parent dom.Element, text string, f func(ev dom.Event)) *dom.HTMLAnchorElement {
 	span := o.CreateChild(parent, "span").(*dom.HTMLSpanElement)
 	span.Class().Add("material-icons")
 	el := o.CreateChild(span, "a").(*dom.HTMLAnchorElement)

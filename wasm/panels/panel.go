@@ -65,11 +65,10 @@ func (pnl *Panel) appendTitle(title string) {
 	bar := mui.Owner().CreateChild(pnl.root, "div")
 	bar.Class().Add("panel-title")
 
-	mui.Owner().CreateTextNode(bar, title)
-
-	rightSpan := mui.Owner().CreateChild(bar, "span").(*dom.HTMLSpanElement)
-	rightSpan.Style().SetProperty("float", "right", "")
-	mui.Owner().NewIconButton(rightSpan, "close", pnl.processCloseEvent)
+	mui.Owner().NewIconButton(bar, "close", pnl.processCloseEvent)
+	textTitleSpan := mui.Owner().CreateChild(bar, "span").(*dom.HTMLSpanElement)
+	textTitleSpan.Class().Add("panel-text-title")
+	mui.Owner().CreateTextNode(textTitleSpan, title)
 }
 
 func (pnl *Panel) appendErr() {
