@@ -8,6 +8,42 @@ import "tree.proto";
 
 option go_package = "multiscope/protos/ticker_go_proto";
 
+/////////////////////////
+// Player
+/////////////////////////
+
+// Player in the Multiscope tree.
+message Player {
+  // Path in the tree.
+  multiscope.NodePath path = 1;
+}
+
+// Request to create a new player in the tree.
+message NewPlayerRequest {
+  // Path in the tree.
+  multiscope.NodePath path = 1;
+}
+
+// Response after creating a new player in the tree.
+message NewPlayerResponse {
+  Player player = 1;
+}
+
+// Request to store a frame in the player.
+// All the children of the player (supporting the functionality)
+// will store their data associated with the current frame number.
+message StoreFrameRequest {
+  // Path to the player.
+  Player player = 1;
+}
+
+// Response after storing a frame.
+message StoreFrameResponse {}
+
+/////////////////////////
+// Ticker
+/////////////////////////
+
 // Ticker in the Multiscope tree.
 message Ticker {
   // Path in the tree.
@@ -75,10 +111,20 @@ message WriteTickerRequest {
 // Response after writing ticker data.
 message WriteTickerResponse {}
 
+/////////////////////////
+// Service
+/////////////////////////
+
 service Tickers {
   // Create a new ticker node in Multiscope.
   rpc NewTicker(NewTickerRequest) returns (NewTickerResponse) {}
 
   // Write ticker data.
   rpc WriteTicker(WriteTickerRequest) returns (WriteTickerResponse) {}
+
+  // Create a new player node in Multiscope.
+  rpc NewPlayer(NewPlayerRequest) returns (NewPlayerResponse) {}
+
+  // Write ticker data.
+  rpc StoreFrame(StoreFrameRequest) returns (StoreFrameResponse) {}
 }

@@ -26,6 +26,10 @@ type TickersClient interface {
 	NewTicker(ctx context.Context, in *NewTickerRequest, opts ...grpc.CallOption) (*NewTickerResponse, error)
 	// Write ticker data.
 	WriteTicker(ctx context.Context, in *WriteTickerRequest, opts ...grpc.CallOption) (*WriteTickerResponse, error)
+	// Create a new player node in Multiscope.
+	NewPlayer(ctx context.Context, in *NewPlayerRequest, opts ...grpc.CallOption) (*NewPlayerResponse, error)
+	// Write ticker data.
+	StoreFrame(ctx context.Context, in *StoreFrameRequest, opts ...grpc.CallOption) (*StoreFrameResponse, error)
 }
 
 type tickersClient struct {
@@ -54,6 +58,24 @@ func (c *tickersClient) WriteTicker(ctx context.Context, in *WriteTickerRequest,
 	return out, nil
 }
 
+func (c *tickersClient) NewPlayer(ctx context.Context, in *NewPlayerRequest, opts ...grpc.CallOption) (*NewPlayerResponse, error) {
+	out := new(NewPlayerResponse)
+	err := c.cc.Invoke(ctx, "/multiscope.ticker.Tickers/NewPlayer", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tickersClient) StoreFrame(ctx context.Context, in *StoreFrameRequest, opts ...grpc.CallOption) (*StoreFrameResponse, error) {
+	out := new(StoreFrameResponse)
+	err := c.cc.Invoke(ctx, "/multiscope.ticker.Tickers/StoreFrame", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TickersServer is the server API for Tickers service.
 // All implementations must embed UnimplementedTickersServer
 // for forward compatibility
@@ -62,6 +84,10 @@ type TickersServer interface {
 	NewTicker(context.Context, *NewTickerRequest) (*NewTickerResponse, error)
 	// Write ticker data.
 	WriteTicker(context.Context, *WriteTickerRequest) (*WriteTickerResponse, error)
+	// Create a new player node in Multiscope.
+	NewPlayer(context.Context, *NewPlayerRequest) (*NewPlayerResponse, error)
+	// Write ticker data.
+	StoreFrame(context.Context, *StoreFrameRequest) (*StoreFrameResponse, error)
 	mustEmbedUnimplementedTickersServer()
 }
 
@@ -74,6 +100,12 @@ func (UnimplementedTickersServer) NewTicker(context.Context, *NewTickerRequest) 
 }
 func (UnimplementedTickersServer) WriteTicker(context.Context, *WriteTickerRequest) (*WriteTickerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method WriteTicker not implemented")
+}
+func (UnimplementedTickersServer) NewPlayer(context.Context, *NewPlayerRequest) (*NewPlayerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NewPlayer not implemented")
+}
+func (UnimplementedTickersServer) StoreFrame(context.Context, *StoreFrameRequest) (*StoreFrameResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StoreFrame not implemented")
 }
 func (UnimplementedTickersServer) mustEmbedUnimplementedTickersServer() {}
 
@@ -124,6 +156,42 @@ func _Tickers_WriteTicker_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Tickers_NewPlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NewPlayerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TickersServer).NewPlayer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/multiscope.ticker.Tickers/NewPlayer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TickersServer).NewPlayer(ctx, req.(*NewPlayerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tickers_StoreFrame_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StoreFrameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TickersServer).StoreFrame(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/multiscope.ticker.Tickers/StoreFrame",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TickersServer).StoreFrame(ctx, req.(*StoreFrameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Tickers_ServiceDesc is the grpc.ServiceDesc for Tickers service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -138,6 +206,14 @@ var Tickers_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "WriteTicker",
 			Handler:    _Tickers_WriteTicker_Handler,
+		},
+		{
+			MethodName: "NewPlayer",
+			Handler:    _Tickers_NewPlayer_Handler,
+		},
+		{
+			MethodName: "StoreFrame",
+			Handler:    _Tickers_StoreFrame_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
