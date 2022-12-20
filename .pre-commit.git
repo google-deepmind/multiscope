@@ -70,6 +70,9 @@ do
   fi
 done
 
+# Disable python test because python cannot be setup on the latest MacOS.
+exit 0
+
 # Check the python client for formatting and run the fast tests.
 # This all needs to happen inside the pipenv shell (managed environment).
 

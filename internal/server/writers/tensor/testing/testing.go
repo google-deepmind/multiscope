@@ -80,6 +80,14 @@ func buildDistribution(dist [][]float64) *plotpb.Plot {
 	}
 }
 
+func tolerance(epsilon float64) cmp.Option {
+	return cmp.Comparer(func(x, y float64) bool {
+		delta := math.Abs(x - y)
+		mean := math.Abs(x+y) / 2.0
+		return delta/mean < epsilon
+	})
+}
+
 var (
 	resetData = testData{
 		Desc: "after reset",
@@ -492,7 +500,7 @@ func checkDistribution(clt pbgrpc.TreeClient, path []string, test *testData) err
 	if len(plt.Plotters) == 0 {
 		return nil
 	}
-	if diff := cmp.Diff(&plt, test.Dist, protocmp.Transform()); diff != "" {
+	if diff := cmp.Diff(&plt, test.Dist, protocmp.Transform(), tolerance(1e-5)); diff != "" {
 		return fmt.Errorf("wrong distribution: %s\ngot:\n%v\nbut want:\n%v", diff, prototext.Format(&plt), test.Dist)
 	}
 	return nil
