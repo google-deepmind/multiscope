@@ -28,6 +28,35 @@ func RegisterService(srv grpc.ServiceRegistrar, state treeservice.StateProvider)
 	pbgrpc.RegisterTickersServer(srv, &Service{state: state})
 }
 
+// NewPlayer creates a new player in the tree.
+func (srv *Service) NewPlayer(ctx context.Context, req *pb.NewPlayerRequest) (*pb.NewPlayerResponse, error) {
+	state := srv.state() // use state throughout this RPC lifetime.
+	player := NewPlayer()
+	playerPath, err := player.addToTree(state, req.GetPath())
+	if err != nil {
+		return nil, err
+	}
+	return &pb.NewPlayerResponse{
+		Player: &pb.Player{
+			Path: playerPath.PB(),
+		},
+	}, nil
+}
+
+// StoreFrame goes through all the children of a tree to store their state into some kind of storage.
+func (srv *Service) StoreFrame(ctx context.Context, req *pb.StoreFrameRequest) (*pb.StoreFrameResponse, error) {
+	state := srv.state() // use state throughout this RPC lifetime.
+	var player *Player
+	if err := core.Set(&player, state.Root(), req.GetPlayer()); err != nil {
+		desc := fmt.Sprintf("cannot get the player from the tree: %v", err)
+		return nil, status.New(codes.InvalidArgument, desc).Err()
+	}
+	if err := player.StoreFrame(req.GetData()); err != nil {
+		return nil, err
+	}
+	return &pb.StoreFrameResponse{}, nil
+}
+
 // NewTicker creates a new ticker in the tree.
 func (srv *Service) NewTicker(ctx context.Context, req *pb.NewTickerRequest) (*pb.NewTickerResponse, error) {
 	state := srv.state() // use state throughout this RPC lifetime.

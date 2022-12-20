@@ -35,10 +35,19 @@ message NewPlayerResponse {
 message StoreFrameRequest {
   // Path to the player.
   Player player = 1;
+
+  // Data to send to the player.
+  PlayerData data = 2;
 }
 
 // Response after storing a frame.
 message StoreFrameResponse {}
+
+// Data sends from the client to the server.
+message PlayerData {
+  // Current tick number.
+  int64 tick = 2;
+}
 
 /////////////////////////
 // Ticker

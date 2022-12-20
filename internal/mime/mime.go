@@ -29,6 +29,8 @@ const (
 	VegaLiteV2 = "vega/specification-lite-v2"
 	// ScalarTimeSeries is a time series of one or more scalar values.
 	ScalarTimeSeries = "data/scalar-time-series"
+	// MultiscopePlayer is a player to play back data.
+	MultiscopePlayer = "multiscope/player"
 	// MultiscopeTicker is a ticker to synchronize data.
 	MultiscopeTicker = "multiscope/ticker"
 	// MultiscopeDMEnvGroup is a group to visualize a dmenv environment.

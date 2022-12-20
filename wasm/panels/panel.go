@@ -82,7 +82,6 @@ const errorMessage = `
 `
 
 func (pnl *Panel) refreshErrorPanel(err string) {
-	// child := pnl.dsp.Root()
 	child := pnl.content
 	pnl.lastErr = err
 	if pnl.lastErr == "" {
@@ -95,12 +94,11 @@ func (pnl *Panel) refreshErrorPanel(err string) {
 	pnl.err.SetInnerHTML(fmt.Sprintf(errorMessage, pnl.lastErr))
 }
 
-func (pnl *Panel) updateError(err string) bool {
+func (pnl *Panel) displayError(err string) {
 	if err == pnl.lastErr {
-		return false
+		return
 	}
 	pnl.refreshErrorPanel(err)
-	return true
 }
 
 func (pnl *Panel) processCloseEvent(ev dom.Event) {
@@ -138,11 +136,13 @@ func (pnl *Panel) Desc() ui.Descriptor {
 
 // Display the latest data.
 func (pnl *Panel) Display(data *treepb.NodeData) {
-	if pnl.updateError(data.Error) {
+	if data.Error != "" {
+		pnl.displayError(fmt.Sprintf("failed to fetch data from the puller: %s", data.Error))
 		return
 	}
 	if err := pnl.dsp.Display(data); err != nil {
-		pnl.updateError(err.Error())
+		pnl.displayError(fmt.Sprintf("displayer %T returned an error: %s", pnl.dsp, err.Error()))
+		return
 	}
 }
 
