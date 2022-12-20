@@ -24,7 +24,7 @@ func TestFastTicker(t *testing.T) {
 	tickerClt := pbgrpc.NewTickersClient(conn)
 
 	ctx := context.Background()
-	rep, err := tickerClt.New(ctx, &pb.NewTickerRequest{
+	rep, err := tickerClt.NewTicker(ctx, &pb.NewTickerRequest{
 		Path: &treepb.NodePath{
 			Path: []string{tickertesting.Ticker01Name},
 		},
@@ -34,7 +34,7 @@ func TestFastTicker(t *testing.T) {
 	}
 	writer := rep.GetTicker()
 	for i, data := range tickertesting.TickerData {
-		if _, err := tickerClt.Write(ctx, &pb.WriteRequest{
+		if _, err := tickerClt.WriteTicker(ctx, &pb.WriteTickerRequest{
 			Ticker: writer,
 			Data:   data.Data,
 		}); err != nil {

@@ -64,7 +64,7 @@ message TickerAction {
 }
 
 // Request to write ticker data.
-message WriteRequest {
+message WriteTickerRequest {
   // Path to the ticker.
   Ticker ticker = 1;
 
@@ -73,12 +73,12 @@ message WriteRequest {
 }
 
 // Response after writing ticker data.
-message WriteResponse {}
+message WriteTickerResponse {}
 
 service Tickers {
   // Create a new ticker node in Multiscope.
-  rpc New(NewTickerRequest) returns (NewTickerResponse) {}
+  rpc NewTicker(NewTickerRequest) returns (NewTickerResponse) {}
 
   // Write ticker data.
-  rpc Write(WriteRequest) returns (WriteResponse) {}
+  rpc WriteTicker(WriteTickerRequest) returns (WriteTickerResponse) {}
 }

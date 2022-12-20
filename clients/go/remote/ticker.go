@@ -75,7 +75,7 @@ func NewTicker(clt *Client, name string, parent Path) (*Ticker, error) {
 	t.callbackPeriod.HistoryTrace = measureStepSize
 	ctx := context.Background()
 	path := clt.toChildPath(name, parent)
-	rep, err := t.clt.New(ctx, &pb.NewTickerRequest{
+	rep, err := t.clt.NewTicker(ctx, &pb.NewTickerRequest{
 		Path: path.NodePath(),
 	})
 	if err != nil {
@@ -181,7 +181,7 @@ func (t *Ticker) writeData() error {
 	exp := t.experimentPeriod.Average()
 	callback := t.callbackPeriod.Average()
 	idle := total - exp - callback
-	_, err := t.clt.Write(context.Background(), &pb.WriteRequest{
+	_, err := t.clt.WriteTicker(context.Background(), &pb.WriteTickerRequest{
 		Ticker: t.ticker,
 		Data: &pb.TickerData{
 			Tick: t.tick,

@@ -28,8 +28,8 @@ func RegisterService(srv grpc.ServiceRegistrar, state treeservice.StateProvider)
 	pbgrpc.RegisterTickersServer(srv, &Service{state: state})
 }
 
-// New creates a new ticker in the tree.
-func (srv *Service) New(ctx context.Context, req *pb.NewTickerRequest) (*pb.NewTickerResponse, error) {
+// NewTicker creates a new ticker in the tree.
+func (srv *Service) NewTicker(ctx context.Context, req *pb.NewTickerRequest) (*pb.NewTickerResponse, error) {
 	state := srv.state() // use state throughout this RPC lifetime.
 	ticker := NewTicker()
 	tickerPath, err := ticker.addToTree(state, req.GetPath())
@@ -43,8 +43,8 @@ func (srv *Service) New(ctx context.Context, req *pb.NewTickerRequest) (*pb.NewT
 	}, nil
 }
 
-// Write the data of a ticker.
-func (srv *Service) Write(ctx context.Context, req *pb.WriteRequest) (*pb.WriteResponse, error) {
+// WriteTicker the data of a ticker.
+func (srv *Service) WriteTicker(ctx context.Context, req *pb.WriteTickerRequest) (*pb.WriteTickerResponse, error) {
 	state := srv.state() // use state throughout this RPC lifetime.
 	var ticker *Ticker
 	if err := core.Set(&ticker, state.Root(), req.GetTicker()); err != nil {
@@ -54,5 +54,5 @@ func (srv *Service) Write(ctx context.Context, req *pb.WriteRequest) (*pb.WriteR
 	if err := ticker.Write(req.GetData()); err != nil {
 		return nil, err
 	}
-	return &pb.WriteResponse{}, nil
+	return &pb.WriteTickerResponse{}, nil
 }
