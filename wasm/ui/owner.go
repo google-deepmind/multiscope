@@ -1,6 +1,10 @@
 package ui
 
-import "honnef.co/go/js/dom/v2"
+import (
+	"syscall/js"
+
+	"honnef.co/go/js/dom/v2"
+)
 
 // Owner owns all the element of a HTML document.
 type Owner struct {
@@ -56,4 +60,22 @@ func (o *Owner) CreateTextNode(parent dom.Element, s string) *dom.Text {
 	el := o.html.CreateTextNode(s)
 	parent.AppendChild(el)
 	return el
+}
+
+// NewSlider returns a new slider.
+func (o *Owner) NewSlider(parent dom.Element, f func(slider *dom.HTMLInputElement)) *dom.HTMLInputElement {
+	container := o.CreateChild(parent, "div").(*dom.HTMLDivElement)
+	container.Class().Add("slidecontainer")
+	slider := o.CreateChild(container, "input").(*dom.HTMLInputElement)
+	slider.Class().Add("slider")
+	slider.SetAttribute("type", "range")
+	slider.SetAttribute("min", "0")
+	slider.SetAttribute("max", "100")
+	slider.SetAttribute("value", "100")
+	listener := func(js.Value, []js.Value) any {
+		f(slider)
+		return nil
+	}
+	slider.Set("oninput", js.FuncOf(listener))
+	return slider
 }

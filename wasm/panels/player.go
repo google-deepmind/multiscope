@@ -15,20 +15,32 @@ func init() {
 }
 
 type player struct {
-	pb      tickerpb.PlayerData
-	node    *treepb.Node
-	root    *dom.HTMLParagraphElement
-	display *dom.HTMLParagraphElement
+	pb          tickerpb.PlayerData
+	node        *treepb.Node
+	root        *dom.HTMLParagraphElement
+	display     *dom.HTMLParagraphElement
+	timeControl *dom.HTMLDivElement
 }
 
 func newPlayer(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
-	dsp := &player{node: node}
+	p := &player{node: node}
 	owner := dbd.UI().Owner()
-	dsp.root = owner.Doc().CreateElement("p").(*dom.HTMLParagraphElement)
-	dsp.root.Class().Add("ticker-content")
-	dsp.display = owner.CreateChild(dsp.root, "p").(*dom.HTMLParagraphElement)
+	p.root = owner.Doc().CreateElement("p").(*dom.HTMLParagraphElement)
+	p.root.Class().Add("ticker-content")
+	p.display = owner.CreateChild(p.root, "p").(*dom.HTMLParagraphElement)
 	desc := dbd.NewDescriptor(node, nil, node.Path)
-	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
+	p.timeControl = p.newTimeControl(owner, p.root)
+	return NewPanel(filepath.Join(node.Path.Path...), desc, p)
+}
+
+func (p *player) newTimeControl(owner *ui.Owner, parent *dom.HTMLParagraphElement) *dom.HTMLDivElement {
+	timeControl := owner.CreateChild(parent, "div").(*dom.HTMLDivElement)
+	owner.NewSlider(timeControl, p.onSliderChange)
+	return timeControl
+}
+
+func (p *player) onSliderChange(slider *dom.HTMLInputElement) {
+	fmt.Println("slider", slider.Get("value").String())
 }
 
 // Display the latest data.

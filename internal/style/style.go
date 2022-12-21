@@ -111,6 +111,11 @@ func (s *Style) Background() color.RGBA {
 	return s.theme.Color00
 }
 
+// BackgroundSub returns a lighter background.
+func (s *Style) BackgroundSub() color.RGBA {
+	return s.theme.Color01
+}
+
 // Foreground returns the current foreground color.
 func (s *Style) Foreground() color.RGBA {
 	return s.theme.Color05

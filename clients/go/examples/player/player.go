@@ -33,10 +33,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	w2.WriteCSS(`
+	err = w2.WriteCSS(`
 	.fancy {color: red;}
 	.superfancy {color: blue;}
 	`)
+	if err != nil {
+		log.Fatal(err)
+	}
 	const text = "Ticker\nsays\n<%d>"
 	const html = `<h1 class="fancy">Ticker</h1> says <h1 class="superfancy">%d</h1>`
 	for {

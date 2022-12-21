@@ -61,8 +61,7 @@ func NewUI(pullerWorker *worker.Worker, c *uipb.Connect) *UI {
 
 	injector.Run(gui)
 	gui.style.OnChange(func(s *style.Style) {
-		gui.Owner().Doc().Body().Style().SetProperty("background", css.Color(s.Background()), "")
-		gui.Owner().Doc().Body().Style().SetProperty("color", css.Color(s.Foreground()), "")
+		setCSS(gui.Owner().Doc(), s)
 	})
 
 	gui.treeClient = treepb.NewTreeClient(conn)
@@ -78,6 +77,13 @@ func NewUI(pullerWorker *worker.Worker, c *uipb.Connect) *UI {
 	}
 	gui.style.OnChange(gui.onStyleChange)
 	return gui
+}
+
+func setCSS(doc dom.HTMLDocument, s *style.Style) {
+	root := doc.QuerySelector(":root").(dom.HTMLElement)
+	root.Style().SetProperty("--main-fg-color", css.Color(s.Foreground()), "")
+	root.Style().SetProperty("--main-bg-color", css.Color(s.Background()), "")
+	root.Style().SetProperty("--main-bg-sub-color", css.Color(s.BackgroundSub()), "")
 }
 
 // SendToRenderers sends an event to renderers.
