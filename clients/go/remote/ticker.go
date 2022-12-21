@@ -101,7 +101,7 @@ func NewTicker(clt *Client, name string, parent Path) (*Ticker, error) {
 	return t, nil
 }
 
-func (t *Ticker) processSetPeriod(msg *pb.TickerAction_SetPeriod) error {
+func (t *Ticker) processSetPeriod(msg *pb.SetPeriod) error {
 	p := time.Duration(msg.GetPeriodMs())
 	t.toTick <- func() error {
 		return t.SetPeriod(p * time.Millisecond)
@@ -109,14 +109,14 @@ func (t *Ticker) processSetPeriod(msg *pb.TickerAction_SetPeriod) error {
 	return nil
 }
 
-func (t *Ticker) processCommand(cmd pb.TickerAction_Command) error {
+func (t *Ticker) processCommand(cmd pb.Command) error {
 	switch cmd.Number() {
-	case pb.TickerAction_STEP.Number():
+	case pb.Command_STEP.Number():
 		t.pauseNextStep.set(true)
 		t.wait <- true
-	case pb.TickerAction_PAUSE.Number():
+	case pb.Command_PAUSE.Number():
 		t.pauseNextStep.set(true)
-	case pb.TickerAction_RUN.Number():
+	case pb.Command_RUN.Number():
 		t.pauseNextStep.set(false)
 		t.wait <- true
 	default:
@@ -141,9 +141,9 @@ func (t *Ticker) processEvent(event *treepb.Event) (bool, error) {
 	}
 	var err error
 	switch a := action.Action.(type) {
-	case *pb.TickerAction_SetPeriod_:
+	case *pb.TickerAction_SetPeriod:
 		err = t.processSetPeriod(a.SetPeriod)
-	case *pb.TickerAction_Command_:
+	case *pb.TickerAction_Command:
 		err = t.processCommand(a.Command)
 	default:
 		err = errors.Errorf("command not supported: %q", a)

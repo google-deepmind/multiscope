@@ -4,4 +4,4 @@ package version
 // Version of the proto API.
 // A new version is generated every time the protocol buffers are
 // generated with go generate.
-const Version = "20221220_151346"
+const Version = "20221221_134546"

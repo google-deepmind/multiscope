@@ -71,7 +71,13 @@ do
 done
 
 # Disable python test because python cannot be setup on the latest MacOS.
-exit 0
+if ! $PASS; then
+  printf "\033[0;30m\033[41mPRE-COMMIT HOOK FAILED\033[0m\n"
+  exit 1
+else
+  printf "\033[0;30m\033[42mPRE-COMMIT HOOK SUCCEEDED\033[0m\n"
+  exit 0
+fi
 
 # Check the python client for formatting and run the fast tests.
 # This all needs to happen inside the pipenv shell (managed environment).

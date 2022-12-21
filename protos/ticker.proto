@@ -8,6 +8,37 @@ import "tree.proto";
 
 option go_package = "multiscope/protos/ticker_go_proto";
 
+
+/////////////////////////
+// Actions
+/////////////////////////
+
+// Set the period at which an experiment runs.
+message SetPeriod {
+  // Duration of the period set by the user.
+  int64 period_ms = 1;
+}
+
+// Control command sent the experiment to pause or run the experiment.
+enum Command {
+  NONE = 0;
+  STEP = 1;
+  PAUSE = 2;
+  RUN = 3;
+}
+
+// SetTickView sets at which tick the data should be displayed.
+message SetTickView {
+  oneof tickCommand {
+    // Range at which to display the data:
+    // this is a number between 0 and 100 (all included).
+    uint32 range = 1;
+
+    // Offset the tick at which to display the data.
+    int32 offset = 2;
+  }
+}
+
 /////////////////////////
 // Player
 /////////////////////////
@@ -25,9 +56,7 @@ message NewPlayerRequest {
 }
 
 // Response after creating a new player in the tree.
-message NewPlayerResponse {
-  Player player = 1;
-}
+message NewPlayerResponse { Player player = 1; }
 
 // Request to store a frame in the player.
 // All the children of the player (supporting the functionality)
@@ -49,6 +78,15 @@ message PlayerData {
   int64 tick = 2;
 }
 
+// Action event for a player.
+message PlayerAction {
+  oneof action {
+    SetPeriod setPeriod = 1;
+    Command command = 2;
+    SetTickView tickView = 3;
+  }
+}
+
 /////////////////////////
 // Ticker
 /////////////////////////
@@ -60,14 +98,10 @@ message Ticker {
 }
 
 // Request to create a new ticker in the tree.
-message NewTickerRequest {
-  multiscope.NodePath path = 1;
-}
+message NewTickerRequest { multiscope.NodePath path = 1; }
 
 // Response after creating a new ticker in the tree.
-message NewTickerResponse {
-  Ticker ticker = 1;
-}
+message NewTickerResponse { Ticker ticker = 1; }
 
 // Data sends from the client to the server.
 message TickerData {
@@ -89,19 +123,6 @@ message TickerData {
 
 // Write actions for a ticker.
 message TickerAction {
-  message SetPeriod {
-    // Duration of the period set by the user.
-    int64 period_ms = 1;
-  }
-
-  // A control command sent by the user to control the experiment.
-  enum Command {
-    NONE = 0;
-    STEP = 1;
-    PAUSE = 2;
-    RUN = 3;
-  }
-
   oneof action {
     SetPeriod setPeriod = 1;
     Command command = 2;

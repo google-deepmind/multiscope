@@ -39,22 +39,22 @@ func newTicker(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 func (t *ticker) createControls(dbd ui.Dashboard, control *dom.HTMLParagraphElement) {
 	owner := dbd.UI().Owner()
 	owner.NewIconButton(control, "play_arrow", func(ev dom.Event) {
-		t.sendAction(dbd, tickerpb.TickerAction_RUN)
+		t.sendAction(dbd, tickerpb.Command_RUN)
 	})
 	owner.NewIconButton(control, "pause", func(ev dom.Event) {
-		t.sendAction(dbd, tickerpb.TickerAction_PAUSE)
+		t.sendAction(dbd, tickerpb.Command_PAUSE)
 	})
 	owner.NewIconButton(control, "skip_next", func(ev dom.Event) {
-		t.sendAction(dbd, tickerpb.TickerAction_STEP)
+		t.sendAction(dbd, tickerpb.Command_STEP)
 	})
 }
 
-func (t *ticker) sendAction(dbd ui.Dashboard, cmd tickerpb.TickerAction_Command) {
+func (t *ticker) sendAction(dbd ui.Dashboard, cmd tickerpb.Command) {
 	clt := dbd.UI().TreeClient()
 	ctx := context.Background()
 	var event anypb.Any
 	if err := anypb.MarshalFrom(&event, &tickerpb.TickerAction{
-		Action: &tickerpb.TickerAction_Command_{Command: cmd},
+		Action: &tickerpb.TickerAction_Command{Command: cmd},
 	}, proto.MarshalOptions{}); err != nil {
 		dbd.UI().DisplayErr(err)
 		return
