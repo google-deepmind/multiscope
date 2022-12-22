@@ -6,6 +6,7 @@ import (
 	tickerpb "multiscope/protos/ticker_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 	"multiscope/wasm/ui"
+	"multiscope/wasm/widgets"
 	"path/filepath"
 
 	"honnef.co/go/js/dom/v2"
@@ -16,11 +17,11 @@ func init() {
 }
 
 type player struct {
-	pb          tickerpb.PlayerInfo
-	node        *treepb.Node
-	root        *dom.HTMLParagraphElement
-	display     *dom.HTMLParagraphElement
-	timeControl *dom.HTMLDivElement
+	pb      tickerpb.PlayerInfo
+	node    *treepb.Node
+	root    *dom.HTMLParagraphElement
+	display *dom.HTMLParagraphElement
+	slider  *widgets.Slider
 }
 
 func newPlayer(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
@@ -30,15 +31,15 @@ func newPlayer(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	p.root.Class().Add("ticker-content")
 	p.display = owner.CreateChild(p.root, "p").(*dom.HTMLParagraphElement)
 	desc := dbd.NewDescriptor(node, nil, node.Path)
-	p.timeControl = p.newTimeControl(owner, p.root)
+	p.newTimeControl(dbd.UI(), p.root)
 	return NewPanel(filepath.Join(node.Path.Path...), desc, p)
 }
 
-func (p *player) newTimeControl(owner *ui.Owner, parent *dom.HTMLParagraphElement) *dom.HTMLDivElement {
+func (p *player) newTimeControl(gui ui.UI, parent *dom.HTMLParagraphElement) {
+	owner := gui.Owner()
 	timeControl := owner.CreateChild(parent, "div").(*dom.HTMLDivElement)
-	owner.NewSlider(timeControl, p.onSliderChange)
+	p.slider = widgets.NewSlider(gui, timeControl, p.onSliderChange)
 	p.createControls(owner, timeControl)
-	return timeControl
 }
 
 func (p *player) createControls(owner *ui.Owner, control dom.Element) {
@@ -65,7 +66,7 @@ func (p *player) sendTickViewAction(gui ui.UI, setTick *tickerpb.SetTickView) {
 	})
 }
 
-func (p *player) onSliderChange(gui ui.UI, slider *dom.HTMLInputElement) {
+func (p *player) onSliderChange(gui ui.UI, val float32) {
 	tline := p.pb.Timeline
 	if tline == nil {
 		return
@@ -74,13 +75,8 @@ func (p *player) onSliderChange(gui ui.UI, slider *dom.HTMLInputElement) {
 	if historyLength == 0 {
 		return
 	}
-	relative, err := ui.SliderValue(slider)
-	if err != nil {
-		gui.DisplayErr(err)
-		return
-	}
-	tick := uint64(relative*historyLength) + tline.OldestTick
-	if relative == 1 {
+	tick := uint64(val*historyLength) + tline.OldestTick
+	if val == 1 {
 		tick = math.MaxUint64
 	}
 	p.sendTickViewAction(gui, &tickerpb.SetTickView{

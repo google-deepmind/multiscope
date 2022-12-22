@@ -1,9 +1,6 @@
 package ui
 
 import (
-	"strconv"
-	"syscall/js"
-
 	"honnef.co/go/js/dom/v2"
 )
 
@@ -62,35 +59,4 @@ func (o *Owner) CreateTextNode(parent dom.Element, s string) *dom.Text {
 	el := o.html.CreateTextNode(s)
 	parent.AppendChild(el)
 	return el
-}
-
-const sliderRangeMax = 10000
-
-// NewSlider returns a new slider.
-func (o *Owner) NewSlider(parent dom.Element, f func(ui UI, slider *dom.HTMLInputElement)) *dom.HTMLInputElement {
-	container := o.CreateChild(parent, "div").(*dom.HTMLDivElement)
-	container.Class().Add("slidecontainer")
-	slider := o.CreateChild(container, "input").(*dom.HTMLInputElement)
-	slider.Class().Add("slider")
-	slider.SetAttribute("type", "range")
-	slider.SetAttribute("min", "0")
-	max := strconv.FormatUint(sliderRangeMax, 10)
-	slider.SetAttribute("max", max)
-	slider.SetAttribute("value", max)
-	listener := func(js.Value, []js.Value) any {
-		f(o.ui, slider)
-		return nil
-	}
-	slider.Set("oninput", js.FuncOf(listener))
-	return slider
-}
-
-// SliderValue returns the value of a slider between 0 and 1.
-func SliderValue(slider *dom.HTMLInputElement) (float32, error) {
-	valueS := slider.Get("value").String()
-	value, err := strconv.ParseInt(valueS, 10, 64)
-	if err != nil {
-		return -1, err
-	}
-	return float32(value) / sliderRangeMax, nil
 }
