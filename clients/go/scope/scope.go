@@ -79,12 +79,12 @@ func NewScalarWriter(name string, parent remote.Path) (*remote.ScalarWriter, err
 }
 
 // NewPlayer creates a new player in Multiscope.
-func NewPlayer(name string, parent remote.Path) (*remote.Player, error) {
+func NewPlayer(name string, ignorePause bool, parent remote.Path) (*remote.Player, error) {
 	clt, err := Client()
 	if err != nil {
 		return nil, err
 	}
-	return remote.NewPlayer(clt, name, parent)
+	return remote.NewPlayer(clt, name, ignorePause, parent)
 }
 
 // NewTicker creates a new Ticker in Multiscope.

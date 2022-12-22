@@ -18,14 +18,15 @@ type Player struct {
 }
 
 // NewPlayer creates a new group in the tree.
-func NewPlayer(clt *Client, name string, parent Path) (*Player, error) {
+func NewPlayer(clt *Client, name string, ignorePause bool, parent Path) (*Player, error) {
 	p := &Player{
 		clt: pbgrpc.NewTickersClient(clt.Connection()),
 	}
 	ctx := context.Background()
 	path := clt.toChildPath(name, parent)
 	rep, err := p.clt.NewPlayer(ctx, &pb.NewPlayerRequest{
-		Path: path.NodePath(),
+		Path:        path.NodePath(),
+		IgnorePause: ignorePause,
 	})
 	if err != nil {
 		return nil, err

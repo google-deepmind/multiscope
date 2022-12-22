@@ -52,6 +52,10 @@ message Player {
 message NewPlayerRequest {
   // Path in the tree.
   multiscope.NodePath path = 1;
+
+  // Force the player to ignore when the UI sends a pause signal.
+  // This is useful when the reader cannot stop reading the data.
+  bool ignorePause = 2;
 }
 
 // Response after creating a new player in the tree.

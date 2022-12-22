@@ -37,7 +37,32 @@ func newPlayer(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 func (p *player) newTimeControl(owner *ui.Owner, parent *dom.HTMLParagraphElement) *dom.HTMLDivElement {
 	timeControl := owner.CreateChild(parent, "div").(*dom.HTMLDivElement)
 	owner.NewSlider(timeControl, p.onSliderChange)
+	p.createControls(owner, timeControl)
 	return timeControl
+}
+
+func (p *player) createControls(owner *ui.Owner, control dom.Element) {
+	owner.NewIconButton(control, "play_arrow", func(gui ui.UI, ev dom.Event) {
+		p.sendControlAction(gui, tickerpb.Command_RUN)
+	})
+	owner.NewIconButton(control, "pause", func(gui ui.UI, ev dom.Event) {
+		p.sendControlAction(gui, tickerpb.Command_PAUSE)
+	})
+	owner.NewIconButton(control, "skip_next", func(gui ui.UI, ev dom.Event) {
+		p.sendControlAction(gui, tickerpb.Command_STEP)
+	})
+}
+
+func (p *player) sendControlAction(gui ui.UI, cmd tickerpb.Command) {
+	ui.SendEvent(gui, p.node.Path, &tickerpb.PlayerAction{
+		Action: &tickerpb.PlayerAction_Command{Command: cmd},
+	})
+}
+
+func (p *player) sendTickViewAction(gui ui.UI, setTick *tickerpb.SetTickView) {
+	ui.SendEvent(gui, p.node.Path, &tickerpb.PlayerAction{
+		Action: &tickerpb.PlayerAction_TickView{TickView: setTick},
+	})
 }
 
 func (p *player) onSliderChange(gui ui.UI, slider *dom.HTMLInputElement) {
@@ -58,10 +83,8 @@ func (p *player) onSliderChange(gui ui.UI, slider *dom.HTMLInputElement) {
 	if relative == 1 {
 		tick = math.MaxUint64
 	}
-	ui.SendEvent(gui, p.node.Path, &tickerpb.PlayerAction{
-		Action: &tickerpb.PlayerAction_TickView{TickView: &tickerpb.SetTickView{
-			TickCommand: &tickerpb.SetTickView_ToDisplay{ToDisplay: tick}},
-		},
+	p.sendTickViewAction(gui, &tickerpb.SetTickView{
+		TickCommand: &tickerpb.SetTickView_ToDisplay{ToDisplay: tick},
 	})
 }
 

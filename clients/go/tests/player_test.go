@@ -24,7 +24,7 @@ func TestPlayerTimeline(t *testing.T) {
 	}
 
 	// Create the tree.
-	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, nil)
+	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +62,7 @@ func TestPlayerTimelineCleanup(t *testing.T) {
 	}
 
 	// Create the tree.
-	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, nil)
+	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestPlayerEmptyTimeline(t *testing.T) {
 	}
 
 	// Create the tree.
-	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, nil)
+	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
