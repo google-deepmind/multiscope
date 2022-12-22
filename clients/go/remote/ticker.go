@@ -2,9 +2,9 @@ package remote
 
 import (
 	"context"
-	"sync"
 	"time"
 
+	"multiscope/internal/control"
 	"multiscope/internal/period"
 	"multiscope/internal/server/events"
 	pb "multiscope/protos/ticker_go_proto"
@@ -19,11 +19,6 @@ import (
 )
 
 type (
-	pauseProtected struct {
-		mut   sync.Mutex
-		pause bool
-	}
-
 	// Caller gets called by the Ticker when it ticks.
 	Caller func() error
 
@@ -33,7 +28,6 @@ type (
 		clt    pbgrpc.TickersClient
 		ticker *pb.Ticker
 
-		period  time.Duration
 		tick    int64
 		callers []Caller
 
@@ -41,34 +35,19 @@ type (
 		experimentPeriod period.Period
 		callbackPeriod   period.Period
 
-		toTick        chan func() error
-		wait          chan bool
-		pauseNextStep pauseProtected
+		control *control.Control
 	}
 )
-
-func (p *pauseProtected) set(pause bool) {
-	p.mut.Lock()
-	defer p.mut.Unlock()
-	p.pause = pause
-}
-
-func (p *pauseProtected) get() bool {
-	p.mut.Lock()
-	defer p.mut.Unlock()
-	return p.pause
-}
 
 const measureStepSize = .99
 
 // NewTicker creates a new ticker node in tree.
 func NewTicker(clt *Client, name string, parent Path) (*Ticker, error) {
-	const channelBuffer = 10
 	t := &Ticker{
-		clt:    pbgrpc.NewTickersClient(clt.Connection()),
-		tick:   -1,
-		toTick: make(chan func() error, channelBuffer),
-		wait:   make(chan bool, channelBuffer),
+		clt:  pbgrpc.NewTickersClient(clt.Connection()),
+		tick: -1,
+
+		control: control.New(),
 	}
 	t.totalPeriod.HistoryTrace = measureStepSize
 	t.experimentPeriod.HistoryTrace = measureStepSize
@@ -97,32 +76,7 @@ func NewTicker(clt *Client, name string, parent Path) (*Ticker, error) {
 
 	// Subscribe builtin callbacks.
 	t.Subscribe(t.writeData)
-	t.Subscribe(t.processTickFunc)
 	return t, nil
-}
-
-func (t *Ticker) processSetPeriod(msg *pb.SetPeriod) error {
-	p := time.Duration(msg.GetPeriodMs())
-	t.toTick <- func() error {
-		return t.SetPeriod(p * time.Millisecond)
-	}
-	return nil
-}
-
-func (t *Ticker) processCommand(cmd pb.Command) error {
-	switch cmd.Number() {
-	case pb.Command_STEP.Number():
-		t.pauseNextStep.set(true)
-		t.wait <- true
-	case pb.Command_PAUSE.Number():
-		t.pauseNextStep.set(true)
-	case pb.Command_RUN.Number():
-		t.pauseNextStep.set(false)
-		t.wait <- true
-	default:
-		return errors.Errorf("command not supported: %q", cmd.String())
-	}
-	return nil
 }
 
 var tickerActionURL = string(proto.MessageName(&pb.TickerAction{}))
@@ -142,9 +96,10 @@ func (t *Ticker) processEvent(event *treepb.Event) (bool, error) {
 	var err error
 	switch a := action.Action.(type) {
 	case *pb.TickerAction_SetPeriod:
-		err = t.processSetPeriod(a.SetPeriod)
+		period := time.Duration(a.SetPeriod.PeriodMs) * time.Millisecond
+		t.control.SetPeriod(period)
 	case *pb.TickerAction_Command:
-		err = t.processCommand(a.Command)
+		err = t.control.ProcessCommand(a.Command)
 	default:
 		err = errors.Errorf("command not supported: %q", a)
 	}
@@ -160,17 +115,6 @@ func (t *Ticker) callCallers() error {
 		err = multierr.Append(err, caller())
 	}
 	return err
-}
-
-func (t *Ticker) processTickFunc() (err error) {
-	for {
-		select {
-		case f := <-t.toTick:
-			err = multierr.Append(err, f())
-		default:
-			return
-		}
-	}
 }
 
 func (t *Ticker) writeData() error {
@@ -198,21 +142,15 @@ func (t *Ticker) writeData() error {
 
 // Pause the ticker at the next step.
 func (t *Ticker) Pause() {
-	t.pauseNextStep.set(true)
+	t.control.Pause()
 }
 
 // Tick the remote ticker.
 func (t *Ticker) Tick() error {
-	expPeriod := t.experimentPeriod.Sample()
+	t.experimentPeriod.Sample()
 	defer t.experimentPeriod.Start()
 
-	if expPeriod < t.period {
-		time.Sleep(t.period - expPeriod)
-	}
-
-	if t.pauseNextStep.get() {
-		<-t.wait
-	}
+	t.control.WaitNextStep()
 
 	t.tick++
 	t.totalPeriod.Sample()
@@ -233,6 +171,6 @@ func (t *Ticker) CurrentTick() int64 {
 
 // SetPeriod sets the period of the ticker.
 func (t *Ticker) SetPeriod(p time.Duration) error {
-	t.period = p
+	t.control.SetPeriod(p)
 	return nil
 }
