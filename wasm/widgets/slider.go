@@ -5,6 +5,7 @@ import (
 	"multiscope/wasm/ui"
 	"strconv"
 	"syscall/js"
+	"time"
 
 	"honnef.co/go/js/dom/v2"
 )
@@ -14,14 +15,15 @@ type Slider struct {
 	ui ui.UI
 	el *dom.HTMLInputElement
 
-	onChange func(ui.UI, float32)
+	onChange   func(ui.UI, float32)
+	lastChange time.Time
 }
 
 const sliderRangeMax = 10000
 
 // NewSlider creates a new slider in a parent.
 func NewSlider(gui ui.UI, parent dom.Element, onChange func(ui.UI, float32)) *Slider {
-	s := &Slider{ui: gui}
+	s := &Slider{ui: gui, onChange: onChange}
 	owner := gui.Owner()
 	container := owner.CreateChild(parent, "div").(*dom.HTMLDivElement)
 	container.Class().Add("slidecontainer")
@@ -44,6 +46,7 @@ func (s *Slider) onEvent(js.Value, []js.Value) any {
 	if err != nil {
 		s.ui.DisplayErr(err)
 	}
+	s.lastChange = time.Now()
 	go s.onChange(s.ui, v)
 	return nil
 }
@@ -56,4 +59,10 @@ func (s *Slider) Value() (float32, error) {
 		return -1, fmt.Errorf("cannot parse value from slider: %w", err)
 	}
 	return float32(value) / sliderRangeMax, nil
+}
+
+// Set the value of the slider.
+// The function does nothing if the user sets the slider a short time ago.
+func (s *Slider) Set(v float32) {
+	s.el.Set("value", int(v*sliderRangeMax))
 }

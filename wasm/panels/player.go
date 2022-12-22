@@ -124,6 +124,7 @@ func (p *player) Display(data *treepb.NodeData) error {
 		tline.HistoryLength,
 		tline.StorageCapacity,
 	))
+	p.slider.Set(float32(tline.DisplayTick-tline.OldestTick) / float32(tline.HistoryLength))
 	return nil
 }
 
