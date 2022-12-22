@@ -9,6 +9,7 @@ import (
 	pb "multiscope/protos/tree_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
 
+	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
@@ -27,6 +28,14 @@ func PathToNodes(ctx context.Context, clt pbgrpc.TreeClient, paths ...[]string) 
 	}
 	if len(paths) != len(reply.Nodes) {
 		return nil, fmt.Errorf("unexpected server reply, got %d nodes back, want %d nodes back", len(reply.Nodes), len(paths))
+	}
+	for i, node := range reply.Nodes {
+		if node.Error != "" {
+			err = multierr.Append(err, fmt.Errorf("cannot fetch node %d at path %v: %v", i, paths[i], node.Error))
+		}
+	}
+	if err != nil {
+		return nil, err
 	}
 	return reply.Nodes, nil
 }

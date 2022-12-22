@@ -1,6 +1,8 @@
 package remote
 
 import (
+	"context"
+	pb "multiscope/protos/tree_go_proto"
 	"sync"
 )
 
@@ -48,6 +50,17 @@ func (c *ClientNode) Client() *Client {
 // Path of the ticker in the tree.
 func (c *ClientNode) Path() Path {
 	return c.path
+}
+
+// Close the node by removing it from the tree.
+func (c *ClientNode) Close() error {
+	ctx := context.Background()
+	_, err := c.Client().TreeClient().Delete(ctx, &pb.DeleteRequest{
+		Path: &pb.NodePath{
+			Path: c.Path(),
+		},
+	})
+	return err
 }
 
 // WithShouldWrite is a writer with a ShouldWrite method.

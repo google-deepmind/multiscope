@@ -16,8 +16,15 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
-// Ticker01Name is the name of the ticker node.
-const Ticker01Name = "Ticker01"
+// Names for testing writers.
+const (
+	Ticker01Name = "Ticker01"
+
+	Ticker01HTMLWriterName = "TickerHTML01"
+
+	// Ticker01NumTicks is the number of ticks the ticker needs to tick.
+	Ticker01NumTicks = 10
+)
 
 var (
 	// TickerData is the data to send to a ticker to test it.

@@ -2,6 +2,7 @@ package base
 
 import (
 	"fmt"
+	"io"
 	"sort"
 	"strconv"
 	"strings"
@@ -10,6 +11,8 @@ import (
 	"multiscope/internal/server/core"
 	"multiscope/internal/server/treeservice"
 	pb "multiscope/protos/tree_go_proto"
+
+	"github.com/pkg/errors"
 )
 
 // Group implements a Parent node to group a set of node together.
@@ -59,6 +62,25 @@ func (g *Group) AddChild(name string, child core.Node) string {
 	}
 	g.children[nodeName] = child
 	return nodeName
+}
+
+// DeleteChild deletes a child in the receiver group.
+// If the child implements io.Close, calls the method before removing the node from the group.
+func (g *Group) DeleteChild(childName string) error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
+	node := g.children[childName]
+	if node == nil {
+		return errors.Errorf("%q is not a child of this group (available children are: %v)", childName, core.ChildrenNames(g))
+	}
+	closer, ok := node.(io.Closer)
+	if ok {
+		if err := closer.Close(); err != nil {
+			return err
+		}
+	}
+	delete(g.children, childName)
+	return nil
 }
 
 // Child returns a child node given its ID.

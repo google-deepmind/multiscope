@@ -12,7 +12,7 @@ import (
 func ChildrenNames(parent Parent) string {
 	children, err := parent.Children()
 	if err != nil {
-		return fmt.Sprintf("<list of children unavailable: %v", err)
+		return fmt.Sprintf("list of children unavailable: %v", err)
 	}
 	return fmt.Sprintf("%v", children)
 }

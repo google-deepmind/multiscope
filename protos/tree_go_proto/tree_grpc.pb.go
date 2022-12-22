@@ -36,6 +36,8 @@ type TreeClient interface {
 	ActivePaths(ctx context.Context, in *ActivePathsRequest, opts ...grpc.CallOption) (Tree_ActivePathsClient, error)
 	// Request a stream of events from the backend.
 	StreamEvents(ctx context.Context, in *StreamEventsRequest, opts ...grpc.CallOption) (Tree_StreamEventsClient, error)
+	// Delete a node and its children in the tree.
+	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteReply, error)
 }
 
 type treeClient struct {
@@ -146,6 +148,15 @@ func (x *treeStreamEventsClient) Recv() (*Event, error) {
 	return m, nil
 }
 
+func (c *treeClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteReply, error) {
+	out := new(DeleteReply)
+	err := c.cc.Invoke(ctx, "/multiscope.Tree/Delete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TreeServer is the server API for Tree service.
 // All implementations must embed UnimplementedTreeServer
 // for forward compatibility
@@ -164,6 +175,8 @@ type TreeServer interface {
 	ActivePaths(*ActivePathsRequest, Tree_ActivePathsServer) error
 	// Request a stream of events from the backend.
 	StreamEvents(*StreamEventsRequest, Tree_StreamEventsServer) error
+	// Delete a node and its children in the tree.
+	Delete(context.Context, *DeleteRequest) (*DeleteReply, error)
 	mustEmbedUnimplementedTreeServer()
 }
 
@@ -188,6 +201,9 @@ func (UnimplementedTreeServer) ActivePaths(*ActivePathsRequest, Tree_ActivePaths
 }
 func (UnimplementedTreeServer) StreamEvents(*StreamEventsRequest, Tree_StreamEventsServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamEvents not implemented")
+}
+func (UnimplementedTreeServer) Delete(context.Context, *DeleteRequest) (*DeleteReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedTreeServer) mustEmbedUnimplementedTreeServer() {}
 
@@ -316,6 +332,24 @@ func (x *treeStreamEventsServer) Send(m *Event) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Tree_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TreeServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/multiscope.Tree/Delete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TreeServer).Delete(ctx, req.(*DeleteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Tree_ServiceDesc is the grpc.ServiceDesc for Tree service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -338,6 +372,10 @@ var Tree_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResetState",
 			Handler:    _Tree_ResetState_Handler,
+		},
+		{
+			MethodName: "Delete",
+			Handler:    _Tree_Delete_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -41,6 +41,9 @@ type (
 		ChildAdder
 
 		Path() *Path
+
+		// Delete a node in the tree.
+		Delete(path []string) error
 	}
 )
 

@@ -4,6 +4,7 @@ package treeservice
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 
 	"multiscope/internal/httpgrpc"
@@ -166,6 +167,18 @@ func (s *TreeServer) ResetState(ctx context.Context, req *pb.ResetStateRequest) 
 	s.Registry = s.Registry.ReplaceState(s.state)
 	s.toActivePaths.dispatch()
 	return &pb.ResetStateReply{}, nil
+}
+
+// Delete a node in the tree.
+func (s *TreeServer) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.DeleteReply, error) {
+	var path []string
+	if req.Path != nil {
+		path = req.Path.Path
+	}
+	if err := s.state.Root().Delete(path); err != nil {
+		return nil, fmt.Errorf("cannot delete node at path %v: %w", path, err)
+	}
+	return &pb.DeleteReply{}, nil
 }
 
 // Desc returns a description of the service.
