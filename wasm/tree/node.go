@@ -42,9 +42,9 @@ func (el *Element) newNode(parent *Node, name string) (*Node, error) {
 	n.item = owner.Doc().CreateElement("li").(dom.HTMLElement)
 	n.item.Class().Add(toStyleClass(path))
 	if node.HasChildren {
-		n.caret = owner.NewTextButton(n.item, "▶ ", func(ev dom.Event) {
+		n.caret = owner.NewTextButton(n.item, "▶ ", func(gui ui.UI, ev dom.Event) {
 			if err := n.expand(); err != nil {
-				el.ui.DisplayErr(err)
+				gui.DisplayErr(err)
 			}
 		})
 	}
@@ -60,9 +60,9 @@ func (el *Element) newNode(parent *Node, name string) (*Node, error) {
 	return n, nil
 }
 
-func (n *Node) openPanel(dom.Event) {
-	if err := n.el.ui.Dashboard().OpenPanel(n.node); err != nil {
-		n.el.ui.DisplayErr(err)
+func (n *Node) openPanel(gui ui.UI, _ dom.Event) {
+	if err := gui.Dashboard().OpenPanel(n.node); err != nil {
+		gui.DisplayErr(err)
 	}
 }
 

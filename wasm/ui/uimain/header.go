@@ -1,6 +1,8 @@
 package uimain
 
 import (
+	"multiscope/wasm/ui"
+
 	"github.com/pkg/errors"
 	"honnef.co/go/js/dom/v2"
 )
@@ -39,17 +41,17 @@ func newHeader(mui *UI) (*Header, error) {
 	return h, nil
 }
 
-func (h *Header) reloadLayout(dom.Event) {
+func (h *Header) reloadLayout(ui.UI, dom.Event) {
 	if err := h.ui.layout.Dashboard().refresh(); err != nil {
 		h.ui.DisplayErr(err)
 	}
 }
 
-func (h *Header) emptyLayout(dom.Event) {
+func (h *Header) emptyLayout(ui.UI, dom.Event) {
 	h.ui.layout.Dashboard().closeAll()
 }
 
-func (h *Header) toggleTreeSideBar(dom.Event) {
+func (h *Header) toggleTreeSideBar(ui.UI, dom.Event) {
 	left := h.ui.Layout().LeftBar()
 	if left.isVisible() {
 		left.hide()

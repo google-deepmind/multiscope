@@ -1,15 +1,12 @@
 package panels
 
 import (
-	"context"
 	"fmt"
 	tickerpb "multiscope/protos/ticker_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 	"multiscope/wasm/ui"
 	"path/filepath"
 
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/anypb"
 	"honnef.co/go/js/dom/v2"
 )
 
@@ -31,43 +28,27 @@ func newTicker(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	dsp.root.Class().Add("ticker-content")
 	dsp.display = owner.CreateChild(dsp.root, "p").(*dom.HTMLParagraphElement)
 	control := owner.CreateChild(dsp.root, "p").(*dom.HTMLParagraphElement)
-	dsp.createControls(dbd, control)
+	dsp.createControls(owner, control)
 	desc := dbd.NewDescriptor(node, nil, node.Path)
 	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
 }
 
-func (t *ticker) createControls(dbd ui.Dashboard, control *dom.HTMLParagraphElement) {
-	owner := dbd.UI().Owner()
-	owner.NewIconButton(control, "play_arrow", func(ev dom.Event) {
-		t.sendAction(dbd, tickerpb.Command_RUN)
+func (t *ticker) createControls(owner *ui.Owner, control *dom.HTMLParagraphElement) {
+	owner.NewIconButton(control, "play_arrow", func(gui ui.UI, ev dom.Event) {
+		t.sendAction(gui, tickerpb.Command_RUN)
 	})
-	owner.NewIconButton(control, "pause", func(ev dom.Event) {
-		t.sendAction(dbd, tickerpb.Command_PAUSE)
+	owner.NewIconButton(control, "pause", func(gui ui.UI, ev dom.Event) {
+		t.sendAction(gui, tickerpb.Command_PAUSE)
 	})
-	owner.NewIconButton(control, "skip_next", func(ev dom.Event) {
-		t.sendAction(dbd, tickerpb.Command_STEP)
+	owner.NewIconButton(control, "skip_next", func(gui ui.UI, ev dom.Event) {
+		t.sendAction(gui, tickerpb.Command_STEP)
 	})
 }
 
-func (t *ticker) sendAction(dbd ui.Dashboard, cmd tickerpb.Command) {
-	clt := dbd.UI().TreeClient()
-	ctx := context.Background()
-	var event anypb.Any
-	if err := anypb.MarshalFrom(&event, &tickerpb.TickerAction{
+func (t *ticker) sendAction(gui ui.UI, cmd tickerpb.Command) {
+	ui.SendEvent(gui, t.node.Path, &tickerpb.TickerAction{
 		Action: &tickerpb.TickerAction_Command{Command: cmd},
-	}, proto.MarshalOptions{}); err != nil {
-		dbd.UI().DisplayErr(err)
-		return
-	}
-	_, err := clt.SendEvents(ctx, &treepb.SendEventsRequest{
-		Events: []*treepb.Event{{
-			Path:    t.node.Path,
-			Payload: &event,
-		}},
 	})
-	if err != nil {
-		dbd.UI().DisplayErr(err)
-	}
 }
 
 const tickerHTML = `

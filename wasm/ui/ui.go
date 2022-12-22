@@ -2,6 +2,7 @@
 package ui
 
 import (
+	"context"
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/renderers"
@@ -9,6 +10,7 @@ import (
 	"syscall/js"
 
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 	"honnef.co/go/js/dom/v2"
 )
 
@@ -100,4 +102,26 @@ func RegisterBuilderPB(msg proto.Message, f PanelBuilder) {
 // (or nil if no builder has been registered).
 func Builder(mime string) PanelBuilder {
 	return mimeToDisplay[mime]
+}
+
+// SendEvent sends an event to the server.
+func SendEvent(ui UI, path *treepb.NodePath, msg proto.Message) {
+	go func() {
+		clt := ui.TreeClient()
+		ctx := context.Background()
+		var event anypb.Any
+		if err := anypb.MarshalFrom(&event, msg, proto.MarshalOptions{}); err != nil {
+			ui.DisplayErr(err)
+			return
+		}
+		_, err := clt.SendEvents(ctx, &treepb.SendEventsRequest{
+			Events: []*treepb.Event{{
+				Path:    path,
+				Payload: &event,
+			}},
+		})
+		if err != nil {
+			ui.DisplayErr(err)
+		}
+	}()
 }

@@ -9,12 +9,17 @@ import (
 	pbgrpc "multiscope/protos/tensor_go_proto"
 )
 
-// TensorWriter writes scalars to Multiscope.
-type TensorWriter struct {
-	*ClientNode
-	clt    pbgrpc.TensorsClient
-	writer *pb.Writer
-}
+type (
+	// Tensor is a minimal to describe tensors.
+	Tensor = tensor.Tensor
+
+	// TensorWriter writes scalars to Multiscope.
+	TensorWriter struct {
+		*ClientNode
+		clt    pbgrpc.TensorsClient
+		writer *pb.Writer
+	}
+)
 
 // NewTensorWriter creates a new writer to display tensors.
 func NewTensorWriter(clt *Client, name string, parent Path) (*TensorWriter, error) {

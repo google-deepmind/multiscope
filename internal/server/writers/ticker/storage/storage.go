@@ -14,7 +14,7 @@ type Storage struct {
 var storage = &Storage{}
 
 func init() {
-	storage.SetSize(1e9)
+	storage.SetSize(2e9)
 }
 
 // Global returns the global storage to use within a process.

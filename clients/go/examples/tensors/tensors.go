@@ -8,6 +8,7 @@ import (
 	"flag"
 
 	"log"
+	"multiscope/clients/go/examples/tensors/tensor"
 	"multiscope/clients/go/scope"
 )
 
@@ -16,43 +17,21 @@ var (
 	local    = flag.Bool("local", true, "open the port to local connection only")
 )
 
-type tensor struct {
-	shape []int
-	value []float32
-}
-
-func (t *tensor) Shape() []int {
-	return t.shape
-}
-
-func (t *tensor) Values() []float32 {
-	return t.value
-}
-
-func newTensor(shape ...int) *tensor {
-	l := 1
-	for _, s := range shape {
-		l *= s
-	}
-	return &tensor{
-		shape: shape,
-		value: make([]float32, l),
-	}
-}
-
-func writeData(w *scope.TensorWriter, rnd *rand.Rand, t *tensor, offset float32) error {
-	for i := range t.value {
-		t.value[i] = rnd.Float32() + offset
+func writeData(w *scope.TensorWriter, rnd *rand.Rand, t *tensor.Tensor, offset float32) error {
+	vals := t.Values()
+	for i := range vals {
+		vals[i] = rnd.Float32() + offset
 	}
 	return w.Write(t)
 }
 
-func writeGradient(w *scope.TensorWriter, t *tensor) error {
+func writeGradient(w *scope.TensorWriter, t *tensor.Tensor) error {
 	dim := float32(t.Shape()[0])
-	for i := range t.value {
-		t.value[i] = (float32(i) / dim) - (dim / 2)
+	vals := t.Values()
+	for i := range vals {
+		vals[i] = (float32(i) / dim) - (dim / 2)
 		if i > 50 && i < 55 {
-			t.value[i] = float32(math.NaN())
+			vals[i] = float32(math.NaN())
 		}
 	}
 	return w.Write(t)
@@ -89,8 +68,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tns := newTensor(20, 20)
-	rgb := newTensor(20, 20, 3)
+	tns := tensor.NewTensor(20, 20)
+	rgb := tensor.NewTensor(20, 20, 3)
 	rnd := rand.New(rand.NewSource(0))
 	for {
 		if err = ticker.Tick(); err != nil {

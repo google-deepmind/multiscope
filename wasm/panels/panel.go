@@ -101,9 +101,9 @@ func (pnl *Panel) displayError(err string) {
 	pnl.refreshErrorPanel(err)
 }
 
-func (pnl *Panel) processCloseEvent(ev dom.Event) {
+func (pnl *Panel) processCloseEvent(gui ui.UI, ev dom.Event) {
 	if err := pnl.Desc().Dashboard().ClosePanel(pnl); err != nil {
-		pnl.desc.Dashboard().UI().DisplayErr(err)
+		gui.DisplayErr(err)
 	}
 }
 

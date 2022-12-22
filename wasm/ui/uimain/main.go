@@ -47,7 +47,7 @@ func NewUI(pullerWorker *worker.Worker, c *uipb.Connect) *UI {
 		addr:   c,
 		window: dom.GetWindow(),
 	}
-	gui.owner = ui.NewOwner(gui.window.Document().(dom.HTMLDocument))
+	gui.owner = ui.NewOwner(gui, gui.window.Document().(dom.HTMLDocument))
 	conn := httpgrpc.Connect(gui.addr.Scheme, gui.addr.Host)
 	rootInfo, err := fetchRootInfo(conn)
 	if err != nil {
