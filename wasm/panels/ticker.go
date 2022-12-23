@@ -6,6 +6,7 @@ import (
 	treepb "multiscope/protos/tree_go_proto"
 	"multiscope/wasm/ui"
 	"path/filepath"
+	"time"
 
 	"honnef.co/go/js/dom/v2"
 )
@@ -22,18 +23,19 @@ type ticker struct {
 }
 
 func newTicker(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
-	dsp := &ticker{node: node}
+	t := &ticker{node: node}
 	owner := dbd.UI().Owner()
-	dsp.root = owner.Doc().CreateElement("p").(*dom.HTMLParagraphElement)
-	dsp.root.Class().Add("ticker-content")
-	dsp.display = owner.CreateChild(dsp.root, "p").(*dom.HTMLParagraphElement)
-	control := owner.CreateChild(dsp.root, "p").(*dom.HTMLParagraphElement)
-	dsp.createControls(owner, control)
+	t.root = owner.Doc().CreateElement("p").(*dom.HTMLParagraphElement)
+	t.root.Class().Add("ticker-content")
+	t.display = owner.CreateChild(t.root, "p").(*dom.HTMLParagraphElement)
+	t.createControls(owner, t.root)
+	t.createPeriod(owner, t.root)
 	desc := dbd.NewDescriptor(node, nil, node.Path)
-	return NewPanel(filepath.Join(node.Path.Path...), desc, dsp)
+	return NewPanel(filepath.Join(node.Path.Path...), desc, t)
 }
 
-func (t *ticker) createControls(owner *ui.Owner, control *dom.HTMLParagraphElement) {
+func (t *ticker) createControls(owner *ui.Owner, parent *dom.HTMLParagraphElement) {
+	control := owner.CreateChild(parent, "p").(*dom.HTMLParagraphElement)
 	owner.NewIconButton(control, "play_arrow", func(gui ui.UI, ev dom.Event) {
 		t.sendAction(gui, tickerpb.Command_RUN)
 	})
@@ -48,6 +50,30 @@ func (t *ticker) createControls(owner *ui.Owner, control *dom.HTMLParagraphEleme
 func (t *ticker) sendAction(gui ui.UI, cmd tickerpb.Command) {
 	ui.SendEvent(gui, t.node.Path, &tickerpb.TickerAction{
 		Action: &tickerpb.TickerAction_Command{Command: cmd},
+	})
+}
+
+func (t *ticker) createPeriod(owner *ui.Owner, parent *dom.HTMLParagraphElement) {
+	period := owner.CreateChild(parent, "p").(*dom.HTMLParagraphElement)
+	owner.NewTextButton(period, "0ms", func(gui ui.UI, ev dom.Event) {
+		t.sendPeriod(gui, 0)
+	})
+	owner.NewTextButton(period, "10ms", func(gui ui.UI, ev dom.Event) {
+		t.sendPeriod(gui, 10*time.Millisecond)
+	})
+	owner.NewTextButton(period, "100ms", func(gui ui.UI, ev dom.Event) {
+		t.sendPeriod(gui, 100*time.Millisecond)
+	})
+	owner.NewTextButton(period, "1s", func(gui ui.UI, ev dom.Event) {
+		t.sendPeriod(gui, time.Second)
+	})
+}
+
+func (t *ticker) sendPeriod(gui ui.UI, d time.Duration) {
+	ui.SendEvent(gui, t.node.Path, &tickerpb.TickerAction{
+		Action: &tickerpb.TickerAction_SetPeriod{SetPeriod: &tickerpb.SetPeriod{
+			PeriodMs: int64(d / time.Millisecond),
+		}},
 	})
 }
 

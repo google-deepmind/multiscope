@@ -5,6 +5,7 @@ import (
 	"multiscope/internal/control"
 	pb "multiscope/protos/ticker_go_proto"
 	"sync"
+	"time"
 
 	"go.uber.org/atomic"
 )
@@ -53,6 +54,11 @@ func (c *playerSyncControl) playerLoop() {
 
 func (c *playerSyncControl) pause() {
 	c.tline.Pause()
+}
+
+func (c *playerSyncControl) setPeriod(period *pb.SetPeriod) error {
+	c.tline.SetPeriod(time.Duration(period.PeriodMs) * time.Millisecond)
+	return nil
 }
 
 func (c *playerSyncControl) processCommand(cmd pb.Command) error {

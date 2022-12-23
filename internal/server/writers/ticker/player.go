@@ -19,6 +19,7 @@ import (
 
 type (
 	playerControl interface {
+		setPeriod(period *pb.SetPeriod) error
 		processCommand(cmd pb.Command) error
 		mainNextStep()
 		pause()
@@ -81,6 +82,8 @@ func (p *Player) processEvents(ev *treepb.Event) (bool, error) {
 		p.control.pause()
 	case *pb.PlayerAction_Command:
 		err = p.control.processCommand(act.Command)
+	case *pb.PlayerAction_SetPeriod:
+		err = p.control.setPeriod(act.SetPeriod)
 	default:
 		err = errors.Errorf("player action %T not implemented", act)
 	}

@@ -8,6 +8,7 @@ import (
 	"multiscope/wasm/ui"
 	"multiscope/wasm/widgets"
 	"path/filepath"
+	"time"
 
 	"honnef.co/go/js/dom/v2"
 )
@@ -40,9 +41,11 @@ func (p *player) newTimeControl(gui ui.UI, parent *dom.HTMLParagraphElement) {
 	timeControl := owner.CreateChild(parent, "div").(*dom.HTMLDivElement)
 	p.slider = widgets.NewSlider(gui, timeControl, p.onSliderChange)
 	p.createControls(owner, timeControl)
+	p.createPeriod(owner, timeControl)
 }
 
-func (p *player) createControls(owner *ui.Owner, control dom.Element) {
+func (p *player) createControls(owner *ui.Owner, parent dom.Element) {
+	control := owner.CreateChild(parent, "p").(*dom.HTMLParagraphElement)
 	owner.NewIconButton(control, "play_arrow", func(gui ui.UI, ev dom.Event) {
 		p.sendControlAction(gui, tickerpb.Command_RUN)
 	})
@@ -51,6 +54,30 @@ func (p *player) createControls(owner *ui.Owner, control dom.Element) {
 	})
 	owner.NewIconButton(control, "skip_next", func(gui ui.UI, ev dom.Event) {
 		p.sendControlAction(gui, tickerpb.Command_STEP)
+	})
+}
+
+func (p *player) createPeriod(owner *ui.Owner, parent dom.Element) {
+	period := owner.CreateChild(parent, "p").(*dom.HTMLParagraphElement)
+	owner.NewTextButton(period, "0ms", func(gui ui.UI, ev dom.Event) {
+		p.sendPeriodAction(gui, 0)
+	})
+	owner.NewTextButton(period, "10ms", func(gui ui.UI, ev dom.Event) {
+		p.sendPeriodAction(gui, 10*time.Millisecond)
+	})
+	owner.NewTextButton(period, "100ms", func(gui ui.UI, ev dom.Event) {
+		p.sendPeriodAction(gui, 100*time.Millisecond)
+	})
+	owner.NewTextButton(period, "1s", func(gui ui.UI, ev dom.Event) {
+		p.sendPeriodAction(gui, time.Second)
+	})
+}
+
+func (p *player) sendPeriodAction(gui ui.UI, d time.Duration) {
+	ui.SendEvent(gui, p.node.Path, &tickerpb.PlayerAction{
+		Action: &tickerpb.PlayerAction_SetPeriod{SetPeriod: &tickerpb.SetPeriod{
+			PeriodMs: int64(d / time.Millisecond),
+		}},
 	})
 }
 

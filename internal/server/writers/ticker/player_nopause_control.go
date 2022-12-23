@@ -51,6 +51,11 @@ func (c *playerNoPauseControl) playerLoop() {
 	}
 }
 
+func (c *playerNoPauseControl) setPeriod(period *pb.SetPeriod) error {
+	c.tline.SetPeriod(time.Duration(period.PeriodMs) * time.Millisecond)
+	return nil
+}
+
 func (c *playerNoPauseControl) processCommand(cmd pb.Command) error {
 	return c.tline.ProcessCommand(cmd)
 }
