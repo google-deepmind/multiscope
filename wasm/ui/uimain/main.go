@@ -24,6 +24,7 @@ import (
 	"github.com/pkg/errors"
 	"gonum.org/v1/plot/vg"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 	"honnef.co/go/js/dom/v2"
 )
 
@@ -36,6 +37,7 @@ type UI struct {
 	style      *style.Style
 	settings   *settings.Settings
 	puller     *puller
+	toServer   *toServer
 	layout     *Layout
 
 	lastError string
@@ -65,6 +67,7 @@ func NewUI(pullerWorker *worker.Worker, c *uipb.Connect) *UI {
 	})
 
 	gui.treeClient = treepb.NewTreeClient(conn)
+	gui.toServer = newToServer(gui)
 	gui.puller = newPuller(gui, pullerWorker)
 	if gui.layout, err = newLayout(gui, rootInfo); err != nil {
 		gui.DisplayErr(err)
@@ -142,6 +145,11 @@ func (gui *UI) newDefaultStyle() (*style.Style, error) {
 	fontFamily := bodyCSS.GetPropertyValue("font-family")
 	s.Set("", fontFamily, fontSize)
 	return s, nil
+}
+
+// SendToServer sends an event to the server.
+func (gui *UI) SendToServer(path *treepb.NodePath, msg proto.Message) {
+	gui.toServer.sendEvent(path, msg)
 }
 
 // Owner returns the owner of the DOM tree of the UI.

@@ -49,7 +49,7 @@ func (t *ticker) createControls(owner *ui.Owner, parent *dom.HTMLParagraphElemen
 }
 
 func (t *ticker) sendAction(gui ui.UI, cmd tickerpb.Command) {
-	ui.SendEvent(gui, t.node.Path, &tickerpb.TickerAction{
+	gui.SendToServer(t.node.Path, &tickerpb.TickerAction{
 		Action: &tickerpb.TickerAction_Command{Command: cmd},
 	})
 }
@@ -71,7 +71,7 @@ func (t *ticker) createPeriod(owner *ui.Owner, parent *dom.HTMLParagraphElement)
 }
 
 func (t *ticker) sendPeriod(gui ui.UI, d time.Duration) {
-	ui.SendEvent(gui, t.node.Path, &tickerpb.TickerAction{
+	gui.SendToServer(t.node.Path, &tickerpb.TickerAction{
 		Action: &tickerpb.TickerAction_SetPeriod{SetPeriod: &tickerpb.SetPeriod{
 			PeriodMs: int64(d / time.Millisecond),
 		}},

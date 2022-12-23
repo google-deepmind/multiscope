@@ -68,7 +68,7 @@ func (p *player) createPeriod(owner *ui.Owner, parent dom.HTMLElement) {
 }
 
 func (p *player) sendPeriod(gui ui.UI, d time.Duration) {
-	ui.SendEvent(gui, p.node.Path, &tickerpb.PlayerAction{
+	gui.SendToServer(p.node.Path, &tickerpb.PlayerAction{
 		Action: &tickerpb.PlayerAction_SetPeriod{SetPeriod: &tickerpb.SetPeriod{
 			PeriodMs: int64(d / time.Millisecond),
 		}},
@@ -76,13 +76,13 @@ func (p *player) sendPeriod(gui ui.UI, d time.Duration) {
 }
 
 func (p *player) sendControlAction(gui ui.UI, cmd tickerpb.Command) {
-	ui.SendEvent(gui, p.node.Path, &tickerpb.PlayerAction{
+	gui.SendToServer(p.node.Path, &tickerpb.PlayerAction{
 		Action: &tickerpb.PlayerAction_Command{Command: cmd},
 	})
 }
 
 func (p *player) sendTickViewAction(gui ui.UI, setTick *tickerpb.SetTickView) {
-	ui.SendEvent(gui, p.node.Path, &tickerpb.PlayerAction{
+	gui.SendToServer(p.node.Path, &tickerpb.PlayerAction{
 		Action: &tickerpb.PlayerAction_TickView{TickView: setTick},
 	})
 }
