@@ -31,7 +31,6 @@ body {
 
 /* Generic style for widgets */
 .icon {
-  vertical-align: top;
 }
 
 .button {
@@ -39,6 +38,17 @@ body {
   user-select: none;
   color: inherit;
   text-decoration: none;
+}
+
+.bordered {
+  border: 1px solid var(--main-fg-color);
+  border-radius: .3em;
+  padding: 4px;
+  margin: 2px;
+}
+
+.fit-content {
+  display: flex;
 }
 
 .slidecontainer {

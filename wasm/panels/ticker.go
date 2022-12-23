@@ -28,14 +28,15 @@ func newTicker(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 	t.root = owner.Doc().CreateElement("p").(*dom.HTMLParagraphElement)
 	t.root.Class().Add("ticker-content")
 	t.display = owner.CreateChild(t.root, "p").(*dom.HTMLParagraphElement)
-	t.createControls(owner, t.root)
 	t.createPeriod(owner, t.root)
+	t.createControls(owner, t.root)
 	desc := dbd.NewDescriptor(node, nil, node.Path)
 	return NewPanel(filepath.Join(node.Path.Path...), desc, t)
 }
 
 func (t *ticker) createControls(owner *ui.Owner, parent *dom.HTMLParagraphElement) {
-	control := owner.CreateChild(parent, "p").(*dom.HTMLParagraphElement)
+	control := owner.CreateChild(parent, "div").(dom.HTMLElement)
+	control.Class().Add("fit-content")
 	owner.NewIconButton(control, "play_arrow", func(gui ui.UI, ev dom.Event) {
 		t.sendAction(gui, tickerpb.Command_RUN)
 	})
@@ -53,20 +54,20 @@ func (t *ticker) sendAction(gui ui.UI, cmd tickerpb.Command) {
 	})
 }
 
+func newPeriodButton(owner *ui.Owner, parent dom.HTMLElement, label string, d time.Duration, cb func(ui.UI, time.Duration)) {
+	el := owner.NewTextButton(parent, label, func(gui ui.UI, ev dom.Event) {
+		cb(gui, d)
+	})
+	el.Class().Add("bordered")
+}
+
 func (t *ticker) createPeriod(owner *ui.Owner, parent *dom.HTMLParagraphElement) {
-	period := owner.CreateChild(parent, "p").(*dom.HTMLParagraphElement)
-	owner.NewTextButton(period, "0ms", func(gui ui.UI, ev dom.Event) {
-		t.sendPeriod(gui, 0)
-	})
-	owner.NewTextButton(period, "10ms", func(gui ui.UI, ev dom.Event) {
-		t.sendPeriod(gui, 10*time.Millisecond)
-	})
-	owner.NewTextButton(period, "100ms", func(gui ui.UI, ev dom.Event) {
-		t.sendPeriod(gui, 100*time.Millisecond)
-	})
-	owner.NewTextButton(period, "1s", func(gui ui.UI, ev dom.Event) {
-		t.sendPeriod(gui, time.Second)
-	})
+	period := owner.CreateChild(parent, "div").(dom.HTMLElement)
+	period.Class().Add("fit-content")
+	newPeriodButton(owner, period, "0ms", 0, t.sendPeriod)
+	newPeriodButton(owner, period, "10ms", 10*time.Millisecond, t.sendPeriod)
+	newPeriodButton(owner, period, "100ms", 100*time.Millisecond, t.sendPeriod)
+	newPeriodButton(owner, period, "1s", time.Second, t.sendPeriod)
 }
 
 func (t *ticker) sendPeriod(gui ui.UI, d time.Duration) {

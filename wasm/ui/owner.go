@@ -30,7 +30,6 @@ func (o *Owner) Doc() dom.HTMLDocument {
 // NewTextButton creates a new button with an event listener associated with it.
 func (o *Owner) NewTextButton(parent dom.Element, text string, f func(ui UI, ev dom.Event)) *dom.HTMLAnchorElement {
 	el := o.CreateChild(parent, "a").(*dom.HTMLAnchorElement)
-	el.Class().Add("icon")
 	el.Class().Add("button")
 	el.SetTextContent(text)
 	el.AddEventListener("click", true, func(ev dom.Event) {
