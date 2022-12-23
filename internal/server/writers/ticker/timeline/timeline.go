@@ -93,16 +93,16 @@ func (tl *Timeline) offsetDisplayTick(offset int64) {
 }
 
 // SetTickView set the view to display.
-func (tl *Timeline) SetTickView(view *pb.SetTickView) (bool, error) {
+func (tl *Timeline) SetTickView(view *pb.SetTickView) error {
 	switch cmd := view.TickCommand.(type) {
 	case *pb.SetTickView_ToDisplay:
 		tl.setDisplayTick(cmd.ToDisplay)
 	case *pb.SetTickView_Offset:
 		tl.offsetDisplayTick(cmd.Offset)
 	default:
-		return false, errors.Errorf("tick command not supported: %T", cmd)
+		return errors.Errorf("tick command not supported: %T", cmd)
 	}
-	return true, nil
+	return nil
 }
 
 type tickContext struct {
@@ -243,6 +243,14 @@ func (tl *Timeline) MarshalData(data *treepb.NodeData, path []string) {
 		current = child
 	}
 	proto.Merge(data, current.data)
+}
+
+// IsLastTickDisplayed returns true if the last tick is being displayed.
+func (tl *Timeline) IsLastTickDisplayed() bool {
+	tl.mux.Lock()
+	defer tl.mux.Unlock()
+
+	return tl.displayTick >= tl.currentTick
 }
 
 // Close the timeline and release all the memory.

@@ -119,12 +119,12 @@ func (p *player) Display(data *treepb.NodeData) error {
 	}
 	p.display.SetInnerHTML(fmt.Sprintf(playerHTML,
 		tline.DisplayTick,
-		tline.OldestTick+tline.HistoryLength,
+		tline.OldestTick+tline.HistoryLength-1,
 		tline.OldestTick,
 		tline.HistoryLength,
 		tline.StorageCapacity,
 	))
-	p.slider.Set(float32(tline.DisplayTick-tline.OldestTick) / float32(tline.HistoryLength))
+	p.slider.Set(float32(tline.DisplayTick-tline.OldestTick) / float32(tline.HistoryLength-1))
 	return nil
 }
 

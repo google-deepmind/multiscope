@@ -31,7 +31,7 @@ func RegisterService(srv grpc.ServiceRegistrar, state treeservice.StateProvider)
 // NewPlayer creates a new player in the tree.
 func (srv *Service) NewPlayer(ctx context.Context, req *pb.NewPlayerRequest) (*pb.NewPlayerResponse, error) {
 	state := srv.state() // use state throughout this RPC lifetime.
-	player := NewPlayer()
+	player := NewPlayer(req.IgnorePause)
 	playerPath, err := player.addToTree(state, req.GetPath())
 	if err != nil {
 		return nil, err

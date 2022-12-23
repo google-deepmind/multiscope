@@ -15,7 +15,7 @@ type Control struct {
 	pause     atomic.Bool
 	period    atomic.Int64
 
-	wait chan bool
+	pauseNextStep chan bool
 }
 
 const channelBuffer = 10
@@ -23,7 +23,7 @@ const channelBuffer = 10
 // New returns a new instance of control.
 func New() *Control {
 	return &Control{
-		wait: make(chan bool, channelBuffer),
+		pauseNextStep: make(chan bool, channelBuffer),
 	}
 }
 
@@ -32,19 +32,20 @@ func New() *Control {
 func (c *Control) ProcessCommand(cmd pb.Command) error {
 	switch cmd.Number() {
 	case pb.Command_STEP.Number():
-		c.pause.Store(true)
-		c.wait <- true
+		c.pauseNextStep <- true
 	case pb.Command_PAUSE.Number():
 		c.pause.Store(true)
 	case pb.Command_RUN.Number():
-		if c.pause.Load() {
-			c.pause.Store(false)
-			c.wait <- true
-		}
+		c.pauseNextStep <- false
 	default:
 		return errors.Errorf("command not supported: %q", cmd.String())
 	}
 	return nil
+}
+
+// IsOnPause returns true if the controller is on pause.
+func (c *Control) IsOnPause() bool {
+	return c.pause.Load()
 }
 
 // Pause the main user thread.
@@ -52,12 +53,25 @@ func (c *Control) Pause() {
 	c.pause.Store(true)
 }
 
+func (c *Control) drainPauseNextStep() {
+	for {
+		select {
+		case pause := <-c.pauseNextStep:
+			c.pause.Store(pause)
+		default:
+			return
+		}
+	}
+}
+
 // WaitNextStep waits the next step if the control is on pause.
 // If not, then the function returns immedialtly.
 func (c *Control) WaitNextStep() {
+	// Pause if we have to.
 	if c.pause.Load() {
-		<-c.wait
+		c.pause.Store(<-c.pauseNextStep)
 	}
+	c.drainPauseNextStep()
 
 	outPeriod := c.outPeriod.Sample()
 	wantPeriod := time.Duration(c.period.Load())

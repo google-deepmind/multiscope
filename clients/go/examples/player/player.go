@@ -40,7 +40,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// Create a new player to store frames in it.
-	player, err := scope.NewPlayer("player", false, nil)
+	player, err := scope.NewPlayer("player", true, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

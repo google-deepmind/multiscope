@@ -17,12 +17,23 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
-// Player is a group node that displays timing data.
-type Player struct {
-	*base.Group
+type (
+	playerControl interface {
+		processCommand(cmd pb.Command) error
+		mainNextStep()
+		pause()
+		close()
+	}
 
-	tline *timeline.Timeline
-}
+	// Player is a group node that displays timing data.
+	Player struct {
+		*base.Group
+
+		tline *timeline.Timeline
+
+		control playerControl
+	}
+)
 
 var (
 	_ core.Node       = (*Player)(nil)
@@ -31,11 +42,16 @@ var (
 )
 
 // NewPlayer returns a new writer to stream data tables.
-func NewPlayer() *Player {
+func NewPlayer(ignorePause bool) *Player {
 	p := &Player{
 		Group: base.NewGroup(mime.MultiscopePlayer),
 	}
 	p.tline = timeline.New(p.Group)
+	if ignorePause {
+		p.control = newNoPauseControl(p)
+	} else {
+		p.control = newSyncControl(p)
+	}
 	return p
 }
 
@@ -44,9 +60,12 @@ func (p *Player) addToTree(state treeservice.State, path *treepb.NodePath) (*cor
 	if err != nil {
 		return nil, err
 	}
-	state.Events().Register(playerPath.Path(), func() events.Callback {
+	_, err = state.Events().Register(playerPath.Path(), func() events.Callback {
 		return events.CallbackF(p.processEvents)
 	})
+	if err != nil {
+		return nil, err
+	}
 	return playerPath, nil
 }
 
@@ -55,16 +74,22 @@ func (p *Player) processEvents(ev *treepb.Event) (bool, error) {
 	if err := anypb.UnmarshalTo(ev.Payload, action, proto.UnmarshalOptions{}); err != nil {
 		return false, err
 	}
+	var err error
 	switch act := action.Action.(type) {
 	case *pb.PlayerAction_TickView:
-		return p.tline.SetTickView(act.TickView)
+		err = p.tline.SetTickView(act.TickView)
+		p.control.pause()
+	case *pb.PlayerAction_Command:
+		err = p.control.processCommand(act.Command)
 	default:
-		return false, errors.Errorf("player action %T not implemented", act)
+		err = errors.Errorf("player action %T not implemented", act)
 	}
+	return err == nil, err
 }
 
 // StoreFrame goes through the tree to store the current state of the nodes into a storage.
 func (p *Player) StoreFrame(data *tickerpb.PlayerData) error {
+	p.control.mainNextStep()
 	return p.tline.Store()
 }
 
@@ -92,5 +117,6 @@ func (p *Player) MarshalData(d *treepb.NodeData, path []string, lastTick uint32)
 
 // Close the player and release the storage memory.
 func (p *Player) Close() error {
+	p.control.close()
 	return p.tline.Close()
 }
