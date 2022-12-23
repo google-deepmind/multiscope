@@ -76,6 +76,7 @@ func (t *ticker) sendPeriod(gui ui.UI, d time.Duration) {
 			PeriodMs: int64(d / time.Millisecond),
 		}},
 	})
+	t.sendAction(gui, tickerpb.Command_RUN)
 }
 
 const tickerHTML = `

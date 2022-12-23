@@ -245,6 +245,14 @@ func (tl *Timeline) MarshalData(data *treepb.NodeData, path []string) {
 	proto.Merge(data, current.data)
 }
 
+// CurrentTick returns the next frame to store.
+func (tl *Timeline) CurrentTick() uint64 {
+	tl.mux.Lock()
+	defer tl.mux.Unlock()
+
+	return tl.currentTick
+}
+
 // IsLastTickDisplayed returns true if the last tick is being displayed.
 func (tl *Timeline) IsLastTickDisplayed() bool {
 	tl.mux.Lock()

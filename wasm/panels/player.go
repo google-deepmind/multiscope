@@ -73,6 +73,7 @@ func (p *player) sendPeriod(gui ui.UI, d time.Duration) {
 			PeriodMs: int64(d / time.Millisecond),
 		}},
 	})
+	p.sendControlAction(gui, tickerpb.Command_RUN)
 }
 
 func (p *player) sendControlAction(gui ui.UI, cmd tickerpb.Command) {
