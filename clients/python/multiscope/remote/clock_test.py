@@ -65,10 +65,10 @@ class TickerTest(parameterized.TestCase):
         pb_ticker = ticker_pb2.Ticker()
         pb_ticker.path.path.extend(["ticker"])
         mock_write = mock.MagicMock()
-        mock_tickers_stub.return_value.New.return_value = FakeTickerResponse(
+        mock_tickers_stub.return_value.NewTicker.return_value = FakeTickerResponse(
             ticker=pb_ticker
         )
-        mock_tickers_stub.return_value.Write = mock_write
+        mock_tickers_stub.return_value.WriteTicker = mock_write
 
         ticker = clock.Ticker("ticker")
         ticker.tick()

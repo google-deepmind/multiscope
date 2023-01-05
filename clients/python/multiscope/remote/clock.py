@@ -59,7 +59,7 @@ class Ticker(group.ParentNode):
         self._client = ticker_pb2_grpc.TickersStub(stream_client.channel)
         path = group.join_path_pb(parent, name)
         req = ticker_pb2.NewTickerRequest(path=path)
-        self._ticker = self._client.New(req).ticker
+        self._ticker = self._client.NewTicker(req).ticker
         super().__init__(path=tuple(self._ticker.path.path))
 
         # Set up event management.
@@ -109,10 +109,10 @@ class Ticker(group.ParentNode):
         data.periods.callbacks.CopyFrom(callbacks_d)
         data.periods.idle.CopyFrom(idle_d)
 
-        req = ticker_pb2.WriteRequest()
+        req = ticker_pb2.WriteTickerRequest()
         req.ticker.CopyFrom(self._ticker)
         req.data.CopyFrom(data)
-        self._client.Write(req)
+        self._client.WriteTicker(req)
 
     def tick(self) -> None:
         """Waits until it's time to continue running."""
@@ -164,19 +164,17 @@ class Ticker(group.ParentNode):
         for fn in self._event_listeners:
             fn(action)
 
-    def _process_control_cmd(self, command: ticker_pb2.TickerAction.Command) -> None:
-        if command == ticker_pb2.TickerAction.Command.NONE:
+    def _process_control_cmd(self, command: ticker_pb2.Command) -> None:
+        if command == ticker_pb2.Command.NONE:
             logging.info("Received a NONE TickerAction Command.")
-        elif command == ticker_pb2.TickerAction.Command.STEP:
+        elif command == ticker_pb2.Command.STEP:
             self.step()
-        elif command == ticker_pb2.TickerAction.Command.PAUSE:
+        elif command == ticker_pb2.Command.PAUSE:
             self.pause()
-        elif command == ticker_pb2.TickerAction.Command.RUN:
+        elif command == ticker_pb2.Command.RUN:
             self.run()
         else:
-            raise ValueError(
-                "Unexpected value of enum TickerAction.Command: {command}."
-            )
+            raise ValueError("Unexpected value of enum Command: {command}.")
 
     @property
     @control.method
