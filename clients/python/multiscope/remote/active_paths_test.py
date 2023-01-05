@@ -3,8 +3,8 @@ import threading
 from absl.testing import absltest
 
 from multiscope.protos import tree_pb2 as pb
-from multiscope import remote as multiscope
 from multiscope.remote import active_paths
+from multiscope.remote import server as multiscope
 from multiscope.remote import stream_client
 
 

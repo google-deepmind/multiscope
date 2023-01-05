@@ -6,7 +6,7 @@ from absl.testing import absltest
 from multiscope.protos import ticker_pb2
 from multiscope.protos import tree_pb2 as pb
 
-from multiscope import remote as multiscope
+from multiscope.remote import server as multiscope
 from multiscope.remote import stream_client
 from multiscope.remote.events import events
 
