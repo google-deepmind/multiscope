@@ -44,6 +44,11 @@ class TreeStub(object):
                 request_serializer=multiscope_dot_protos_dot_tree__pb2.StreamEventsRequest.SerializeToString,
                 response_deserializer=multiscope_dot_protos_dot_tree__pb2.Event.FromString,
                 )
+        self.Delete = channel.unary_unary(
+                '/multiscope.Tree/Delete',
+                request_serializer=multiscope_dot_protos_dot_tree__pb2.DeleteRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_tree__pb2.DeleteReply.FromString,
+                )
 
 
 class TreeServicer(object):
@@ -93,6 +98,13 @@ class TreeServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Delete(self, request, context):
+        """Delete a node and its children in the tree.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_TreeServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -125,6 +137,11 @@ def add_TreeServicer_to_server(servicer, server):
                     servicer.StreamEvents,
                     request_deserializer=multiscope_dot_protos_dot_tree__pb2.StreamEventsRequest.FromString,
                     response_serializer=multiscope_dot_protos_dot_tree__pb2.Event.SerializeToString,
+            ),
+            'Delete': grpc.unary_unary_rpc_method_handler(
+                    servicer.Delete,
+                    request_deserializer=multiscope_dot_protos_dot_tree__pb2.DeleteRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_tree__pb2.DeleteReply.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -235,5 +252,22 @@ class Tree(object):
         return grpc.experimental.unary_stream(request, target, '/multiscope.Tree/StreamEvents',
             multiscope_dot_protos_dot_tree__pb2.StreamEventsRequest.SerializeToString,
             multiscope_dot_protos_dot_tree__pb2.Event.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Delete(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/multiscope.Tree/Delete',
+            multiscope_dot_protos_dot_tree__pb2.DeleteRequest.SerializeToString,
+            multiscope_dot_protos_dot_tree__pb2.DeleteReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

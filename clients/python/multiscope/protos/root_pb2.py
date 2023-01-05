@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 from multiscope.protos import tree_pb2 as multiscope_dot_protos_dot_tree__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cmultiscope/protos/root.proto\x12\x0fmultiscope.root\x1a\x1cmultiscope/protos/tree.proto\"I\n\x08RootInfo\x12\x14\n\x0ckey_settings\x18\x01 \x01(\t\x12\'\n\x06layout\x18\x02 \x01(\x0b\x32\x17.multiscope.root.Layout\"5\n\nLayoutList\x12\'\n\tdisplayed\x18\x02 \x03(\x0b\x32\x14.multiscope.NodePath\"?\n\x06Layout\x12+\n\x04list\x18\x01 \x01(\x0b\x32\x1b.multiscope.root.LayoutListH\x00\x42\x08\n\x06layout\"-\n\x15SetKeySettingsRequest\x12\x14\n\x0ckey_settings\x18\x01 \x01(\t\"\x18\n\x16SetKeySettingsResponse\";\n\x10SetLayoutRequest\x12\'\n\x06layout\x18\x01 \x01(\x0b\x32\x17.multiscope.root.Layout\"\x13\n\x11SetLayoutResponse\"\x13\n\x11GetVersionRequest\"%\n\x12GetVersionResponse\x12\x0f\n\x07version\x18\x01 \x01(\t\"\x14\n\x12GetRootInfoRequest\">\n\x13GetRootInfoResponse\x12\'\n\x04info\x18\x01 \x01(\x0b\x32\x19.multiscope.root.RootInfo2\xf6\x02\n\x04Root\x12W\n\nGetVersion\x12\".multiscope.root.GetVersionRequest\x1a#.multiscope.root.GetVersionResponse\"\x00\x12Z\n\x0bGetRootInfo\x12#.multiscope.root.GetRootInfoRequest\x1a$.multiscope.root.GetRootInfoResponse\"\x00\x12\x63\n\x0eSetKeySettings\x12&.multiscope.root.SetKeySettingsRequest\x1a\'.multiscope.root.SetKeySettingsResponse\"\x00\x12T\n\tSetLayout\x12!.multiscope.root.SetLayoutRequest\x1a\".multiscope.root.SetLayoutResponse\"\x00\x42!Z\x1fmultiscope/protos/root_go_protob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cmultiscope/protos/root.proto\x12\x0fmultiscope.root\x1a\x1cmultiscope/protos/tree.proto\"I\n\x08RootInfo\x12\x14\n\x0ckey_settings\x18\x01 \x01(\t\x12\'\n\x06layout\x18\x02 \x01(\x0b\x32\x17.multiscope.root.Layout\"O\n\nLayoutList\x12\x18\n\x10\x64\x65\x66\x61ultRowHeight\x18\x01 \x01(\x05\x12\'\n\tdisplayed\x18\x02 \x03(\x0b\x32\x14.multiscope.NodePath\"?\n\x06Layout\x12+\n\x04list\x18\x01 \x01(\x0b\x32\x1b.multiscope.root.LayoutListH\x00\x42\x08\n\x06layout\"-\n\x15SetKeySettingsRequest\x12\x14\n\x0ckey_settings\x18\x01 \x01(\t\"\x18\n\x16SetKeySettingsResponse\";\n\x10SetLayoutRequest\x12\'\n\x06layout\x18\x01 \x01(\x0b\x32\x17.multiscope.root.Layout\"\x13\n\x11SetLayoutResponse\"\x13\n\x11GetVersionRequest\"%\n\x12GetVersionResponse\x12\x0f\n\x07version\x18\x01 \x01(\t\"\x14\n\x12GetRootInfoRequest\">\n\x13GetRootInfoResponse\x12\'\n\x04info\x18\x01 \x01(\x0b\x32\x19.multiscope.root.RootInfo2\xf6\x02\n\x04Root\x12W\n\nGetVersion\x12\".multiscope.root.GetVersionRequest\x1a#.multiscope.root.GetVersionResponse\"\x00\x12Z\n\x0bGetRootInfo\x12#.multiscope.root.GetRootInfoRequest\x1a$.multiscope.root.GetRootInfoResponse\"\x00\x12\x63\n\x0eSetKeySettings\x12&.multiscope.root.SetKeySettingsRequest\x1a\'.multiscope.root.SetKeySettingsResponse\"\x00\x12T\n\tSetLayout\x12!.multiscope.root.SetLayoutRequest\x1a\".multiscope.root.SetLayoutResponse\"\x00\x42!Z\x1fmultiscope/protos/root_go_protob\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'multiscope.protos.root_pb2', globals())
@@ -25,25 +25,25 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _ROOTINFO._serialized_start=79
   _ROOTINFO._serialized_end=152
   _LAYOUTLIST._serialized_start=154
-  _LAYOUTLIST._serialized_end=207
-  _LAYOUT._serialized_start=209
-  _LAYOUT._serialized_end=272
-  _SETKEYSETTINGSREQUEST._serialized_start=274
-  _SETKEYSETTINGSREQUEST._serialized_end=319
-  _SETKEYSETTINGSRESPONSE._serialized_start=321
-  _SETKEYSETTINGSRESPONSE._serialized_end=345
-  _SETLAYOUTREQUEST._serialized_start=347
-  _SETLAYOUTREQUEST._serialized_end=406
-  _SETLAYOUTRESPONSE._serialized_start=408
-  _SETLAYOUTRESPONSE._serialized_end=427
-  _GETVERSIONREQUEST._serialized_start=429
-  _GETVERSIONREQUEST._serialized_end=448
-  _GETVERSIONRESPONSE._serialized_start=450
-  _GETVERSIONRESPONSE._serialized_end=487
-  _GETROOTINFOREQUEST._serialized_start=489
-  _GETROOTINFOREQUEST._serialized_end=509
-  _GETROOTINFORESPONSE._serialized_start=511
-  _GETROOTINFORESPONSE._serialized_end=573
-  _ROOT._serialized_start=576
-  _ROOT._serialized_end=950
+  _LAYOUTLIST._serialized_end=233
+  _LAYOUT._serialized_start=235
+  _LAYOUT._serialized_end=298
+  _SETKEYSETTINGSREQUEST._serialized_start=300
+  _SETKEYSETTINGSREQUEST._serialized_end=345
+  _SETKEYSETTINGSRESPONSE._serialized_start=347
+  _SETKEYSETTINGSRESPONSE._serialized_end=371
+  _SETLAYOUTREQUEST._serialized_start=373
+  _SETLAYOUTREQUEST._serialized_end=432
+  _SETLAYOUTRESPONSE._serialized_start=434
+  _SETLAYOUTRESPONSE._serialized_end=453
+  _GETVERSIONREQUEST._serialized_start=455
+  _GETVERSIONREQUEST._serialized_end=474
+  _GETVERSIONRESPONSE._serialized_start=476
+  _GETVERSIONRESPONSE._serialized_end=513
+  _GETROOTINFOREQUEST._serialized_start=515
+  _GETROOTINFOREQUEST._serialized_end=535
+  _GETROOTINFORESPONSE._serialized_start=537
+  _GETROOTINFORESPONSE._serialized_end=599
+  _ROOT._serialized_start=602
+  _ROOT._serialized_end=976
 # @@protoc_insertion_point(module_scope)

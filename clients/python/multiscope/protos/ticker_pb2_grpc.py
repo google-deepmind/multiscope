@@ -6,7 +6,11 @@ from multiscope.protos import ticker_pb2 as multiscope_dot_protos_dot_ticker__pb
 
 
 class TickersStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """///////////////////////
+    Service
+    ///////////////////////
+
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -14,29 +18,57 @@ class TickersStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.New = channel.unary_unary(
-                '/multiscope.ticker.Tickers/New',
+        self.NewTicker = channel.unary_unary(
+                '/multiscope.ticker.Tickers/NewTicker',
                 request_serializer=multiscope_dot_protos_dot_ticker__pb2.NewTickerRequest.SerializeToString,
                 response_deserializer=multiscope_dot_protos_dot_ticker__pb2.NewTickerResponse.FromString,
                 )
-        self.Write = channel.unary_unary(
-                '/multiscope.ticker.Tickers/Write',
-                request_serializer=multiscope_dot_protos_dot_ticker__pb2.WriteRequest.SerializeToString,
-                response_deserializer=multiscope_dot_protos_dot_ticker__pb2.WriteResponse.FromString,
+        self.WriteTicker = channel.unary_unary(
+                '/multiscope.ticker.Tickers/WriteTicker',
+                request_serializer=multiscope_dot_protos_dot_ticker__pb2.WriteTickerRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_ticker__pb2.WriteTickerResponse.FromString,
+                )
+        self.NewPlayer = channel.unary_unary(
+                '/multiscope.ticker.Tickers/NewPlayer',
+                request_serializer=multiscope_dot_protos_dot_ticker__pb2.NewPlayerRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_ticker__pb2.NewPlayerResponse.FromString,
+                )
+        self.StoreFrame = channel.unary_unary(
+                '/multiscope.ticker.Tickers/StoreFrame',
+                request_serializer=multiscope_dot_protos_dot_ticker__pb2.StoreFrameRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_ticker__pb2.StoreFrameResponse.FromString,
                 )
 
 
 class TickersServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """///////////////////////
+    Service
+    ///////////////////////
 
-    def New(self, request, context):
+    """
+
+    def NewTicker(self, request, context):
         """Create a new ticker node in Multiscope.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Write(self, request, context):
+    def WriteTicker(self, request, context):
+        """Write ticker data.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def NewPlayer(self, request, context):
+        """Create a new player node in Multiscope.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StoreFrame(self, request, context):
         """Write ticker data.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -46,15 +78,25 @@ class TickersServicer(object):
 
 def add_TickersServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'New': grpc.unary_unary_rpc_method_handler(
-                    servicer.New,
+            'NewTicker': grpc.unary_unary_rpc_method_handler(
+                    servicer.NewTicker,
                     request_deserializer=multiscope_dot_protos_dot_ticker__pb2.NewTickerRequest.FromString,
                     response_serializer=multiscope_dot_protos_dot_ticker__pb2.NewTickerResponse.SerializeToString,
             ),
-            'Write': grpc.unary_unary_rpc_method_handler(
-                    servicer.Write,
-                    request_deserializer=multiscope_dot_protos_dot_ticker__pb2.WriteRequest.FromString,
-                    response_serializer=multiscope_dot_protos_dot_ticker__pb2.WriteResponse.SerializeToString,
+            'WriteTicker': grpc.unary_unary_rpc_method_handler(
+                    servicer.WriteTicker,
+                    request_deserializer=multiscope_dot_protos_dot_ticker__pb2.WriteTickerRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_ticker__pb2.WriteTickerResponse.SerializeToString,
+            ),
+            'NewPlayer': grpc.unary_unary_rpc_method_handler(
+                    servicer.NewPlayer,
+                    request_deserializer=multiscope_dot_protos_dot_ticker__pb2.NewPlayerRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_ticker__pb2.NewPlayerResponse.SerializeToString,
+            ),
+            'StoreFrame': grpc.unary_unary_rpc_method_handler(
+                    servicer.StoreFrame,
+                    request_deserializer=multiscope_dot_protos_dot_ticker__pb2.StoreFrameRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_ticker__pb2.StoreFrameResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -64,10 +106,14 @@ def add_TickersServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class Tickers(object):
-    """Missing associated documentation comment in .proto file."""
+    """///////////////////////
+    Service
+    ///////////////////////
+
+    """
 
     @staticmethod
-    def New(request,
+    def NewTicker(request,
             target,
             options=(),
             channel_credentials=None,
@@ -77,14 +123,14 @@ class Tickers(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/multiscope.ticker.Tickers/New',
+        return grpc.experimental.unary_unary(request, target, '/multiscope.ticker.Tickers/NewTicker',
             multiscope_dot_protos_dot_ticker__pb2.NewTickerRequest.SerializeToString,
             multiscope_dot_protos_dot_ticker__pb2.NewTickerResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def Write(request,
+    def WriteTicker(request,
             target,
             options=(),
             channel_credentials=None,
@@ -94,8 +140,42 @@ class Tickers(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/multiscope.ticker.Tickers/Write',
-            multiscope_dot_protos_dot_ticker__pb2.WriteRequest.SerializeToString,
-            multiscope_dot_protos_dot_ticker__pb2.WriteResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/multiscope.ticker.Tickers/WriteTicker',
+            multiscope_dot_protos_dot_ticker__pb2.WriteTickerRequest.SerializeToString,
+            multiscope_dot_protos_dot_ticker__pb2.WriteTickerResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def NewPlayer(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/multiscope.ticker.Tickers/NewPlayer',
+            multiscope_dot_protos_dot_ticker__pb2.NewPlayerRequest.SerializeToString,
+            multiscope_dot_protos_dot_ticker__pb2.NewPlayerResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def StoreFrame(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/multiscope.ticker.Tickers/StoreFrame',
+            multiscope_dot_protos_dot_ticker__pb2.StoreFrameRequest.SerializeToString,
+            multiscope_dot_protos_dot_ticker__pb2.StoreFrameResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -15,7 +15,7 @@ from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb
 from multiscope.protos import tree_pb2 as multiscope_dot_protos_dot_tree__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1emultiscope/protos/ticker.proto\x12\x11multiscope.ticker\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cmultiscope/protos/tree.proto\",\n\x06Ticker\x12\"\n\x04path\x18\x01 \x01(\x0b\x32\x14.multiscope.NodePath\"6\n\x10NewTickerRequest\x12\"\n\x04path\x18\x01 \x01(\x0b\x32\x14.multiscope.NodePath\">\n\x11NewTickerResponse\x12)\n\x06ticker\x18\x01 \x01(\x0b\x32\x19.multiscope.ticker.Ticker\"\x8e\x02\n\nTickerData\x12\x0c\n\x04tick\x18\x02 \x01(\x03\x12\x36\n\x07periods\x18\x03 \x01(\x0b\x32%.multiscope.ticker.TickerData.Periods\x1a\xb9\x01\n\x07Periods\x12(\n\x05total\x18\x01 \x01(\x0b\x32\x19.google.protobuf.Duration\x12-\n\nexperiment\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\x12,\n\tcallbacks\x18\x03 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\'\n\x04idle\x18\x04 \x01(\x0b\x32\x19.google.protobuf.Duration\"\xe7\x01\n\x0cTickerAction\x12>\n\tsetPeriod\x18\x01 \x01(\x0b\x32).multiscope.ticker.TickerAction.SetPeriodH\x00\x12:\n\x07\x63ommand\x18\x02 \x01(\x0e\x32\'.multiscope.ticker.TickerAction.CommandH\x00\x1a\x1e\n\tSetPeriod\x12\x11\n\tperiod_ms\x18\x01 \x01(\x03\"1\n\x07\x43ommand\x12\x08\n\x04NONE\x10\x00\x12\x08\n\x04STEP\x10\x01\x12\t\n\x05PAUSE\x10\x02\x12\x07\n\x03RUN\x10\x03\x42\x08\n\x06\x61\x63tion\"f\n\x0cWriteRequest\x12)\n\x06ticker\x18\x01 \x01(\x0b\x32\x19.multiscope.ticker.Ticker\x12+\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32\x1d.multiscope.ticker.TickerData\"\x0f\n\rWriteResponse2\xab\x01\n\x07Tickers\x12R\n\x03New\x12#.multiscope.ticker.NewTickerRequest\x1a$.multiscope.ticker.NewTickerResponse\"\x00\x12L\n\x05Write\x12\x1f.multiscope.ticker.WriteRequest\x1a .multiscope.ticker.WriteResponse\"\x00\x42#Z!multiscope/protos/ticker_go_protob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1emultiscope/protos/ticker.proto\x12\x11multiscope.ticker\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cmultiscope/protos/tree.proto\"\x1e\n\tSetPeriod\x12\x11\n\tperiod_ms\x18\x01 \x01(\x03\"D\n\x0bSetTickView\x12\x14\n\nto_display\x18\x01 \x01(\x04H\x00\x12\x10\n\x06offset\x18\x02 \x01(\x03H\x00\x42\r\n\x0btickCommand\",\n\x06Player\x12\"\n\x04path\x18\x01 \x01(\x0b\x32\x14.multiscope.NodePath\"K\n\x10NewPlayerRequest\x12\"\n\x04path\x18\x01 \x01(\x0b\x32\x14.multiscope.NodePath\x12\x13\n\x0bignorePause\x18\x02 \x01(\x08\">\n\x11NewPlayerResponse\x12)\n\x06player\x18\x01 \x01(\x0b\x32\x19.multiscope.ticker.Player\"\x1a\n\nPlayerData\x12\x0c\n\x04tick\x18\x01 \x01(\x04\"k\n\x11StoreFrameRequest\x12)\n\x06player\x18\x01 \x01(\x0b\x32\x19.multiscope.ticker.Player\x12+\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32\x1d.multiscope.ticker.PlayerData\"\x14\n\x12StoreFrameResponse\"g\n\x08TimeLine\x12\x14\n\x0c\x64isplay_tick\x18\x01 \x01(\x04\x12\x16\n\x0ehistory_length\x18\x02 \x01(\x04\x12\x13\n\x0boldest_tick\x18\x03 \x01(\x04\x12\x18\n\x10storage_capacity\x18\x04 \x01(\t\";\n\nPlayerInfo\x12-\n\x08timeline\x18\x01 \x01(\x0b\x32\x1b.multiscope.ticker.TimeLine\"\xae\x01\n\x0cPlayerAction\x12\x31\n\tsetPeriod\x18\x01 \x01(\x0b\x32\x1c.multiscope.ticker.SetPeriodH\x00\x12-\n\x07\x63ommand\x18\x02 \x01(\x0e\x32\x1a.multiscope.ticker.CommandH\x00\x12\x32\n\x08tickView\x18\x03 \x01(\x0b\x32\x1e.multiscope.ticker.SetTickViewH\x00\x42\x08\n\x06\x61\x63tion\",\n\x06Ticker\x12\"\n\x04path\x18\x01 \x01(\x0b\x32\x14.multiscope.NodePath\"6\n\x10NewTickerRequest\x12\"\n\x04path\x18\x01 \x01(\x0b\x32\x14.multiscope.NodePath\">\n\x11NewTickerResponse\x12)\n\x06ticker\x18\x01 \x01(\x0b\x32\x19.multiscope.ticker.Ticker\"\x8e\x02\n\nTickerData\x12\x0c\n\x04tick\x18\x02 \x01(\x03\x12\x36\n\x07periods\x18\x03 \x01(\x0b\x32%.multiscope.ticker.TickerData.Periods\x1a\xb9\x01\n\x07Periods\x12(\n\x05total\x18\x01 \x01(\x0b\x32\x19.google.protobuf.Duration\x12-\n\nexperiment\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\x12,\n\tcallbacks\x18\x03 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\'\n\x04idle\x18\x04 \x01(\x0b\x32\x19.google.protobuf.Duration\"z\n\x0cTickerAction\x12\x31\n\tsetPeriod\x18\x01 \x01(\x0b\x32\x1c.multiscope.ticker.SetPeriodH\x00\x12-\n\x07\x63ommand\x18\x02 \x01(\x0e\x32\x1a.multiscope.ticker.CommandH\x00\x42\x08\n\x06\x61\x63tion\"l\n\x12WriteTickerRequest\x12)\n\x06ticker\x18\x01 \x01(\x0b\x32\x19.multiscope.ticker.Ticker\x12+\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32\x1d.multiscope.ticker.TickerData\"\x15\n\x13WriteTickerResponse*1\n\x07\x43ommand\x12\x08\n\x04NONE\x10\x00\x12\x08\n\x04STEP\x10\x01\x12\t\n\x05PAUSE\x10\x02\x12\x07\n\x03RUN\x10\x03\x32\xfa\x02\n\x07Tickers\x12X\n\tNewTicker\x12#.multiscope.ticker.NewTickerRequest\x1a$.multiscope.ticker.NewTickerResponse\"\x00\x12^\n\x0bWriteTicker\x12%.multiscope.ticker.WriteTickerRequest\x1a&.multiscope.ticker.WriteTickerResponse\"\x00\x12X\n\tNewPlayer\x12#.multiscope.ticker.NewPlayerRequest\x1a$.multiscope.ticker.NewPlayerResponse\"\x00\x12[\n\nStoreFrame\x12$.multiscope.ticker.StoreFrameRequest\x1a%.multiscope.ticker.StoreFrameResponse\"\x00\x42#Z!multiscope/protos/ticker_go_protob\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'multiscope.protos.ticker_pb2', globals())
@@ -23,26 +23,46 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z!multiscope/protos/ticker_go_proto'
-  _TICKER._serialized_start=115
-  _TICKER._serialized_end=159
-  _NEWTICKERREQUEST._serialized_start=161
-  _NEWTICKERREQUEST._serialized_end=215
-  _NEWTICKERRESPONSE._serialized_start=217
-  _NEWTICKERRESPONSE._serialized_end=279
-  _TICKERDATA._serialized_start=282
-  _TICKERDATA._serialized_end=552
-  _TICKERDATA_PERIODS._serialized_start=367
-  _TICKERDATA_PERIODS._serialized_end=552
-  _TICKERACTION._serialized_start=555
-  _TICKERACTION._serialized_end=786
-  _TICKERACTION_SETPERIOD._serialized_start=695
-  _TICKERACTION_SETPERIOD._serialized_end=725
-  _TICKERACTION_COMMAND._serialized_start=727
-  _TICKERACTION_COMMAND._serialized_end=776
-  _WRITEREQUEST._serialized_start=788
-  _WRITEREQUEST._serialized_end=890
-  _WRITERESPONSE._serialized_start=892
-  _WRITERESPONSE._serialized_end=907
-  _TICKERS._serialized_start=910
-  _TICKERS._serialized_end=1081
+  _COMMAND._serialized_start=1602
+  _COMMAND._serialized_end=1651
+  _SETPERIOD._serialized_start=115
+  _SETPERIOD._serialized_end=145
+  _SETTICKVIEW._serialized_start=147
+  _SETTICKVIEW._serialized_end=215
+  _PLAYER._serialized_start=217
+  _PLAYER._serialized_end=261
+  _NEWPLAYERREQUEST._serialized_start=263
+  _NEWPLAYERREQUEST._serialized_end=338
+  _NEWPLAYERRESPONSE._serialized_start=340
+  _NEWPLAYERRESPONSE._serialized_end=402
+  _PLAYERDATA._serialized_start=404
+  _PLAYERDATA._serialized_end=430
+  _STOREFRAMEREQUEST._serialized_start=432
+  _STOREFRAMEREQUEST._serialized_end=539
+  _STOREFRAMERESPONSE._serialized_start=541
+  _STOREFRAMERESPONSE._serialized_end=561
+  _TIMELINE._serialized_start=563
+  _TIMELINE._serialized_end=666
+  _PLAYERINFO._serialized_start=668
+  _PLAYERINFO._serialized_end=727
+  _PLAYERACTION._serialized_start=730
+  _PLAYERACTION._serialized_end=904
+  _TICKER._serialized_start=906
+  _TICKER._serialized_end=950
+  _NEWTICKERREQUEST._serialized_start=952
+  _NEWTICKERREQUEST._serialized_end=1006
+  _NEWTICKERRESPONSE._serialized_start=1008
+  _NEWTICKERRESPONSE._serialized_end=1070
+  _TICKERDATA._serialized_start=1073
+  _TICKERDATA._serialized_end=1343
+  _TICKERDATA_PERIODS._serialized_start=1158
+  _TICKERDATA_PERIODS._serialized_end=1343
+  _TICKERACTION._serialized_start=1345
+  _TICKERACTION._serialized_end=1467
+  _WRITETICKERREQUEST._serialized_start=1469
+  _WRITETICKERREQUEST._serialized_end=1577
+  _WRITETICKERRESPONSE._serialized_start=1579
+  _WRITETICKERRESPONSE._serialized_end=1600
+  _TICKERS._serialized_start=1654
+  _TICKERS._serialized_end=2032
 # @@protoc_insertion_point(module_scope)
