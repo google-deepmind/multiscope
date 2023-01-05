@@ -7,18 +7,7 @@ from multiscope.remote.writers import scalar
 
 
 def setUpModule():
-    # TODO: this had a timeout of 0 before. Is that because we don't actually need
-    # to connect to multiscope for these tests? Consider best way forward.
-    remote.start_server()
-
-
-# TODO: use unittest.mock (from unittest import mock) and
-#     mock_client = mock.create_autospec(
-#         scalar_pb2_grpc.ScalarsStub, instance=True)
-# instead of hand-defining the class here. Also consider patching it!
-# Had an issue when I tried:
-# `AttributeError: Mock object has no attribute 'Write'`
-# -- maybe it has to do with it being a proto? Or I'm making a mistake.
+    remote.start_server(connection_timeout_secs=2)
 
 
 class MockClient:
@@ -49,11 +38,6 @@ class TestScopeScalarWriter(absltest.TestCase):
             }
         )
         self.assertEqual(w._client.request.label_to_value, {"sin": 0.0, "cos": 1.0})
-
-        # TODO: when using a mock, do this:
-        # mock_client.Write.assert_called_once()
-        # _, write_kwargs = mock_client.call_args
-        # self.assertEqual(write_kwargs["label_to_value"], {"sin": 0., "cos": 1.})
 
     def test_writer_sequence_vals(self):
         """Writes a sequence of values inside a dictionary."""
