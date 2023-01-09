@@ -10,7 +10,7 @@ import (
 )
 
 type (
-	// Tensor is a minimal to describe tensors.
+	// Tensor is a minimal interface to describe tensors.
 	Tensor = tensor.Tensor
 
 	// TensorWriter writes scalars to Multiscope.

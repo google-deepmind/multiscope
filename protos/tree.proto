@@ -12,7 +12,9 @@ option go_package = "multiscope/protos/tree_go_proto";
 //==============================================================================
 
 // Path of a node in the tree.
-message NodePath { repeated string path = 1; }
+message NodePath {
+  repeated string path = 1;
+}
 
 // A node and its information in the graph.
 message Node {
@@ -31,8 +33,9 @@ message Node {
   // `children` field is empty, then the children may be fetched by making
   // another request.
   //
-  // This is an optimisation to avoid making another request when the parent
-  // has received the rquest.
+  // With this feature we avoid having to include the complete subtree under
+  // Node, but at the same time inform users if they should make further queries
+  // of the structure.
   bool has_children = 6;
 }
 
@@ -47,7 +50,7 @@ message NodeData {
   uint32 tick = 3;
   // Payload.
   oneof data {
-    bytes raw = 6 [ ctype = CORD ];
+    bytes raw = 6 [ctype = CORD];
     google.protobuf.Any pb = 7;
   }
   // MIME type of the `data` field. If `data` is `raw` bytes, this field
@@ -73,10 +76,14 @@ message Event {
 //==============================================================================
 
 // Request to parse the tree of available data.
-message NodeStructRequest { repeated NodePath paths = 1; }
+message NodeStructRequest {
+  repeated NodePath paths = 1;
+}
 
 // Subset of the tree of available data.
-message NodeStructReply { repeated Node nodes = 1; }
+message NodeStructReply {
+  repeated Node nodes = 1;
+}
 
 message DataRequest {
   NodePath path = 1;
@@ -87,13 +94,19 @@ message DataRequest {
 }
 
 // Request to query data from nodes in the tree.
-message NodeDataRequest { repeated DataRequest reqs = 1; }
+message NodeDataRequest {
+  repeated DataRequest reqs = 1;
+}
 
 // Data from nodes in the tree.
-message NodeDataReply { repeated NodeData node_data = 1; }
+message NodeDataReply {
+  repeated NodeData node_data = 1;
+}
 
 // Request to send events to the backend.
-message SendEventsRequest { repeated Event events = 1; }
+message SendEventsRequest {
+  repeated Event events = 1;
+}
 
 // Request for streaming events from the backend. Subscribe to events matching
 // ALL of the provided filters.
@@ -105,17 +118,23 @@ message StreamEventsRequest {
 }
 
 // Errors from processing the events.
-message SendEventsReply { repeated string errors = 1; }
+message SendEventsReply {
+  repeated string errors = 1;
+}
 
 message ActivePathsRequest {}
 
-message ActivePathsReply { repeated NodePath paths = 1; }
+message ActivePathsReply {
+  repeated NodePath paths = 1;
+}
 
 message ResetStateRequest {}
 
 message ResetStateReply {}
 
-message DeleteRequest { NodePath path = 1; }
+message DeleteRequest {
+  NodePath path = 1;
+}
 
 message DeleteReply {}
 
