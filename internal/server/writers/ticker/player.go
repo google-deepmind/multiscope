@@ -8,7 +8,6 @@ import (
 	"multiscope/internal/server/treeservice"
 	"multiscope/internal/server/writers/base"
 	"multiscope/internal/server/writers/ticker/timeline"
-	pb "multiscope/protos/ticker_go_proto"
 	tickerpb "multiscope/protos/ticker_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 
@@ -19,8 +18,8 @@ import (
 
 type (
 	playerControl interface {
-		setPeriod(period *pb.SetPeriod) error
-		processCommand(cmd pb.Command) error
+		setPeriod(period *tickerpb.SetPeriod) error
+		processCommand(cmd tickerpb.Command) error
 		mainNextStep()
 		pause()
 		close()
@@ -71,18 +70,18 @@ func (p *Player) addToTree(state treeservice.State, path *treepb.NodePath) (*cor
 }
 
 func (p *Player) processEvents(ev *treepb.Event) (bool, error) {
-	action := &pb.PlayerAction{}
+	action := &tickerpb.PlayerAction{}
 	if err := anypb.UnmarshalTo(ev.Payload, action, proto.UnmarshalOptions{}); err != nil {
 		return false, err
 	}
 	var err error
 	switch act := action.Action.(type) {
-	case *pb.PlayerAction_TickView:
+	case *tickerpb.PlayerAction_TickView:
 		err = p.tline.SetTickView(act.TickView)
 		p.control.pause()
-	case *pb.PlayerAction_Command:
+	case *tickerpb.PlayerAction_Command:
 		err = p.control.processCommand(act.Command)
-	case *pb.PlayerAction_SetPeriod:
+	case *tickerpb.PlayerAction_SetPeriod:
 		err = p.control.setPeriod(act.SetPeriod)
 	default:
 		err = errors.Errorf("player action %T not implemented", act)
@@ -98,7 +97,7 @@ func (p *Player) StoreFrame(data *tickerpb.PlayerData) error {
 
 // MIME returns the mime type of this node.
 func (p *Player) MIME() string {
-	return mime.ProtoToMIME(&pb.PlayerInfo{})
+	return mime.ProtoToMIME(&tickerpb.PlayerInfo{})
 }
 
 // MarshalData retrieves the NodeData of a child based on path.
@@ -107,7 +106,7 @@ func (p *Player) MarshalData(d *treepb.NodeData, path []string, lastTick uint32)
 		p.tline.MarshalData(d, path)
 		return
 	}
-	data := &pb.PlayerInfo{
+	data := &tickerpb.PlayerInfo{
 		Timeline: p.tline.MarshalDisplay(),
 	}
 	anyPB, err := anypb.New(data)
