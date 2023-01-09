@@ -1,3 +1,4 @@
+// Package jsutil provides helper functions for javascript.
 package jsutil
 
 import "syscall/js"

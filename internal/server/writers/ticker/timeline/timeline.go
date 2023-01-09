@@ -1,3 +1,4 @@
+// Package timeline implements the timeline of the player.
 package timeline
 
 import (

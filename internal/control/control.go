@@ -1,3 +1,4 @@
+// Package control processes events to pause, step, and run a process.
 package control
 
 import (
@@ -31,11 +32,11 @@ func New() *Control {
 // This function is typically called from the Go routine managing an event.
 func (c *Control) ProcessCommand(cmd pb.Command) error {
 	switch cmd.Number() {
-	case pb.Command_STEP.Number():
+	case pb.Command_CMD_STEP.Number():
 		c.pauseNextStep <- true
-	case pb.Command_PAUSE.Number():
+	case pb.Command_CMD_PAUSE.Number():
 		c.pause.Store(true)
-	case pb.Command_RUN.Number():
+	case pb.Command_CMD_RUN.Number():
 		c.pauseNextStep <- false
 	default:
 		return errors.Errorf("command not supported: %q", cmd.String())

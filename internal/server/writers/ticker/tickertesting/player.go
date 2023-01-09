@@ -106,7 +106,7 @@ func checkDisplayedValues(clt pbgrpc.TreeClient, nodes []*treepb.Node, tick int)
 	return nil
 }
 
-// CheckPlayerTimelime01 checks the timeline by sending events to the player.
+// CheckPlayerTimeline01 checks the timeline by sending events to the player.
 func CheckPlayerTimeline01(clt pbgrpc.TreeClient, tickerPath, writerPath []string) error {
 	// Get the nodes given the path.
 	nodes, err := client.PathToNodes(context.Background(), clt,

@@ -57,7 +57,7 @@ func (c *playerNoPauseControl) setPeriod(period *pb.SetPeriod) error {
 }
 
 func (c *playerNoPauseControl) processCommand(cmd pb.Command) error {
-	if cmd != pb.Command_RUN {
+	if cmd != pb.Command_CMD_RUN {
 		c.player.tline.SetTickView(&pb.SetTickView{
 			TickCommand: &pb.SetTickView_ToDisplay{
 				ToDisplay: c.player.tline.CurrentTick() - 1,

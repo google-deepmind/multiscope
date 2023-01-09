@@ -48,13 +48,13 @@ func (p *player) createControls(owner *ui.Owner, parent dom.Element) {
 	control := owner.CreateChild(parent, "div").(dom.HTMLElement)
 	control.Class().Add("fit-content")
 	owner.NewIconButton(control, "play_arrow", func(gui ui.UI, ev dom.Event) {
-		p.sendControlAction(gui, tickerpb.Command_RUN)
+		p.sendControlAction(gui, tickerpb.Command_CMD_RUN)
 	})
 	owner.NewIconButton(control, "pause", func(gui ui.UI, ev dom.Event) {
-		p.sendControlAction(gui, tickerpb.Command_PAUSE)
+		p.sendControlAction(gui, tickerpb.Command_CMD_PAUSE)
 	})
 	owner.NewIconButton(control, "skip_next", func(gui ui.UI, ev dom.Event) {
-		p.sendControlAction(gui, tickerpb.Command_STEP)
+		p.sendControlAction(gui, tickerpb.Command_CMD_STEP)
 	})
 }
 
@@ -73,7 +73,7 @@ func (p *player) sendPeriod(gui ui.UI, d time.Duration) {
 			PeriodMs: int64(d / time.Millisecond),
 		}},
 	})
-	p.sendControlAction(gui, tickerpb.Command_RUN)
+	p.sendControlAction(gui, tickerpb.Command_CMD_RUN)
 }
 
 func (p *player) sendControlAction(gui ui.UI, cmd tickerpb.Command) {

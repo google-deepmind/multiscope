@@ -19,12 +19,12 @@ message SetPeriod {
   int64 period_ms = 1;
 }
 
-// Control command sent the experiment to pause or run the experiment.
+// Command controls the experiment.
 enum Command {
-  NONE = 0;
-  STEP = 1;
-  PAUSE = 2;
-  RUN = 3;
+  CMD_NONE = 0;
+  CMD_STEP = 1;
+  CMD_PAUSE = 2;
+  CMD_RUN = 3;
 }
 
 // SetTickView sets at which tick the data should be displayed.

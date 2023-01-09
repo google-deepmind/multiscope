@@ -38,13 +38,13 @@ func (t *ticker) createControls(owner *ui.Owner, parent *dom.HTMLParagraphElemen
 	control := owner.CreateChild(parent, "div").(dom.HTMLElement)
 	control.Class().Add("fit-content")
 	owner.NewIconButton(control, "play_arrow", func(gui ui.UI, ev dom.Event) {
-		t.sendAction(gui, tickerpb.Command_RUN)
+		t.sendAction(gui, tickerpb.Command_CMD_RUN)
 	})
 	owner.NewIconButton(control, "pause", func(gui ui.UI, ev dom.Event) {
-		t.sendAction(gui, tickerpb.Command_PAUSE)
+		t.sendAction(gui, tickerpb.Command_CMD_PAUSE)
 	})
 	owner.NewIconButton(control, "skip_next", func(gui ui.UI, ev dom.Event) {
-		t.sendAction(gui, tickerpb.Command_STEP)
+		t.sendAction(gui, tickerpb.Command_CMD_STEP)
 	})
 }
 
@@ -76,7 +76,7 @@ func (t *ticker) sendPeriod(gui ui.UI, d time.Duration) {
 			PeriodMs: int64(d / time.Millisecond),
 		}},
 	})
-	t.sendAction(gui, tickerpb.Command_RUN)
+	t.sendAction(gui, tickerpb.Command_CMD_RUN)
 }
 
 const tickerHTML = `
