@@ -1,3 +1,4 @@
+// Package storage provides a global registry for storage for the server.
 package storage
 
 import (
