@@ -6,6 +6,7 @@ from multiscope.remote.clock import Ticker
 from multiscope.remote.control.control import disable
 from multiscope.remote.control.control import undo_disable
 from multiscope.remote.control.control import DISABLE_MULTISCOPE
+from multiscope.remote.player import Player
 from multiscope.remote.server import get_dashboard_url
 from multiscope.remote.server import reset
 from multiscope.remote.server import start_server

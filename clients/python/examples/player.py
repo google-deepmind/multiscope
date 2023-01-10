@@ -1,4 +1,4 @@
-"""A simple example of using a Ticker."""
+"""A simple example of using a Player."""
 
 import time
 
@@ -9,10 +9,10 @@ from examples import common
 
 def main(argv):
     multiscope.start_server()
-    ticker = multiscope.Ticker("ticker")
-    text = multiscope.TextWriter("Current time", ticker)
+    player = multiscope.Player("player")
+    text = multiscope.TextWriter("Current time", player)
     for _ in common.step():
-        ticker.tick()
+        player.store_frame()
         text.write(time.strftime("%H:%M:%S %Z on %b %d, %Y"))
 
 
