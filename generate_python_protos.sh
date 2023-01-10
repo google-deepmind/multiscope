@@ -33,7 +33,7 @@ cp protos/*.proto protos/multiscope/protos/
 # Wow, on MacOS the equivalent sed command does not do anything (even with the)
 # correct -i.bak or similar variant. Do `brew install gnu-sed` to install
 # and use gnu-sed (gsed).
-gsed -i -E 's/import "(\w+).proto";/import "multiscope\/protos\/\1.proto";/' \
+sed -i -E 's/import "(\w+).proto";/import "multiscope\/protos\/\1.proto";/' \
     protos/multiscope/protos/*.proto
 
 # Step 4: Generate the protos.

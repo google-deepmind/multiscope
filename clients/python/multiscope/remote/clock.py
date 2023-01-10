@@ -165,13 +165,13 @@ class Ticker(group.ParentNode):
             fn(action)
 
     def _process_control_cmd(self, command: ticker_pb2.Command) -> None:
-        if command == ticker_pb2.Command.NONE:
-            logging.info("Received a NONE TickerAction Command.")
-        elif command == ticker_pb2.Command.STEP:
+        if command == ticker_pb2.Command.CMD_NONE:
+            logging.info("Received a CMD_NONE TickerAction Command.")
+        elif command == ticker_pb2.Command.CMD_STEP:
             self.step()
-        elif command == ticker_pb2.Command.PAUSE:
+        elif command == ticker_pb2.Command.CMD_PAUSE:
             self.pause()
-        elif command == ticker_pb2.Command.RUN:
+        elif command == ticker_pb2.Command.CMD_RUN:
             self.run()
         else:
             raise ValueError("Unexpected value of enum Command: {command}.")
