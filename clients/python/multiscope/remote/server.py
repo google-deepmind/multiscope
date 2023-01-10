@@ -1,6 +1,7 @@
 """Interactions with the server."""
 # TODO: this is a minimal implementation, far from the original.
 
+import portpicker
 import threading
 from typing import Optional, Tuple
 
@@ -8,6 +9,7 @@ import atexit
 import logging
 import os
 import subprocess
+import termcolor
 
 from absl import flags
 
@@ -34,7 +36,11 @@ _grpc_url: Optional[str] = None
 _lock = threading.Lock()
 
 
-def start_server(connection_timeout_secs: int = 15) -> Optional[int]:
+def start_server(
+    port: Optional[int] = None,
+    grpc_port: Optional[int] = None,
+    connection_timeout_secs: int = 15,
+) -> Optional[int]:
     """Starts the Multiscope server.
 
     This function may be called multiple times, but the server will only be
@@ -73,11 +79,21 @@ def start_server(connection_timeout_secs: int = 15) -> Optional[int]:
             )
             return _web_port
 
-        _web_port, _grpc_url = start_server_unsafe(connection_timeout_secs)
+        http_port = port or _HTTP_PORT.value
+        grpc_port = grpc_port or _GRPC_PORT.value
+
+        _web_port, _grpc_url = _start_server_unsafe(
+            http_port=http_port,
+            grpc_port=grpc_port,
+            connection_timeout_secs=connection_timeout_secs,
+        )
+
     return _web_port
 
 
-def start_server_unsafe(connection_timeout_secs) -> Tuple[int, str]:
+def _start_server_unsafe(
+    http_port: int, grpc_port: int, connection_timeout_secs
+) -> Tuple[int, str]:
     """Starts the server and returns the http and grpc ports."""
     # TODO: this currently requires:
     #
@@ -89,17 +105,16 @@ def start_server_unsafe(connection_timeout_secs) -> Tuple[int, str]:
     #         * Go --> C/C++ (through ctypes or others) --> Python is a path
     #         * using RPC is suggested.
     #     b) Build the multiscope server (if needed?).
-    # 2. For us to pick a grpc port on the flag that's going to be available.
-    #    This is because we don't get, from the server, what grpc_url was chosen;
-    #    We may:
-    #    a) parse the output from the multiscope server binary we just started.
-    #    b) if calling into Go, just fetch the return value.
-    #    c) write the url into an agreed upon spot.
+    if http_port == 0 or not portpicker.is_port_free(http_port):
+        http_port = portpicker.pick_unused_port()
+    if grpc_port == 0 or not portpicker.is_port_free(grpc_port):
+        grpc_port = portpicker.pick_unused_port()
+
     server_process = subprocess.Popen(
         [
             os.path.expanduser(_MULTISCOPE_BINARY_PATH.value),
-            "--http_port=" + str(_HTTP_PORT.value),
-            "--grpc_port=" + str(_GRPC_PORT.value),
+            "--http_port=" + str(http_port),
+            "--grpc_port=" + str(grpc_port),
             "--local=" + str(_LOCAL.value),
         ]
     )
@@ -109,7 +124,14 @@ def start_server_unsafe(connection_timeout_secs) -> Tuple[int, str]:
 
     atexit.register(close_server)
 
-    grpc_url = f"localhost:{_GRPC_PORT.value}"
+    web_url = get_dashboard_url(http_port)
+    termcolor.cprint(
+        "[Multiscope] Live dashboard: {}".format(web_url),
+        color="blue",
+        attrs=["bold"],
+        flush=True,
+    )
+    grpc_url = f"localhost:{grpc_port}"
 
     logging.info("Connecting grp_url: %s", grpc_url)
     stream_client.InitializeStub(grpc_url)
@@ -123,15 +145,15 @@ def start_server_unsafe(connection_timeout_secs) -> Tuple[int, str]:
         daemon=True,
     ).start()
 
-    return _HTTP_PORT.value, grpc_url
+    return http_port, grpc_url
 
 
 def get_dashboard_url(port: int) -> str:
     if _LOCAL.value:
         return f"http://localhost:{port}"
     else:
-        # TODO: implement.
-        raise NotImplementedError("Figure the base out?")
+        # TODO: can we figure the host name out?
+        return f"<your_host_name>:{port}"
 
 
 def reset():
