@@ -10,6 +10,8 @@ absl-py = "*"
 grpcio-tools = "*"
 grpcio = "*"
 numpy = "*"
+portpicker = "*"
+termcolor = "*"
 
 [dev-packages]
 black = "*"
