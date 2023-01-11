@@ -7,6 +7,21 @@ if [[ ! -x "$PIPENV" ]]; then
   exit 1
 fi
 
+if [ "$(uname)" == "Darwin" ]; then
+  # On MacOS, the built in `sed` command does not do anything for us (even with the)
+  # correct -i.bak or similar variant. Do `brew install gnu-sed` to install
+  # and use gnu-sed (gsed), a reproduction of sed on gnu.
+
+  SED=`which gsed`
+  if [[ ! -x "$SED" ]]; then
+    printf "\t\033[41mWe detected you are using MacOS but do not have gsed."
+    printf "\t\033[41mPlease install it, e.g. with 'brew install gnu-sed'.\033[0m"
+    exit 1
+  fi
+else
+  SED=`which sed`
+fi
+
 # Step 1: Find the base directory (where this script is).
 BASE=$( dirname -- "$( readlink -f -- "$0"; )"; )
 cd "$BASE"
@@ -30,10 +45,7 @@ cd ../..
 #         work as we'd like them.
 mkdir -p protos/multiscope/protos
 cp protos/*.proto protos/multiscope/protos/
-# Wow, on MacOS the equivalent sed command does not do anything (even with the)
-# correct -i.bak or similar variant. Do `brew install gnu-sed` to install
-# and use gnu-sed (gsed).
-sed -i -E 's/import "(\w+).proto";/import "multiscope\/protos\/\1.proto";/' \
+$SED -i -E 's/import "(\w+).proto";/import "multiscope\/protos\/\1.proto";/' \
     protos/multiscope/protos/*.proto
 
 # Step 4: Generate the protos.
