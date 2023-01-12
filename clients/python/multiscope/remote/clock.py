@@ -118,8 +118,8 @@ class Ticker(group.ParentNode):
         """Waits until it's time to continue running."""
         since_last_tick = self._experiment_timer.sample()
 
-        if since_last_tick < self._period:
-            time.sleep((self._period - since_last_tick).total_seconds())
+        if since_last_tick < self.period:
+            time.sleep((self.period - since_last_tick).total_seconds())
 
         with self._pause_lock:
             should_pause = self._pause_next_step
@@ -155,7 +155,9 @@ class Ticker(group.ParentNode):
         # them potentially queue up, ignore all but the last one of each type.
         if action_type == "setPeriod":
             # Calling it through the property setter is thread-safe.
-            self.period = float(action.setPeriod.period_ms) * 1e-6
+            self.period: datetime.timedelta = int(
+                action.setPeriod.period_ms * 1e6
+            )  # pytype: disable=annotation-type-mismatch
         elif action_type == "command":
             self._process_control_cmd(action.command)
         else:
@@ -178,18 +180,25 @@ class Ticker(group.ParentNode):
 
     @property
     @control.method
-    def period(self) -> float:
-        """Gets the period of the clock in milliseconds. Thread-safe."""
+    def period(self) -> datetime.timedelta:
+        """Gets the period of the clock as a timedelta. Thread-safe."""
         with self._period_lock:
-            return self._period.total_seconds() * 1000
+            return self._period
 
     @period.setter
     @control.method
     def period(self, p_nanos: int):
         """Sets the period in nano seconds. Thread-safe."""
-        period = datetime.timedelta(milliseconds=p_nanos * 1e6)
+        period = datetime.timedelta(milliseconds=p_nanos * 1e-6)
         with self._period_lock:
             self._period = period
+
+    @property
+    @control.method
+    def period_ms(self) -> float:
+        """Gets the period of the clock in milliseconds. Thread-safe."""
+        with self._period_lock:
+            return self._period.total_seconds() * 1000
 
     @control.method
     def step(self):
