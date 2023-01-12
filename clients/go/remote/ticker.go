@@ -22,6 +22,11 @@ type (
 	// Caller gets called by the Ticker when it ticks.
 	Caller func() error
 
+	// Subscriber registers callers so that they can be called back to push their data to Multiscope.
+	Subscriber interface {
+		Subscribe(c Caller)
+	}
+
 	// Ticker is a directory node able to perform additional synchronization on its children.
 	Ticker struct {
 		*ClientNode
