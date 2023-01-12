@@ -10,8 +10,6 @@ FLAGS.multiscope_strict_mode = True
 
 
 def setUpModule():
-    # TODO: in scalar_test `start_server()` is imported from `remote.__init__`,
-    #   here it's from multiscope. Make consistent.
     multiscope.start_server()
 
 

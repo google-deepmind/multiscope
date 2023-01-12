@@ -1,15 +1,20 @@
+from absl import flags
 from typing import Any, NamedTuple
 from unittest import mock
 
 from absl.testing import absltest
 from absl.testing import parameterized
 
+import multiscope
 from multiscope.protos import ticker_pb2
 from multiscope.protos import ticker_pb2_grpc
 from multiscope.protos import tree_pb2 as pb
-from multiscope.remote import server as multiscope
 from multiscope.remote import clock
 from multiscope.remote import stream_client
+
+
+FLAGS = flags.FLAGS
+FLAGS.multiscope_strict_mode = True
 
 
 class FakeTickerResponse(NamedTuple):

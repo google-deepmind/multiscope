@@ -29,13 +29,18 @@ class Player(group.ParentNode):
     """
 
     @control.init
-    def __init__(self, name: str, parent: Optional[group.ParentNode] = None, stoppable: bool = True):
+    def __init__(
+        self,
+        name: str,
+        parent: Optional[group.ParentNode] = None,
+        stoppable: bool = True,
+    ):
         self._tick_num: int = 0
 
         # Make the connection to the multiscope server.
         self._client = ticker_pb2_grpc.TickersStub(stream_client.channel)
         path = group.join_path_pb(parent, name)
-        req = ticker_pb2.NewPlayerRequest(path=path,ignorePause=not stoppable)
+        req = ticker_pb2.NewPlayerRequest(path=path, ignorePause=not stoppable)
         self._player = self._client.NewPlayer(req).player
         super().__init__(path=tuple(self._player.path.path))
 
@@ -46,5 +51,3 @@ class Player(group.ParentNode):
         req.player.CopyFrom(self._player)
         req.data.CopyFrom(data)
         self._client.StoreFrame(req)
-
-

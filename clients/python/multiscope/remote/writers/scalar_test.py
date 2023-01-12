@@ -2,12 +2,12 @@ import math
 
 from absl.testing import absltest
 
-from multiscope import remote
+import multiscope
 from multiscope.remote.writers import scalar
 
 
 def setUpModule():
-    remote.start_server(connection_timeout_secs=2)
+    multiscope.start_server(connection_timeout_secs=2)
 
 
 class MockClient:
