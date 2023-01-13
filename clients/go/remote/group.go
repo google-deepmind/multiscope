@@ -33,3 +33,8 @@ func NewGroup(clt *Client, name string, parent Path) (*Group, error) {
 		clt:        clw,
 	}, nil
 }
+
+// Root returns a root node.
+func Root(clt *Client) *Group {
+	return &Group{ClientNode: NewClientNode(clt, nil)}
+}

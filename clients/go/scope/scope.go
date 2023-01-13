@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"multiscope/clients/go/reflect"
 	"multiscope/clients/go/remote"
 	treepb "multiscope/protos/tree_go_proto"
 	"time"
@@ -22,6 +23,9 @@ type (
 
 	// ScalarWriter writes maps of key to scalars.
 	ScalarWriter = remote.ScalarWriter
+
+	// ImageWriter writes images.
+	ImageWriter = remote.ImageWriter
 
 	// HTMLWriter writes html and css.
 	HTMLWriter = remote.HTMLWriter
@@ -67,6 +71,15 @@ func Start(httpPort int, local bool) error {
 // SetGlobalClient sets the global Multiscope client.
 func SetGlobalClient(clt *remote.Client) {
 	scopeClient = clt
+}
+
+// NewGroup creates a new group to which children can be added.
+func NewGroup(name string, parent remote.Path) (*remote.Group, error) {
+	clt, err := Client()
+	if err != nil {
+		return nil, err
+	}
+	return remote.NewGroup(clt, name, parent)
 }
 
 // NewScalarWriter creates a new writer to write scalars to Multiscope.
@@ -144,4 +157,16 @@ func Client() (*remote.Client, error) {
 		return nil, errors.New("multiscope client is nil (did you call scope.Start()?)")
 	}
 	return scopeClient, nil
+}
+
+// Reflect builds a Multiscope tree by parsing a Go instance.
+func Reflect(root remote.Node, name string, obj any) (remote.Node, error) {
+	if root == nil {
+		clt, err := Client()
+		if err != nil {
+			return nil, err
+		}
+		root = remote.Root(clt)
+	}
+	return reflect.On(root, name, obj)
 }
