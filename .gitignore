@@ -8,5 +8,7 @@
 *.dvi
 *.synctex.gz
 *~
+*.egg-info/
 clients/python/build/*
 __pycache__
+*.py[cod]
