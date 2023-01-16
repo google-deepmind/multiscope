@@ -14,6 +14,8 @@ import (
 var (
 	httpPort = flag.Int("http_port", scope.DefaultPort, "http port")
 	local    = flag.Bool("local", true, "open the port to local connection only")
+
+	numSteps = flag.Int("num_steps", math.MaxInt, "number of steps to run")
 )
 
 func writeTensorData(w *scope.TensorWriter, rnd *rand.Rand, t *tensor.Tensor, offset float32) error {
@@ -73,7 +75,7 @@ func main() {
 	const html = `<h1 class="fancy">Ticker</h1> says <h1 class="superfancy">%d</h1>`
 	rnd := rand.New(rand.NewSource(0))
 	rgb := tensor.NewTensor(20, 20, 3)
-	for {
+	for i := 0; i < *numSteps; i++ {
 		if err = player.StoreFrame(); err != nil {
 			break
 		}
@@ -90,5 +92,8 @@ func main() {
 			break
 		}
 	}
-	log.Fatal(err)
+	if err != nil {
+		log.Fatal(err)
+	}
+	<-make(chan bool)
 }
