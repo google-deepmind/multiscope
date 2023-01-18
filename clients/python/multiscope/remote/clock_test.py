@@ -51,11 +51,13 @@ class TickerTest(parameterized.TestCase):
         self.assertEqual(2, ticker.current_tick)
 
     @parameterized.parameters([0, 10, 100])
-    def testSetPeriod(self, period_ms):
+    def testSetPeriod(self, period_ms: int):
         """Tests that we can set the period from the server."""
         ticker = clock.Ticker("ticker")
         ticker._register_event_listener(
-            lambda a: self.assertAlmostEqual(period_ms, ticker.period)
+            lambda a: self.assertAlmostEqual(
+                period_ms, ticker.period.total_seconds() * 1000
+            )
         )
 
         action = ticker_pb2.TickerAction()
