@@ -3,6 +3,7 @@ package panels
 import (
 	"fmt"
 	"math"
+	"multiscope/internal/utils/temporizer"
 	tickerpb "multiscope/protos/ticker_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 	"multiscope/wasm/ui"
@@ -23,6 +24,10 @@ type player struct {
 	root    *dom.HTMLParagraphElement
 	display *dom.HTMLParagraphElement
 	slider  *widgets.Slider
+
+	// Temporizer to avoid overwriting user inputs.
+	userInputTemporizer     *temporizer.Temporizer[float32]
+	sendTickValueTemporizer *temporizer.Temporizer[uint64]
 }
 
 func newPlayer(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
@@ -39,7 +44,15 @@ func newPlayer(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 func (p *player) newTimeControl(gui ui.UI, parent *dom.HTMLParagraphElement) {
 	owner := gui.Owner()
 	timeControl := owner.CreateChild(parent, "div").(*dom.HTMLDivElement)
+	p.sendTickValueTemporizer = temporizer.NewTemporizer(func(tick uint64) {
+		p.sendTickViewAction(gui, &tickerpb.SetTickView{
+			TickCommand: &tickerpb.SetTickView_ToDisplay{ToDisplay: tick},
+		})
+	})
 	p.slider = widgets.NewSlider(gui, timeControl, p.onSliderChange)
+	p.userInputTemporizer = temporizer.NewTemporizer(func(val float32) {
+		p.slider.Set(val)
+	})
 	p.createPeriod(owner, timeControl)
 	p.createControls(owner, timeControl)
 }
@@ -89,6 +102,7 @@ func (p *player) sendTickViewAction(gui ui.UI, setTick *tickerpb.SetTickView) {
 }
 
 func (p *player) onSliderChange(gui ui.UI, val float32) {
+	p.userInputTemporizer.SetDuration(5 * time.Second)
 	tline := p.pb.Timeline
 	if tline == nil {
 		return
@@ -101,9 +115,7 @@ func (p *player) onSliderChange(gui ui.UI, val float32) {
 	if val == 1 {
 		tick = math.MaxUint64
 	}
-	p.sendTickViewAction(gui, &tickerpb.SetTickView{
-		TickCommand: &tickerpb.SetTickView_ToDisplay{ToDisplay: tick},
-	})
+	p.sendTickValueTemporizer.Set(tick, 150*time.Millisecond)
 }
 
 const playerHTML = `
@@ -146,7 +158,10 @@ func (p *player) Display(data *treepb.NodeData) error {
 		tline.HistoryLength,
 		tline.StorageCapacity,
 	))
-	p.slider.Set(float32(tline.DisplayTick-tline.OldestTick) / float32(tline.HistoryLength-1))
+	p.userInputTemporizer.Set(
+		float32(tline.DisplayTick-tline.OldestTick)/float32(tline.HistoryLength-1),
+		50*time.Millisecond,
+	)
 	return nil
 }
 
