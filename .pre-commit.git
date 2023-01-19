@@ -1,5 +1,8 @@
 #!/bin/zsh
 
+autoload -U colors
+colors
+
 GOFMT=`which gofmt`
 
 if [[ ! -x "$GOFMT" ]]; then
@@ -70,14 +73,21 @@ do
   fi
 done
 
-# Disable python test because python cannot be setup on the latest MacOS.
-# if ! $PASS; then
-#   printf "\033[0;30m\033[41mPRE-COMMIT HOOK FAILED\033[0m\n"
-#   exit 1
-# else
-#   printf "\033[0;30m\033[42mPRE-COMMIT HOOK SUCCEEDED\033[0m\n"
-#   exit 0
-# fi
+# Disable python test because python seems unreliable on MacOS.
+if [[ ! -z "$DISABLE_PYTHON_CHECKS" ]]; then
+  printf "$fg[yellow]"
+  printf "**********************************\n"
+  printf "* WARNING PYTHON CHECKS DISABLED *\n"
+  printf "**********************************\n"
+  printf "$fg[default]"
+  if ! $PASS; then
+    printf "$fg[red]PRE-COMMIT HOOK FAILED$fg[default]\n"
+    exit 1
+  else
+    printf "$fg[green]PRE-COMMIT HOOK SUCCEEDED$fg[default]\n"
+    exit 0
+  fi
+fi
 
 # Check the python client for formatting and run the fast tests.
 # This all needs to happen inside the pipenv shell (managed environment).
