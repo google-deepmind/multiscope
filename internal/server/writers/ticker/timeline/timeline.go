@@ -4,57 +4,33 @@ package timeline
 import (
 	"fmt"
 	"math"
-	"runtime"
 	"sync"
 
 	"multiscope/internal/server/core"
 	"multiscope/internal/server/writers/ticker/storage"
+	"multiscope/internal/server/writers/ticker/timedb"
 	pb "multiscope/protos/ticker_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 
 	"github.com/pkg/errors"
-	"go.uber.org/multierr"
 	"google.golang.org/protobuf/proto"
 )
 
-const maxNumberOfSteps = 1e6
-
-// We store the data in a tree such that we can record the data or error
-// for all levels.
-// For instance, for the path /a/b/c/, we may have an error at level /a
-// (e.g. cannot get the children).
-// Storing a recursive data structure, as opposed to a flat structure, makes
-// it easy to retrieve the error at level /a if the path /a/b/c is requested.
-type nodeRecord struct {
-	data   *treepb.NodeData
-	toData map[string]*nodeRecord
-	err    error
-}
-
-type tickData struct {
-	size uint64
-	root *nodeRecord
-}
-
 // Timeline stores data for a sub-tree for all ticks.
 type Timeline struct {
-	mux          sync.Mutex
-	root         core.Node
-	currentTick  uint64
-	displayTick  uint64
-	oldestTick   uint64
-	tickToRecord map[uint64]*tickData
-	storage      uint64
+	mux sync.Mutex
+
+	currentTick uint64
+	displayTick uint64
+	db          *timedb.TimeDB
 }
 
 // New returns a new time given a node in the tree.
-func New(root core.Node) *Timeline {
-	storage.Global().Register()
+func New(node core.Node) *Timeline {
 	return &Timeline{
-		root:         root,
-		tickToRecord: make(map[uint64]*tickData),
-		currentTick:  0,
-		displayTick:  math.MaxInt64,
+		db:          timedb.New(node),
+		currentTick: 0,
+		displayTick: math.MaxInt64,
 	}
 }
 
@@ -63,18 +39,19 @@ func (tl *Timeline) MarshalDisplay() *pb.TimeLine {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 
-	if len(tl.tickToRecord) == 0 {
+	if tl.db.NumRecords() == 0 {
 		return nil
 	}
+	currentStorage := tl.db.StorageSize()
 	maxStorage := storage.Global().Available()
 	storageCapacity := fmt.Sprintf("%.e/%.e (%d%%)",
-		float64(tl.storage),
+		float64(currentStorage),
 		float64(maxStorage),
-		int(float64(tl.storage)/float64(maxStorage)*100))
+		int(float64(currentStorage)/float64(maxStorage)*100))
 	return &pb.TimeLine{
 		DisplayTick:     tl.adjustDisplayTick(tl.displayTick),
-		OldestTick:      tl.oldestTick,
-		HistoryLength:   uint64(len(tl.tickToRecord)),
+		OldestTick:      tl.db.Oldest(),
+		HistoryLength:   uint64(tl.db.NumRecords()),
 		StorageCapacity: storageCapacity,
 	}
 }
@@ -106,94 +83,21 @@ func (tl *Timeline) SetTickView(view *pb.SetTickView) error {
 	return nil
 }
 
-type tickContext struct {
-	parentPath []string
-	current    core.Node
-	tckData    *tickData
-}
-
-func (tl *Timeline) recursiveTick(ctx *tickContext) *nodeRecord {
-	record := &nodeRecord{}
-	data := &treepb.NodeData{}
-	ctx.current.MarshalData(data, nil, 0)
-	if data.Data != nil {
-		record.data = data
-		ctx.tckData.size += uint64(proto.Size(data))
-	}
-	parent, ok := ctx.current.(core.Parent)
-	if !ok {
-		return record
-	}
-	children, err := parent.Children()
-	if err != nil {
-		record.err = err
-		return record
-	}
-	for _, childName := range children {
-		child, childErr := parent.Child(childName)
-		if childErr != nil {
-			err = multierr.Append(err, childErr)
-			continue
-		}
-		childPath := append([]string{}, ctx.parentPath...)
-		childPath = append(childPath, childName)
-		if record.toData == nil {
-			record.toData = make(map[string]*nodeRecord)
-		}
-		record.toData[childName] = tl.recursiveTick(&tickContext{
-			parentPath: childPath,
-			current:    child,
-			tckData:    ctx.tckData,
-		})
-	}
-	record.err = err
-	return record
-}
-
-func (tl *Timeline) cleanupStorage() {
-	const targetRatio = .9
-	targetStorage := uint64(float32(storage.Global().Available()) * targetRatio)
-	targetNumberOfSteps := int(float32(len(tl.tickToRecord)) * targetRatio)
-	for tl.storage > targetStorage || len(tl.tickToRecord) > targetNumberOfSteps {
-		oldestRecord := tl.tickToRecord[tl.oldestTick]
-		tl.storage -= oldestRecord.size
-		delete(tl.tickToRecord, tl.oldestTick)
-		tl.oldestTick++
-	}
-	runtime.GC()
-}
-
 // Store the data for all children.
 func (tl *Timeline) Store() error {
-	// Save the data for all children.
-	tckData := &tickData{}
-	tckData.root = tl.recursiveTick(&tickContext{
-		parentPath: []string{},
-		current:    tl.root,
-		tckData:    tckData,
-	})
+	tl.db.Store(tl.currentTick)
 
-	// Store the data in the timeline.
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
-	defer func() {
-		tl.currentTick++
-	}()
-	tl.tickToRecord[tl.currentTick] = tckData
-	tl.storage += tckData.size
+	tl.currentTick++
 
-	// Clean-up the timeline if necessary.
-	if tl.storage < storage.Global().Available() && len(tl.tickToRecord) < maxNumberOfSteps {
-		return nil
-	}
-	tl.cleanupStorage()
 	return nil
 }
 
 func (tl *Timeline) adjustDisplayTick(tick uint64) uint64 {
-	if tick < tl.oldestTick {
+	if tick < tl.db.Oldest() {
 		// Adjust to the oldest tick.
-		return tl.oldestTick
+		return tl.db.Oldest()
 	}
 	if tick < tl.currentTick {
 		// Valid value between the oldest tick and the current tick.
@@ -207,43 +111,26 @@ func (tl *Timeline) adjustDisplayTick(tick uint64) uint64 {
 	return tl.currentTick - 1
 }
 
-func keys(d map[string]*nodeRecord) []string {
-	r := []string{}
-	for k := range d {
-		r = append(r, k)
-	}
-	return r
-}
-
 // MarshalData serializes the data given the current tick being displayed.
 func (tl *Timeline) MarshalData(data *treepb.NodeData, path []string) {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 
 	displayTick := tl.adjustDisplayTick(tl.displayTick)
-	tckData := tl.tickToRecord[displayTick]
-	if tckData == nil {
+	rec := tl.db.Fetch(displayTick)
+	if rec == nil {
 		data.Error = fmt.Sprintf("data for tick %d does not exist", displayTick)
 		return
 	}
-	current := tckData.root
-	if current.err != nil {
-		data.Error = current.err.Error()
-		return
-	}
 	for _, p := range path {
-		child, ok := current.toData[p]
-		if !ok {
-			data.Error = fmt.Sprintf("child %q in path %v cannot be found in the timeline. Available children are: %v", p, path, keys(current.toData))
+		child := rec.Child(p)
+		if child == nil {
+			data.Error = fmt.Sprintf("child %q in path %v cannot be found in the timeline. Available children are: %v", p, path, rec.Children())
 			return
 		}
-		if child.err != nil {
-			data.Error = child.err.Error()
-			return
-		}
-		current = child
+		rec = child
 	}
-	proto.Merge(data, current.data)
+	proto.Merge(data, rec.Data())
 }
 
 // CurrentTick returns the next frame to store.
@@ -264,9 +151,6 @@ func (tl *Timeline) IsLastTickDisplayed() bool {
 
 // Close the timeline and release all the memory.
 func (tl *Timeline) Close() error {
-	for k := range tl.tickToRecord {
-		delete(tl.tickToRecord, k)
-	}
-	storage.Global().Unregister()
+	tl.db.Close()
 	return nil
 }
