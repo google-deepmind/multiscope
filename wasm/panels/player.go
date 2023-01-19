@@ -60,6 +60,9 @@ func (p *player) newTimeControl(gui ui.UI, parent *dom.HTMLParagraphElement) {
 func (p *player) createControls(owner *ui.Owner, parent dom.Element) {
 	control := owner.CreateChild(parent, "div").(dom.HTMLElement)
 	control.Class().Add("fit-content")
+	owner.NewIconButton(control, "skip_previous", func(gui ui.UI, ev dom.Event) {
+		p.sendControlAction(gui, tickerpb.Command_CMD_STEPBACK)
+	})
 	owner.NewIconButton(control, "play_arrow", func(gui ui.UI, ev dom.Event) {
 		p.sendControlAction(gui, tickerpb.Command_CMD_RUN)
 	})

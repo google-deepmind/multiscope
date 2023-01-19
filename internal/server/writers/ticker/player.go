@@ -8,6 +8,7 @@ import (
 	"multiscope/internal/server/treeservice"
 	"multiscope/internal/server/writers/base"
 	"multiscope/internal/server/writers/ticker/timeline"
+	pb "multiscope/protos/ticker_go_proto"
 	tickerpb "multiscope/protos/ticker_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 
@@ -80,7 +81,20 @@ func (p *Player) processEvents(ev *treepb.Event) (bool, error) {
 		err = p.tline.SetTickView(act.TickView)
 		p.control.pause()
 	case *tickerpb.PlayerAction_Command:
-		err = p.control.processCommand(act.Command)
+		switch act.Command {
+		case tickerpb.Command_CMD_STEP:
+			err = p.tline.SetTickView(&pb.SetTickView{
+				TickCommand: &pb.SetTickView_Offset{Offset: 1},
+			})
+			p.control.pause()
+		case tickerpb.Command_CMD_STEPBACK:
+			err = p.tline.SetTickView(&pb.SetTickView{
+				TickCommand: &pb.SetTickView_Offset{Offset: -1},
+			})
+			p.control.pause()
+		default:
+			err = p.control.processCommand(act.Command)
+		}
 	case *tickerpb.PlayerAction_SetPeriod:
 		err = p.control.setPeriod(act.SetPeriod)
 	default:

@@ -22,9 +22,10 @@ message SetPeriod {
 // Command controls the experiment.
 enum Command {
   CMD_NONE = 0;
-  CMD_STEP = 1;
-  CMD_PAUSE = 2;
-  CMD_RUN = 3;
+  CMD_PAUSE = 1;
+  CMD_RUN = 2;
+  CMD_STEP = 3;
+  CMD_STEPBACK = 4;
 }
 
 // SetTickView sets at which tick the data should be displayed.

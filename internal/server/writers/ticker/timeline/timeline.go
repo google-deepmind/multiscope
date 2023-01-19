@@ -21,7 +21,7 @@ type Timeline struct {
 	mux sync.Mutex
 
 	currentTick uint64
-	displayTick uint64
+	displayTick int64
 	db          *timedb.TimeDB
 }
 
@@ -49,7 +49,7 @@ func (tl *Timeline) MarshalDisplay() *pb.TimeLine {
 		float64(maxStorage),
 		int(float64(currentStorage)/float64(maxStorage)*100))
 	return &pb.TimeLine{
-		DisplayTick:     tl.adjustDisplayTick(tl.displayTick),
+		DisplayTick:     uint64(tl.adjustDisplayTick(tl.displayTick)),
 		OldestTick:      tl.db.Oldest(),
 		HistoryLength:   uint64(tl.db.NumRecords()),
 		StorageCapacity: storageCapacity,
@@ -60,14 +60,15 @@ func (tl *Timeline) setDisplayTick(displayTick uint64) {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 
-	tl.displayTick = displayTick
+	tl.displayTick = int64(displayTick)
 }
 
 func (tl *Timeline) offsetDisplayTick(offset int64) {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 
-	tl.displayTick = uint64(int64(tl.displayTick) + offset)
+	tl.displayTick = tl.adjustDisplayTick(tl.displayTick)
+	tl.displayTick += offset
 }
 
 // SetTickView set the view to display.
@@ -94,12 +95,19 @@ func (tl *Timeline) Store() error {
 	return nil
 }
 
-func (tl *Timeline) adjustDisplayTick(tick uint64) uint64 {
-	if tick < tl.db.Oldest() {
+func (tl *Timeline) adjustDisplayTick(tick int64) (out int64) {
+	defer func() {
+		if out < 0 {
+			out = 0
+		}
+	}()
+
+	oldest := int64(tl.db.Oldest())
+	if tick < int64(tl.db.Oldest()) {
 		// Adjust to the oldest tick.
-		return tl.db.Oldest()
+		return oldest
 	}
-	if tick < tl.currentTick {
+	if tick < int64(tl.currentTick) {
 		// Valid value between the oldest tick and the current tick.
 		return tick
 	}
@@ -108,7 +116,7 @@ func (tl *Timeline) adjustDisplayTick(tick uint64) uint64 {
 		return 0
 	}
 	// Adjust to the latest tick.
-	return tl.currentTick - 1
+	return int64(tl.currentTick) - 1
 }
 
 // MarshalData serializes the data given the current tick being displayed.
@@ -116,7 +124,7 @@ func (tl *Timeline) MarshalData(data *treepb.NodeData, path []string) {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 
-	displayTick := tl.adjustDisplayTick(tl.displayTick)
+	displayTick := uint64(tl.adjustDisplayTick(tl.displayTick))
 	rec := tl.db.Fetch(displayTick)
 	if rec == nil {
 		data.Error = fmt.Sprintf("data for tick %d does not exist", displayTick)
@@ -146,7 +154,7 @@ func (tl *Timeline) IsLastTickDisplayed() bool {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 
-	return tl.displayTick >= tl.currentTick
+	return tl.displayTick >= int64(tl.currentTick)
 }
 
 // Close the timeline and release all the memory.
