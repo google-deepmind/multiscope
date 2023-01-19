@@ -91,8 +91,6 @@ func (tp *Temporizer[T]) SetDuration(dr time.Duration) {
 	tp.mut.Lock()
 	defer tp.mut.Unlock()
 
-	if dr > tp.currentDuration {
-		tp.currentDuration = dr
-	}
+	tp.currentDuration = dr
 	tp.lastCall = time.Now()
 }

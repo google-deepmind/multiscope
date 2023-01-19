@@ -25,8 +25,21 @@ type player struct {
 	display *dom.HTMLParagraphElement
 	slider  *widgets.Slider
 
-	// Temporizer to avoid overwriting user inputs.
-	userInputTemporizer     *temporizer.Temporizer[float32]
+	// userInputTemporizer avoids changing the slider position when the server sends
+	// a new position while the user interacts with the slider.
+	//
+	// There are a few cases where the slider locations can change because of the server:
+	// 1. two users look at the same process using Multiscope, one user moves the slider.
+	//    The position of the slider will be updated on the frontend of the other user.
+	// 2. the process continues to run, storage is running out of memory, so the position
+	//    of the slider needs to be updated
+	// 3. the user moves the slider, the command is sent to the server, the server takes a
+	//    while to process the command, and by the time the response comes back to the UI,
+	//    the user has already moved the slider to a different position. This is even
+	//    worse when a lot of commands are sent to the server (see next temporizer).
+	userInputTemporizer *temporizer.Temporizer[float32]
+	// sendTickValueTemporizer avoids sending too many commands to the server
+	// when the user moves the slider.
 	sendTickValueTemporizer *temporizer.Temporizer[uint64]
 }
 
@@ -84,6 +97,7 @@ func (p *player) createPeriod(owner *ui.Owner, parent dom.HTMLElement) {
 }
 
 func (p *player) sendPeriod(gui ui.UI, d time.Duration) {
+	p.userInputTemporizer.SetDuration(0)
 	gui.SendToServer(p.node.Path, &tickerpb.PlayerAction{
 		Action: &tickerpb.PlayerAction_SetPeriod{SetPeriod: &tickerpb.SetPeriod{
 			PeriodMs: int64(d / time.Millisecond),
@@ -93,6 +107,7 @@ func (p *player) sendPeriod(gui ui.UI, d time.Duration) {
 }
 
 func (p *player) sendControlAction(gui ui.UI, cmd tickerpb.Command) {
+	p.userInputTemporizer.SetDuration(0)
 	gui.SendToServer(p.node.Path, &tickerpb.PlayerAction{
 		Action: &tickerpb.PlayerAction_Command{Command: cmd},
 	})
