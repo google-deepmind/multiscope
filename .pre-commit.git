@@ -73,22 +73,6 @@ do
   fi
 done
 
-# Disable python test because python seems unreliable on MacOS.
-if [[ ! -z "$DISABLE_PYTHON_CHECKS" ]]; then
-  printf "$fg[yellow]"
-  printf "**********************************\n"
-  printf "* WARNING PYTHON CHECKS DISABLED *\n"
-  printf "**********************************\n"
-  printf "$fg[default]"
-  if ! $PASS; then
-    printf "$fg[red]PRE-COMMIT HOOK FAILED$fg[default]\n"
-    exit 1
-  else
-    printf "$fg[green]PRE-COMMIT HOOK SUCCEEDED$fg[default]\n"
-    exit 0
-  fi
-fi
-
 # Check the python client for formatting and run the fast tests.
 # This all needs to happen inside the pipenv shell (managed environment).
 
@@ -109,6 +93,26 @@ else
   printf "\033[31mPython black formatter.\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
   PASS=false
 fi
+
+# Disable python test because python seems unreliable on MacOS.
+if [[ -z "$ENABLE_PYTHON_CHECKS" ]]; then
+  # Cleanup python:
+  deactivate
+
+  printf "$fg[yellow]"
+  printf "**********************************\n"
+  printf "* WARNING PYTHON CHECKS DISABLED *\n"
+  printf "**********************************\n"
+  printf "$fg[default]"
+  if ! $PASS; then
+    printf "$fg[red]PRE-COMMIT HOOK FAILED$fg[default]\n"
+    exit 1
+  else
+    printf "$fg[green]PRE-COMMIT HOOK SUCCEEDED$fg[default]\n"
+    exit 0
+  fi
+fi
+
 
 # Step: run the tests.
 python multiscope/run_tests.py --only_fast_tests=True
