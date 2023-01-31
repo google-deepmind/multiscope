@@ -109,7 +109,7 @@ func TestPlayerTimelineCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	textWant := fmt.Sprintf("%s  %02d", padding, 55)
+	textWant := fmt.Sprintf("%s  %02d", padding, 60)
 	if string(textGot) != textWant {
 		t.Errorf("got %s, want %s", string(textGot), textWant)
 	}
@@ -126,11 +126,11 @@ func TestPlayerTimelineCleanup(t *testing.T) {
 	}
 	tlGot := display.Timeline
 	tlWant := &pb.TimeLine{
-		DisplayTick:     55,
-		HistoryLength:   45,
-		OldestTick:      55,
-		StorageCapacity: "4e+03/5e+03 (90%)"}
-	if diff := cmp.Diff(tlGot, tlWant, protocmp.Transform()); diff != "" {
+		DisplayTick:     60,
+		HistoryLength:   40,
+		OldestTick:      60,
+		StorageCapacity: "5e+03/5e+03 (92%)"}
+	if diff := cmp.Diff(tlWant, tlGot, protocmp.Transform()); diff != "" {
 		t.Errorf("got the following timeline:\n%v\nbut want the following:\n%v\ndiff:\n%s",
 			tlGot, tlWant, diff)
 	}

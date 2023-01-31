@@ -51,7 +51,8 @@ type (
 		tensor Tensor
 		updts  []updaters
 
-		state treeservice.State
+		state    treeservice.State
+		timeline *tlNode
 	}
 )
 
@@ -74,6 +75,7 @@ func NewWriter() (*Writer, error) {
 	w := &Writer{
 		Group: base.NewGroup(mime.MultiscopeTensorGroup),
 	}
+	w.timeline = newAdapter(w)
 	w.updts = []updaters{
 		newMetrics(w),
 		newImageUpdater(w),
@@ -133,6 +135,11 @@ func (w *Writer) Write(tns Tensor) (err error) {
 		err = multierr.Append(err, updt.update(w.tensor))
 	}
 	return
+}
+
+// Timeline returns a node to serialize in the timeline.
+func (w *Writer) Timeline() core.Node {
+	return w.timeline
 }
 
 // MarshalData writes the tensor protobuf into a data node.

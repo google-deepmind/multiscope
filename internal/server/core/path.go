@@ -103,17 +103,17 @@ func (k Key) Split() []string {
 
 // Path represents a path in the stream tree.
 type Path struct {
-	root Root
+	root Node
 	path []string
 }
 
 // NewPath returns a new path given a root node.
-func NewPath(root Root) *Path {
+func NewPath(root Node) *Path {
 	return &Path{root: root}
 }
 
 // Root returns the root of the path.
-func (p *Path) Root() Root {
+func (p *Path) Root() Node {
 	return p.root
 }
 
