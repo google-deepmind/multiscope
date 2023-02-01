@@ -6,6 +6,7 @@ import (
 )
 
 type bitPlaneUpdater struct {
+	indexer
 	parent   *Writer
 	img      tnrdr.Image
 	writer   *imageWriter
@@ -66,10 +67,15 @@ func (u *bitPlaneUpdater) reset() error {
 	return u.writer.Write(u.img)
 }
 
-func (u *bitPlaneUpdater) update(t Tensor) error {
+func (u *bitPlaneUpdater) update(updateIndex uint, t Tensor) error {
 	if !u.parent.state.PathLog().IsActive(u.key) {
 		return nil
 	}
+	return u.forceUpdate(updateIndex, t)
+}
+
+func (u *bitPlaneUpdater) forceUpdate(updateIndex uint, t Tensor) error {
+	u.indexer.updateIndex(updateIndex)
 	u.cache = resizeBitTensor(t, u.cache)
 	u.cache.shape = append(append([]int{}, t.Shape()...), 8)
 	updateValues(t, u.cache.value)

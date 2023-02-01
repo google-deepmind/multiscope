@@ -28,6 +28,12 @@ func (adpt *tlNode) MIME() string {
 }
 
 func (adpt *tlNode) MarshalData(data *treepb.NodeData, path []string, lastTick uint32) {
+	err := adpt.w.forceUpdate()
+	if err != nil {
+		data.Error = err.Error()
+		return
+	}
+
 	dst := &anypb.Any{}
 	if err := anypb.MarshalFrom(dst, adpt.last, proto.MarshalOptions{}); err != nil {
 		data.Error = err.Error()

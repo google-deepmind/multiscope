@@ -7,6 +7,7 @@ import (
 )
 
 type historyUpdater struct {
+	indexer
 	parent           *Writer
 	w                *scalar.Writer
 	nSelect, lastLen int
@@ -33,7 +34,12 @@ func (u *historyUpdater) reset() error {
 	return nil
 }
 
-func (u *historyUpdater) update(Tensor) error {
+func (u *historyUpdater) update(updateIndex uint, t Tensor) error {
+	return u.forceUpdate(updateIndex, t)
+}
+
+func (u *historyUpdater) forceUpdate(updateIndex uint, _ Tensor) error {
+	u.indexer.updateIndex(updateIndex)
 	const maxIndicesSelected = 20
 
 	vals := u.parent.tensor.Values()

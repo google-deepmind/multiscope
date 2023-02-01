@@ -14,6 +14,7 @@ const (
 )
 
 type distributionUpdater struct {
+	indexer
 	parent *Writer
 	writer *plot.Writer
 	bins   []int
@@ -54,10 +55,15 @@ func (u *distributionUpdater) reset() (err error) {
 	return u.writer.Write(u.plot)
 }
 
-func (u *distributionUpdater) update(Tensor) (err error) {
+func (u *distributionUpdater) update(updateIndex uint, t Tensor) (err error) {
 	if !u.parent.state.PathLog().IsActive(u.key) {
 		return nil
 	}
+	return u.forceUpdate(updateIndex, t)
+}
+
+func (u *distributionUpdater) forceUpdate(updateIndex uint, _ Tensor) (err error) {
+	u.indexer.updateIndex(updateIndex)
 	if len(u.parent.tensor.Values()) < 2 {
 		return u.reset()
 	}

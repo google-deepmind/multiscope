@@ -11,6 +11,7 @@ import (
 )
 
 type tensorUpdater struct {
+	indexer
 	parent *Writer
 	writer *text.HTMLWriter
 }
@@ -38,10 +39,16 @@ const tensorInfo = `
 `
 
 func (u *tensorUpdater) reset() error {
-	return u.update(nil)
+	return u.update(0, nil)
 }
 
-func (u *tensorUpdater) update(Tensor) error {
+func (u *tensorUpdater) update(updateIndex uint, t Tensor) error {
+	return u.forceUpdate(updateIndex, t)
+}
+
+func (u *tensorUpdater) forceUpdate(updateIndex uint, _ Tensor) error {
+	u.indexer.updateIndex(updateIndex)
+
 	size := len(u.parent.tensor.Values())
 	min := u.parent.m.HistMin
 	max := u.parent.m.HistMax

@@ -6,6 +6,7 @@ import (
 )
 
 type metricsUpdater struct {
+	indexer
 	parent *Writer
 	minmax *scalar.Writer
 	norms  *scalar.Writer
@@ -39,7 +40,12 @@ func (u *metricsUpdater) forwardActive(parent *core.Path) {
 	u.parent.state.PathLog().Forward(parent, normsPath)
 }
 
-func (u *metricsUpdater) update(Tensor) (err error) {
+func (u *metricsUpdater) update(updateIndex uint, t Tensor) (err error) {
+	return u.forceUpdate(updateIndex, t)
+}
+
+func (u *metricsUpdater) forceUpdate(updateIndex uint, _ Tensor) (err error) {
+	u.updateIndex(updateIndex)
 	if err := u.minmax.Write(map[string]float64{
 		"min": float64(u.parent.m.Min),
 		"max": float64(u.parent.m.Max),

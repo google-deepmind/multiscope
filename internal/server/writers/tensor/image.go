@@ -6,6 +6,7 @@ import (
 )
 
 type imageUpdater struct {
+	indexer
 	parent   *Writer
 	img      tnrdr.Image
 	writer   *imageWriter
@@ -34,10 +35,15 @@ func (u *imageUpdater) reset() error {
 	return u.writer.Write(u.img)
 }
 
-func (u *imageUpdater) update(t Tensor) error {
+func (u *imageUpdater) update(updateIndex uint, t Tensor) error {
 	if !u.parent.state.PathLog().IsActive(u.key) {
 		return nil
 	}
+	return u.forceUpdate(updateIndex, t)
+}
+
+func (u *imageUpdater) forceUpdate(updateIndex uint, t Tensor) error {
+	u.updateIndex(updateIndex)
 	u.img = u.renderer.Render(t, &u.parent.m, u.img)
 	return u.writer.Write(u.img)
 }

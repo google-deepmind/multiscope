@@ -8,6 +8,7 @@ import (
 )
 
 type rgbUpdater struct {
+	indexer
 	parent *Writer
 	img    *image.RGBA
 	writer *imageWriter
@@ -70,10 +71,15 @@ func (u *rgbUpdater) reset() error {
 	return u.writer.Write(u.img)
 }
 
-func (u *rgbUpdater) update(Tensor) error {
+func (u *rgbUpdater) update(updateIndex uint, t Tensor) error {
 	if !u.parent.state.PathLog().IsActive(u.key) {
 		return nil
 	}
+	return u.forceUpdate(updateIndex, t)
+}
+
+func (u *rgbUpdater) forceUpdate(updateIndex uint, _ Tensor) error {
+	u.indexer.updateIndex(updateIndex)
 	u.img = alloc(u.img, u.parent.tensor.Shape())
 	const (
 		rOffset = iota

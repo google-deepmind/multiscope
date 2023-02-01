@@ -34,12 +34,16 @@ type (
 		ValuesUInt8() []uint8
 	}
 
-	updaters interface {
+	updater interface {
 		forwardActive(path *core.Path)
 
 		reset() error
 
-		update(t Tensor) error
+		update(updateIndex uint, t Tensor) error
+
+		forceUpdate(updateIndex uint, t Tensor) error
+
+		lastUpdateIndex() uint
 	}
 
 	// Writer writes tensors to Multiscope.
@@ -47,9 +51,10 @@ type (
 		*base.Group
 		mux sync.Mutex
 
-		m      tnrdr.Metrics
-		tensor Tensor
-		updts  []updaters
+		m           tnrdr.Metrics
+		tensor      Tensor
+		updts       []updater
+		updateIndex uint
 
 		state    treeservice.State
 		timeline *tlNode
@@ -76,7 +81,7 @@ func NewWriter() (*Writer, error) {
 		Group: base.NewGroup(mime.MultiscopeTensorGroup),
 	}
 	w.timeline = newAdapter(w)
-	w.updts = []updaters{
+	w.updts = []updater{
 		newMetrics(w),
 		newImageUpdater(w),
 		newBitPlaneUpdater(w),
@@ -129,10 +134,21 @@ func (w *Writer) reset() (err error) {
 func (w *Writer) Write(tns Tensor) (err error) {
 	w.mux.Lock()
 	defer w.mux.Unlock()
+	w.updateIndex++
+
 	w.tensor = tns
 	w.m.Update(w.tensor.Values())
 	for _, updt := range w.updts {
-		err = multierr.Append(err, updt.update(w.tensor))
+		err = multierr.Append(err, updt.update(w.updateIndex, w.tensor))
+	}
+	return
+}
+
+func (w *Writer) forceUpdate() (err error) {
+	for _, updt := range w.updts {
+		if updt.lastUpdateIndex() != w.updateIndex {
+			err = multierr.Append(err, updt.forceUpdate(w.updateIndex, w.tensor))
+		}
 	}
 	return
 }
