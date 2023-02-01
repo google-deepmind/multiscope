@@ -32,7 +32,7 @@ enum Command {
 message SetTickView {
   oneof tickCommand {
     // Value of the tick to display.
-    uint64 to_display = 1;
+    int64 to_display = 1;
 
     // Offset the tick at which to display the data.
     int64 offset = 2;
@@ -64,7 +64,7 @@ message NewPlayerResponse { Player player = 1; }
 
 // Data sends to the player from an experiment.
 message PlayerData {
-  uint64 tick = 1;
+  int64 tick = 1;
 }
 
 // Request to store a frame in the player.
@@ -83,9 +83,9 @@ message StoreFrameResponse {}
 
 // Time line information.
 message TimeLine {
-  uint64 display_tick = 1;
-  uint64 history_length = 2;
-  uint64 oldest_tick = 3;
+  int64 display_tick = 1;
+  int64 history_length = 2;
+  int64 oldest_tick = 3;
   string storage_capacity = 4;
 }
 

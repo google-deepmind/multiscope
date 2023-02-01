@@ -13,7 +13,7 @@ import (
 
 var errTickerDisplayNotModified = errors.New("the ticker action did not modify the display")
 
-func queryDisplayTick(clt pbgrpc.TreeClient, tickerPath []string) (uint64, error) {
+func queryDisplayTick(clt pbgrpc.TreeClient, tickerPath []string) (int64, error) {
 	ctx := context.Background()
 	data, err := client.NodesData(ctx, clt, []*treepb.Node{{
 		Path: &treepb.NodePath{
@@ -57,7 +57,7 @@ func sendEventWaitForUpdate(clt pbgrpc.TreeClient, tickerPath []string, action *
 }
 
 // SendSetDisplayTick sends an event to a ticker to set the tick being displayed.
-func SendSetDisplayTick(clt pbgrpc.TreeClient, tickerPath []string, tick uint64) error {
+func SendSetDisplayTick(clt pbgrpc.TreeClient, tickerPath []string, tick int64) error {
 	return sendEventWaitForUpdate(clt, tickerPath, &pb.PlayerAction{
 		Action: &pb.PlayerAction_TickView{
 			TickView: &pb.SetTickView{
@@ -117,7 +117,7 @@ func CheckPlayerTimeline01(clt pbgrpc.TreeClient, tickerPath, writerPath []strin
 	}
 	// Check the data using SetDisplayTick
 	for i := 0; i < Ticker01NumTicks; i++ {
-		displayTick := uint64(i)
+		displayTick := int64(i)
 		if err := SendSetDisplayTick(clt, tickerPath, displayTick); err != nil {
 			return fmt.Errorf("cannot set the clock display to %d: %v", displayTick, err)
 		}

@@ -40,7 +40,7 @@ type player struct {
 	userInputTemporizer *temporizer.Temporizer[float32]
 	// sendTickValueTemporizer avoids sending too many commands to the server
 	// when the user moves the slider.
-	sendTickValueTemporizer *temporizer.Temporizer[uint64]
+	sendTickValueTemporizer *temporizer.Temporizer[int64]
 }
 
 func newPlayer(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
@@ -57,7 +57,7 @@ func newPlayer(dbd ui.Dashboard, node *treepb.Node) (ui.Panel, error) {
 func (p *player) newTimeControl(gui ui.UI, parent *dom.HTMLParagraphElement) {
 	owner := gui.Owner()
 	timeControl := owner.CreateChild(parent, "div").(*dom.HTMLDivElement)
-	p.sendTickValueTemporizer = temporizer.NewTemporizer(func(tick uint64) {
+	p.sendTickValueTemporizer = temporizer.NewTemporizer(func(tick int64) {
 		p.sendTickViewAction(gui, &tickerpb.SetTickView{
 			TickCommand: &tickerpb.SetTickView_ToDisplay{ToDisplay: tick},
 		})
@@ -120,6 +120,7 @@ func (p *player) sendTickViewAction(gui ui.UI, setTick *tickerpb.SetTickView) {
 }
 
 func (p *player) onSliderChange(gui ui.UI, val float32) {
+	// Set a timer such that the slider does not change its position during the next 5s.
 	p.userInputTemporizer.SetDuration(5 * time.Second)
 	tline := p.pb.Timeline
 	if tline == nil {
@@ -129,9 +130,9 @@ func (p *player) onSliderChange(gui ui.UI, val float32) {
 	if historyLength == 0 {
 		return
 	}
-	tick := uint64(val*historyLength) + tline.OldestTick
+	tick := int64(val*historyLength) + tline.OldestTick
 	if val == 1 {
-		tick = math.MaxUint64
+		tick = math.MaxInt64
 	}
 	p.sendTickValueTemporizer.Set(tick, 150*time.Millisecond)
 }

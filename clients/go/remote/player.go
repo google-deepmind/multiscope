@@ -49,7 +49,7 @@ func (p *Player) StoreFrame() error {
 	_, err := p.clt.StoreFrame(ctx, &pb.StoreFrameRequest{
 		Player: p.player,
 		Data: &pb.PlayerData{
-			Tick: uint64(p.tick),
+			Tick: int64(p.tick),
 		},
 	})
 	return err

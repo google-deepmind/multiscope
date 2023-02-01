@@ -23,8 +23,8 @@ type (
 		node core.Node
 
 		storage      uint64
-		tickToRecord map[uint64]storedRecord
-		oldestTick   uint64
+		tickToRecord map[int64]storedRecord
+		oldestTick   int64
 	}
 )
 
@@ -33,12 +33,12 @@ func New(node core.Node) *TimeDB {
 	storage.Global().Register()
 	return &TimeDB{
 		node:         node,
-		tickToRecord: make(map[uint64]storedRecord),
+		tickToRecord: make(map[int64]storedRecord),
 	}
 }
 
 // Oldest returns the oldest tick.
-func (db *TimeDB) Oldest() uint64 {
+func (db *TimeDB) Oldest() int64 {
 	db.mut.RLock()
 	defer db.mut.RUnlock()
 
@@ -47,7 +47,7 @@ func (db *TimeDB) Oldest() uint64 {
 
 // Fetch the root record for a given tick.
 // The result can be nil if no record has been stored for the tick.
-func (db *TimeDB) Fetch(tick uint64) *Record {
+func (db *TimeDB) Fetch(tick int64) *Record {
 	db.mut.RLock()
 	defer db.mut.RUnlock()
 
@@ -55,7 +55,7 @@ func (db *TimeDB) Fetch(tick uint64) *Record {
 }
 
 // Store a record given a tick index.
-func (db *TimeDB) Store(tick uint64) {
+func (db *TimeDB) Store(tick int64) {
 	rec := db.newContext().buildRecord()
 	size := rec.computeSize()
 
