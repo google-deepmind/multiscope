@@ -148,6 +148,11 @@ def _start_server_unsafe(
     return http_port, grpc_url
 
 
+def server_address() -> str:
+    """Returns the Multiscope gRPC servrer url to connect a Multiscope client."""
+    return _grpc_url
+
+
 def get_dashboard_url(port: int) -> str:
     if _LOCAL.value:
         return f"http://localhost:{port}"
