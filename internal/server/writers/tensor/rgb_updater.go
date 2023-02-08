@@ -44,7 +44,7 @@ func alloc(img *image.RGBA, shape []int) *image.RGBA {
 	return image.NewRGBA(image.Rect(0, 0, shapeX, shapeY))
 }
 
-func toUInt8(m *tnrdr.Metrics, tns Tensor) []uint8 {
+func toUInt8(m *tnrdr.Metrics, tns sTensor) []uint8 {
 	var valsUint8 []uint8
 	if tnsuint8, ok := tns.(WithUInt8); ok {
 		valsUint8 = tnsuint8.ValuesUInt8()
@@ -52,7 +52,7 @@ func toUInt8(m *tnrdr.Metrics, tns Tensor) []uint8 {
 	if valsUint8 != nil {
 		return valsUint8
 	}
-	vals := tns.Values()
+	vals := tns.ValuesF32()
 	valsUint8 = make([]uint8, len(vals))
 	scale := float32(1.0)
 	// TODO(degris): this is bad because uint8 images with a maximum of 1 will be scaled.
@@ -71,14 +71,14 @@ func (u *rgbUpdater) reset() error {
 	return u.writer.Write(u.img)
 }
 
-func (u *rgbUpdater) update(updateIndex uint, t Tensor) error {
+func (u *rgbUpdater) update(updateIndex uint, t sTensor) error {
 	if !u.parent.state.PathLog().IsActive(u.key) {
 		return nil
 	}
 	return u.forceUpdate(updateIndex, t)
 }
 
-func (u *rgbUpdater) forceUpdate(updateIndex uint, _ Tensor) error {
+func (u *rgbUpdater) forceUpdate(updateIndex uint, _ sTensor) error {
 	u.indexer.updateIndex(updateIndex)
 	u.img = alloc(u.img, u.parent.tensor.Shape())
 	const (

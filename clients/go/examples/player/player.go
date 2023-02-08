@@ -67,7 +67,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	wRGB, err := scope.NewTensorWriter("Scaled RGB", player.Path())
+	wRGB, err := scope.NewTensorWriter[float32]("Scaled RGB", player.Path())
 	if err != nil {
 		log.Fatal(err)
 	}

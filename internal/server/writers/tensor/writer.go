@@ -16,32 +16,14 @@ import (
 )
 
 type (
-	// Tensor defines a float64 tensor.
-	Tensor interface {
-		// Shape returns the shape of the Tensor. The product of the dimensions matches the length of the slice returned by Value.
-		Shape() []int
-
-		// Value returns a slice stored by the Tensor.
-		//
-		// The data may not be copied. The slice needs to be copied to own it (e.g. for storage).
-		// Not completely sure this is necessary, but it seems safer and does not add any significant cost.
-		Values() []float32
-	}
-
-	// WithUInt8 is a tensor to which the values can be accessed as uint8s.
-	WithUInt8 interface {
-		// ValueUInt8 returns the value of the tensor as uint8s.
-		ValuesUInt8() []uint8
-	}
-
 	updater interface {
 		forwardActive(path *core.Path)
 
 		reset() error
 
-		update(updateIndex uint, t Tensor) error
+		update(updateIndex uint, t sTensor) error
 
-		forceUpdate(updateIndex uint, t Tensor) error
+		forceUpdate(updateIndex uint, t sTensor) error
 
 		lastUpdateIndex() uint
 	}
@@ -52,7 +34,7 @@ type (
 		mux sync.Mutex
 
 		m           tnrdr.Metrics
-		tensor      Tensor
+		tensor      sTensor
 		updts       []updater
 		updateIndex uint
 
@@ -112,7 +94,7 @@ func (w *Writer) ForwardActive(state treeservice.State, path *core.Path) {
 }
 
 func (w *Writer) write(pbt *pb.Tensor) error {
-	tns, err := ProtoToTensor(pbt)
+	tns, err := protoToTensor(pbt)
 	if err != nil {
 		return fmt.Errorf("cannot deserialize the tensor: %v", err)
 	}
@@ -122,7 +104,7 @@ func (w *Writer) write(pbt *pb.Tensor) error {
 func (w *Writer) reset() (err error) {
 	w.mux.Lock()
 	defer w.mux.Unlock()
-	w.tensor = &PBTensor{}
+	w.tensor = &sliceTensor[float32]{}
 	w.m.Reset()
 	for _, updt := range w.updts {
 		err = multierr.Append(err, updt.reset())
@@ -131,13 +113,13 @@ func (w *Writer) reset() (err error) {
 }
 
 // Write a tensor to the writer.
-func (w *Writer) Write(tns Tensor) (err error) {
+func (w *Writer) Write(tns sTensor) (err error) {
 	w.mux.Lock()
 	defer w.mux.Unlock()
 	w.updateIndex++
 
 	w.tensor = tns
-	w.m.Update(w.tensor.Values())
+	w.m.Update(w.tensor.ValuesF32())
 	for _, updt := range w.updts {
 		err = multierr.Append(err, updt.update(w.updateIndex, w.tensor))
 	}

@@ -3,26 +3,22 @@ package remote
 import (
 	"context"
 	"errors"
+	"fmt"
 
-	"multiscope/internal/server/writers/tensor"
+	"multiscope/lib/tensor"
 	pb "multiscope/protos/tensor_go_proto"
 	pbgrpc "multiscope/protos/tensor_go_proto"
 )
 
-type (
-	// Tensor is a minimal interface to describe tensors.
-	Tensor = tensor.Tensor
-
-	// TensorWriter writes scalars to Multiscope.
-	TensorWriter struct {
-		*ClientNode
-		clt    pbgrpc.TensorsClient
-		writer *pb.Writer
-	}
-)
+// TensorWriter writes scalars to Multiscope.
+type TensorWriter[T tensor.Supported] struct {
+	*ClientNode
+	clt    pbgrpc.TensorsClient
+	writer *pb.Writer
+}
 
 // NewTensorWriter creates a new writer to display tensors.
-func NewTensorWriter(clt *Client, name string, parent Path) (*TensorWriter, error) {
+func NewTensorWriter[T tensor.Supported](clt *Client, name string, parent Path) (*TensorWriter[T], error) {
 	clttw := pbgrpc.NewTensorsClient(clt.Connection())
 	ctx := context.Background()
 	path := clt.toChildPath(name, parent)
@@ -43,7 +39,7 @@ func NewTensorWriter(clt *Client, name string, parent Path) (*TensorWriter, erro
 		}
 	}
 	writerPath := toPath(writer)
-	return &TensorWriter{
+	return &TensorWriter[T]{
 		ClientNode: NewClientNode(clt, writerPath),
 		clt:        clttw,
 		writer:     writer,
@@ -51,10 +47,14 @@ func NewTensorWriter(clt *Client, name string, parent Path) (*TensorWriter, erro
 }
 
 // Write a tensor.
-func (w *TensorWriter) Write(tns tensor.Tensor) error {
-	_, err := w.clt.Write(context.Background(), &pb.WriteRequest{
+func (w *TensorWriter[T]) Write(tns tensor.Tensor[T]) error {
+	tensorPB, err := tensor.Marshal[T](tns)
+	if err != nil {
+		return fmt.Errorf("cannot marshal tensor: %v", err)
+	}
+	_, err = w.clt.Write(context.Background(), &pb.WriteRequest{
 		Writer: w.writer,
-		Tensor: tensor.ToProto(tns),
+		Tensor: tensorPB,
 	})
 	return err
 }

@@ -24,7 +24,7 @@ func buildMatrixLabel(p []int) string {
 	return result + ".,.]=\n"
 }
 
-func buildMatrixString(t Tensor, offsets []int, p []int) string {
+func buildMatrixString(t sTensor, offsets []int, p []int) string {
 	shape := t.Shape()
 	fullPos := make([]int, len(shape))
 	copy(fullPos, p)
@@ -32,7 +32,7 @@ func buildMatrixString(t Tensor, offsets []int, p []int) string {
 	if len(p) > 0 {
 		result += buildMatrixLabel(p)
 	}
-	data := t.Values()
+	data := t.ValuesF32()
 	for x := 0; x < shape[len(shape)-2]; x++ {
 		for y := 0; y < shape[len(shape)-1]; y++ {
 			fullPos[len(fullPos)-2] = x
@@ -44,7 +44,7 @@ func buildMatrixString(t Tensor, offsets []int, p []int) string {
 	return result
 }
 
-func buildStringRec(t Tensor, offsets []int, p []int) string {
+func buildStringRec(t sTensor, offsets []int, p []int) string {
 	shape := t.Shape()
 	if len(shape)-len(p) == 2 {
 		return buildMatrixString(t, offsets, p)
@@ -70,9 +70,9 @@ func computeOffsets(shape []int) []int {
 	return offsets
 }
 
-func toString(t Tensor) string {
+func toString(t sTensor) string {
 	if len(t.Shape()) <= 1 {
-		return fmt.Sprint(t.Values())
+		return fmt.Sprint(t.ValuesF32())
 	}
 	return buildStringRec(t, computeOffsets(t.Shape()), []int{})
 }

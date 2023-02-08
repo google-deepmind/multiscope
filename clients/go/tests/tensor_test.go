@@ -27,7 +27,7 @@ func TestTensorWriter(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	writer, err := remote.NewTensorWriter(clt, tensortesting.Tensor01Name, nil)
+	writer, err := remote.NewTensorWriter[float32](clt, tensortesting.Tensor01Name, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,7 +49,7 @@ func TestTensorWriterForwardImageAndShouldWrite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	writer, err := remote.NewTensorWriter(clt, tensortesting.Tensor01Name, nil)
+	writer, err := remote.NewTensorWriter[float32](clt, tensortesting.Tensor01Name, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +64,7 @@ func TestTensorWriterForwardDistributionAndShouldWrite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	writer, err := remote.NewTensorWriter(clt, tensortesting.Tensor01Name, nil)
+	writer, err := remote.NewTensorWriter[float32](clt, tensortesting.Tensor01Name, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestTensorWriterForwardMinMaxAndShouldWrite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	writer, err := remote.NewTensorWriter(clt, tensortesting.Tensor01Name, nil)
+	writer, err := remote.NewTensorWriter[float32](clt, tensortesting.Tensor01Name, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestTensorWriterForwardNormsAndShouldWrite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	writer, err := remote.NewTensorWriter(clt, tensortesting.Tensor01Name, nil)
+	writer, err := remote.NewTensorWriter[float32](clt, tensortesting.Tensor01Name, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

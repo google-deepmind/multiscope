@@ -55,23 +55,23 @@ func (u *distributionUpdater) reset() (err error) {
 	return u.writer.Write(u.plot)
 }
 
-func (u *distributionUpdater) update(updateIndex uint, t Tensor) (err error) {
+func (u *distributionUpdater) update(updateIndex uint, t sTensor) (err error) {
 	if !u.parent.state.PathLog().IsActive(u.key) {
 		return nil
 	}
 	return u.forceUpdate(updateIndex, t)
 }
 
-func (u *distributionUpdater) forceUpdate(updateIndex uint, _ Tensor) (err error) {
+func (u *distributionUpdater) forceUpdate(updateIndex uint, _ sTensor) (err error) {
 	u.indexer.updateIndex(updateIndex)
-	if len(u.parent.tensor.Values()) < 2 {
+	if u.parent.tensor.size() < 2 {
 		return u.reset()
 	}
 	for i := range u.bins {
 		u.bins[i] = 0
 	}
 	bucketSize := ((u.parent.m.Range) / numBins)
-	for _, v := range u.parent.tensor.Values() {
+	for _, v := range u.parent.tensor.ValuesF32() {
 		bucket := int(math.Floor(float64((v - u.parent.m.Min) / bucketSize)))
 		if bucket < 0 {
 			bucket = 0

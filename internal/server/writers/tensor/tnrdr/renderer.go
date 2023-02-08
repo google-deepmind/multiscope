@@ -20,7 +20,7 @@ type (
 		Shape() []int
 
 		// Values returns the tensor values.
-		Values() []float32
+		ValuesF32() []float32
 	}
 
 	// Renderer renders a tensor into an image.
@@ -64,7 +64,7 @@ func squeezedDims(shape []int) int {
 
 // Render a tensor into an image.
 func (r Renderer) Render(t Tensor, m *Metrics, img Image) Image {
-	if len(t.Values()) == 0 {
+	if len(t.ValuesF32()) == 0 {
 		return r.ClearImage(img)
 	}
 	if squeezedDims(t.Shape()) <= 1 {
@@ -74,13 +74,13 @@ func (r Renderer) Render(t Tensor, m *Metrics, img Image) Image {
 }
 
 func (r Renderer) resize1DImage(t Tensor, img Image) Image {
-	if img != nil && numPix(img) == len(t.Values()) {
+	if img != nil && numPix(img) == len(t.ValuesF32()) {
 		return img
 	}
-	sqrt := math.Sqrt(float64(len(t.Values())))
+	sqrt := math.Sqrt(float64(len(t.ValuesF32())))
 	dimX := int(math.Ceil(sqrt))
 	dimY := int(math.Floor(sqrt))
-	for ; dimY*dimX < len(t.Values()); dimY++ {
+	for ; dimY*dimX < len(t.ValuesF32()); dimY++ {
 	}
 	return r.imgF(image.Rect(0, 0, dimX, dimY))
 }
@@ -88,7 +88,7 @@ func (r Renderer) resize1DImage(t Tensor, img Image) Image {
 func (r Renderer) render1DTensor(t Tensor, m *Metrics, img Image) Image {
 	img = r.resize1DImage(t, img)
 	bounds := img.Bounds()
-	for i, v := range t.Values() {
+	for i, v := range t.ValuesF32() {
 		x := i % bounds.Dx()
 		y := i / bounds.Dx()
 		img.Set(x, y, ToColor(m, v))
@@ -129,7 +129,7 @@ func renderImg(ctx renderContext) {
 		pos := ctx.offset + ctx.stride*i
 		x := i % ctx.dimX
 		y := i / ctx.dimX
-		rgba := ToColor(ctx.m, ctx.t.Values()[pos])
+		rgba := ToColor(ctx.m, ctx.t.ValuesF32()[pos])
 		ctx.img.Set(ctx.imgPosX+x, ctx.imgPosY+y, rgba)
 	}
 }

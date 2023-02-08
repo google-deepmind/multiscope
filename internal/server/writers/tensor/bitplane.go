@@ -21,16 +21,16 @@ type bitTensor struct {
 	value []float32
 }
 
-func resizeBitTensor(t Tensor, old *bitTensor) *bitTensor {
-	size := len(t.Values()) * 8
-	if old != nil && size == len(old.Values()) {
+func resizeBitTensor(t sTensor, old *bitTensor) *bitTensor {
+	size := t.size() * 8
+	if old != nil && size == len(old.ValuesF32()) {
 		return old
 	}
 	return &bitTensor{value: make([]float32, size)}
 }
 
-func updateValues(t Tensor, value []float32) {
-	for j, k := range t.Values() {
+func updateValues(t sTensor, value []float32) {
+	for j, k := range t.ValuesF32() {
 		for i := 0; i < 8; i++ {
 			value[j*8+i] = float32((uint8(k)>>i)&1) * 255
 		}
@@ -41,7 +41,7 @@ func (b *bitTensor) Shape() []int {
 	return b.shape
 }
 
-func (b *bitTensor) Values() []float32 {
+func (b *bitTensor) ValuesF32() []float32 {
 	return b.value
 }
 
@@ -67,14 +67,14 @@ func (u *bitPlaneUpdater) reset() error {
 	return u.writer.Write(u.img)
 }
 
-func (u *bitPlaneUpdater) update(updateIndex uint, t Tensor) error {
+func (u *bitPlaneUpdater) update(updateIndex uint, t sTensor) error {
 	if !u.parent.state.PathLog().IsActive(u.key) {
 		return nil
 	}
 	return u.forceUpdate(updateIndex, t)
 }
 
-func (u *bitPlaneUpdater) forceUpdate(updateIndex uint, t Tensor) error {
+func (u *bitPlaneUpdater) forceUpdate(updateIndex uint, t sTensor) error {
 	u.indexer.updateIndex(updateIndex)
 	u.cache = resizeBitTensor(t, u.cache)
 	u.cache.shape = append(append([]int{}, t.Shape()...), 8)

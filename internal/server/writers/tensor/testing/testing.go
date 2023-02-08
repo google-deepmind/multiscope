@@ -12,8 +12,9 @@ import (
 
 	"multiscope/internal/grpc/client"
 	"multiscope/internal/mime"
-	"multiscope/internal/server/writers/tensor"
+	scopetensor "multiscope/internal/server/writers/tensor"
 	scopetesting "multiscope/internal/testing"
+	"multiscope/lib/tensor"
 	plotpb "multiscope/protos/plot_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
@@ -24,10 +25,18 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 )
 
-type tensorImpl struct {
-	shape []int
-	value []float32
-}
+type (
+	tensorF32 interface {
+		tensor.Base
+		Values() []float32
+		ValuesF32() []float32
+	}
+
+	tensorImpl struct {
+		shape []int
+		value []float32
+	}
+)
 
 // Shape returns the shape of the testing tensor.
 func (t *tensorImpl) Shape() []int {
@@ -39,12 +48,17 @@ func (t *tensorImpl) Values() []float32 {
 	return t.value
 }
 
+// ValuesF32 returns the set of values of the testing tensor.
+func (t *tensorImpl) ValuesF32() []float32 {
+	return t.value
+}
+
 // Tensor01Name is the name of the tensor writer in the tree.
 const Tensor01Name = "tensor01"
 
 type testData struct {
 	Desc               string
-	Tensor             tensor.Tensor
+	Tensor             tensorF32
 	ToImg, ToBitPlane  func() *image.RGBA
 	Min, Max           float32
 	ScaleMin, ScaleMax float32
@@ -358,7 +372,7 @@ var (
 )
 
 // NewTestTensor returns a tensor for tests.
-func NewTestTensor() tensor.Tensor {
+func NewTestTensor() tensor.Base {
 	return &tensorImpl{
 		shape: []int{1, 2, 3},
 		value: []float32{-6, 5, -4, 3, -2, 1},
@@ -366,7 +380,7 @@ func NewTestTensor() tensor.Tensor {
 }
 
 // checkRenderedImage checks the data that can be read from the tensor01 node.
-func checkRenderedImage(clt pbgrpc.TreeClient, path []string, nodeName string, tns tensor.Tensor, want *image.RGBA) error {
+func checkRenderedImage(clt pbgrpc.TreeClient, path []string, nodeName string, tns tensorF32, want *image.RGBA) error {
 	ctx := context.Background()
 	imgPath := append(append([]string{}, path...), nodeName)
 	// Get the nodes and check their types.
@@ -386,7 +400,7 @@ func checkRenderedImage(clt pbgrpc.TreeClient, path []string, nodeName string, t
 		return err
 	}
 	imgB, err := client.ToRaw(data[0])
-	if len(tns.Values()) == 0 {
+	if len(tns.ValuesF32()) == 0 {
 		if len(imgB) > 0 {
 			return fmt.Errorf("got raw data %v for an empty tensor but want an empty buffer", imgB)
 		}
@@ -425,8 +439,8 @@ func extractScalarPlotData(data *treepb.NodeData) (*plotpb.Plot, map[string]floa
 func checkMetrics(clt pbgrpc.TreeClient, path []string, test *testData) error {
 	ctx := context.Background()
 	paths := [][]string{
-		append(append([]string{}, path...), tensor.NodeNameMinMax),
-		append(append([]string{}, path...), tensor.NodeNameNorms),
+		append(append([]string{}, path...), scopetensor.NodeNameMinMax),
+		append(append([]string{}, path...), scopetensor.NodeNameNorms),
 	}
 	nodes, err := client.PathToNodes(ctx, clt, paths...)
 	if err != nil {
@@ -476,7 +490,7 @@ func checkMetrics(clt pbgrpc.TreeClient, path []string, test *testData) error {
 
 func checkDistribution(clt pbgrpc.TreeClient, path []string, test *testData) error {
 	ctx := context.Background()
-	dataDistPath := append(append([]string{}, path...), tensor.NodeNameDistribution)
+	dataDistPath := append(append([]string{}, path...), scopetensor.NodeNameDistribution)
 	nodes, err := client.PathToNodes(ctx, clt, dataDistPath)
 	if err != nil {
 		return err
@@ -508,7 +522,7 @@ func checkDistribution(clt pbgrpc.TreeClient, path []string, test *testData) err
 
 func checkTensorInfo(clt pbgrpc.TreeClient, path []string, test *testData) error {
 	ctx := context.Background()
-	infoPath := append(append([]string{}, path...), tensor.NodeNameInfo, "html")
+	infoPath := append(append([]string{}, path...), scopetensor.NodeNameInfo, "html")
 	nodes, err := client.PathToNodes(ctx, clt, infoPath)
 	if err != nil {
 		return err
@@ -537,7 +551,7 @@ func checkTensorInfo(clt pbgrpc.TreeClient, path []string, test *testData) error
 
 // CheckTensorData checks the data provided by the server once a tensor has been written.
 func CheckTensorData(clt pbgrpc.TreeClient, path []string, test *testData) error {
-	if err := checkRenderedImage(clt, path, tensor.NodeNameImage, test.Tensor, test.ToImg()); err != nil {
+	if err := checkRenderedImage(clt, path, scopetensor.NodeNameImage, test.Tensor, test.ToImg()); err != nil {
 		return fmt.Errorf("image error for test %q: %v", test.Desc, err)
 	}
 	if err := checkMetrics(clt, path, test); err != nil {
@@ -549,7 +563,7 @@ func CheckTensorData(clt pbgrpc.TreeClient, path []string, test *testData) error
 	if err := checkTensorInfo(clt, path, test); err != nil {
 		return fmt.Errorf("tensor info error: %v", err)
 	}
-	if err := checkRenderedImage(clt, path, tensor.NodeNameBitPlane, test.Tensor, test.ToBitPlane()); err != nil {
+	if err := checkRenderedImage(clt, path, scopetensor.NodeNameBitPlane, test.Tensor, test.ToBitPlane()); err != nil {
 		return fmt.Errorf("bit plane error: %v", err)
 	}
 	return nil

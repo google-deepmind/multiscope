@@ -48,23 +48,23 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	wPos, err := scope.NewTensorWriter("Positive Data", ticker.Path())
+	wPos, err := scope.NewTensorWriter[float32]("Positive Data", ticker.Path())
 	if err != nil {
 		log.Fatal(err)
 	}
-	wNeg, err := scope.NewTensorWriter("Negative Data", ticker.Path())
+	wNeg, err := scope.NewTensorWriter[float32]("Negative Data", ticker.Path())
 	if err != nil {
 		log.Fatal(err)
 	}
-	wReal, err := scope.NewTensorWriter("Real Data", ticker.Path())
+	wReal, err := scope.NewTensorWriter[float32]("Real Data", ticker.Path())
 	if err != nil {
 		log.Fatal(err)
 	}
-	wGradient, err := scope.NewTensorWriter("Gradient", ticker.Path())
+	wGradient, err := scope.NewTensorWriter[float32]("Gradient", ticker.Path())
 	if err != nil {
 		log.Fatal(err)
 	}
-	wRGB, err := scope.NewTensorWriter("Scaled RGB", ticker.Path())
+	wRGB, err := scope.NewTensorWriter[float32]("Scaled RGB", ticker.Path())
 	if err != nil {
 		log.Fatal(err)
 	}

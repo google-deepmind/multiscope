@@ -14,10 +14,20 @@ message Writer {
 
 enum DataType {
   DT_INVALID = 0;
-  DT_FLOAT32 = 1;
-  DT_UINT8 = 4;
-}
 
+  DT_FLOAT32 = 1;
+  DT_FLOAT64 = 2;
+
+  DT_UINT8 = 4;
+  DT_UINT16 = 17;
+  DT_UINT32 = 22;
+  DT_UINT64 = 23;
+
+  DT_INT8 = 6;
+  DT_INT16 = 5;
+  DT_INT32 = 3;
+  DT_INT64 = 9;
+}
 
 // Dimensions of a tensor.
 message Shape {
@@ -59,13 +69,11 @@ message Tensor {
   // can be used for all tensor types. The purpose of this representation is to
   // reduce serialization overhead during RPC call by avoiding serialization of
   // many repeated small items.
-  bytes content = 4 [ctype = CORD];
+  bytes content = 4 [ ctype = CORD ];
 }
 
 // Request to create a new TensorWriter in the tree.
-message NewWriterRequest {
-  multiscope.NodePath path = 1;
-}
+message NewWriterRequest { multiscope.NodePath path = 1; }
 
 // Response after creating a new TensorWriter in the tree.
 message NewWriterResponse {

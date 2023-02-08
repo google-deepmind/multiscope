@@ -1,7 +1,7 @@
 // Package tensor declares a minimal tensor implementation for the examples.
 package tensor
 
-import "multiscope/clients/go/remote"
+import "multiscope/lib/tensor"
 
 // Tensor implements the Multiscope tensor interface.
 type Tensor struct {
@@ -9,7 +9,7 @@ type Tensor struct {
 	vals  []float32
 }
 
-var _ remote.Tensor = (*Tensor)(nil)
+var _ tensor.Tensor[float32] = (*Tensor)(nil)
 
 // NewTensor creates a new tensor given a shape.
 func NewTensor(shape ...int) *Tensor {

@@ -34,15 +34,15 @@ func (u *historyUpdater) reset() error {
 	return nil
 }
 
-func (u *historyUpdater) update(updateIndex uint, t Tensor) error {
+func (u *historyUpdater) update(updateIndex uint, t sTensor) error {
 	return u.forceUpdate(updateIndex, t)
 }
 
-func (u *historyUpdater) forceUpdate(updateIndex uint, _ Tensor) error {
+func (u *historyUpdater) forceUpdate(updateIndex uint, _ sTensor) error {
 	u.indexer.updateIndex(updateIndex)
 	const maxIndicesSelected = 20
 
-	vals := u.parent.tensor.Values()
+	vals := u.parent.tensor.ValuesF32()
 	if len(vals) != u.lastLen {
 		u.data = make(map[string]float64)
 		u.nSelect = maxIndicesSelected

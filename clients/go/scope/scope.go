@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"multiscope/clients/go/reflect"
 	"multiscope/clients/go/remote"
+	"multiscope/lib/tensor"
 	treepb "multiscope/protos/tree_go_proto"
 	"time"
 )
@@ -34,7 +35,7 @@ type (
 	TextWriter = remote.TextWriter
 
 	// TensorWriter writes tensor data.
-	TensorWriter = remote.TensorWriter
+	TensorWriter = remote.TensorWriter[float32]
 
 	// Group is a directory node in the tree.
 	Group = remote.Group
@@ -137,12 +138,12 @@ func NewImageWriter(name string, parent remote.Path) (*remote.ImageWriter, error
 }
 
 // NewTensorWriter creates a new writer to display images in Multiscope.
-func NewTensorWriter(name string, parent remote.Path) (*remote.TensorWriter, error) {
+func NewTensorWriter[T tensor.Supported](name string, parent remote.Path) (*remote.TensorWriter[T], error) {
 	clt, err := Client()
 	if err != nil {
 		return nil, err
 	}
-	return remote.NewTensorWriter(clt, name, parent)
+	return remote.NewTensorWriter[T](clt, name, parent)
 }
 
 // EventsManager returns the registry mapping path to callback of the main Multiscope remote.
