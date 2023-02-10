@@ -10,15 +10,22 @@ import (
 	pbgrpc "multiscope/protos/tensor_go_proto"
 )
 
-// TensorWriter writes scalars to Multiscope.
-type TensorWriter[T tensor.Supported] struct {
-	*ClientNode
-	clt    pbgrpc.TensorsClient
-	writer *pb.Writer
-}
+type (
+	// TensorWriterPB writes tensors already represented as protocol buffers.
+	TensorWriterPB struct {
+		*ClientNode
+		clt    pbgrpc.TensorsClient
+		writer *pb.Writer
+	}
 
-// NewTensorWriter creates a new writer to display tensors.
-func NewTensorWriter[T tensor.Supported](clt *Client, name string, parent Path) (*TensorWriter[T], error) {
+	// TensorWriter writes tensors to Multiscope.
+	TensorWriter[T tensor.Supported] struct {
+		*TensorWriterPB
+	}
+)
+
+// NewTensorWriterPB creates a new writer to display tensors already represented as protocol buffers.
+func NewTensorWriterPB(clt *Client, name string, parent Path) (*TensorWriterPB, error) {
 	clttw := pbgrpc.NewTensorsClient(clt.Connection())
 	ctx := context.Background()
 	path := clt.toChildPath(name, parent)
@@ -39,11 +46,29 @@ func NewTensorWriter[T tensor.Supported](clt *Client, name string, parent Path) 
 		}
 	}
 	writerPath := toPath(writer)
-	return &TensorWriter[T]{
+	return &TensorWriterPB{
 		ClientNode: NewClientNode(clt, writerPath),
 		clt:        clttw,
 		writer:     writer,
 	}, nil
+}
+
+// WritePB a tensor as a protocol buffer.
+func (w *TensorWriterPB) WritePB(tPB *pb.Tensor) error {
+	_, err := w.clt.Write(context.Background(), &pb.WriteRequest{
+		Writer: w.writer,
+		Tensor: tPB,
+	})
+	return err
+}
+
+// NewTensorWriter creates a new writer to display tensors.
+func NewTensorWriter[T tensor.Supported](clt *Client, name string, parent Path) (*TensorWriter[T], error) {
+	w, err := NewTensorWriterPB(clt, name, parent)
+	if err != nil {
+		return nil, err
+	}
+	return &TensorWriter[T]{TensorWriterPB: w}, nil
 }
 
 // Write a tensor.
@@ -52,9 +77,5 @@ func (w *TensorWriter[T]) Write(tns tensor.Tensor[T]) error {
 	if err != nil {
 		return fmt.Errorf("cannot marshal tensor: %v", err)
 	}
-	_, err = w.clt.Write(context.Background(), &pb.WriteRequest{
-		Writer: w.writer,
-		Tensor: tensorPB,
-	})
-	return err
+	return w.WritePB(tensorPB)
 }
