@@ -122,20 +122,22 @@ func Unmarshal(p *pb.Tensor) (reflect.Type, []int, []byte, error) {
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("cannot unmarshal tensor: type %v is not supported", p.Dtype)
 	}
-	element := reflect.Zero(tp).Interface()
-
 	// Compute the size of the buffer.
 	sizeOf := int(tp.Size())
 	if len(p.Content)%sizeOf != 0 {
-		return nil, nil, nil, fmt.Errorf("invalid value length: %d is not divisible by the size of a %T (=%d)", len(p.Content), element, sizeOf)
+		return nil, nil, nil, fmt.Errorf("invalid value length: %d is not divisible by the size of a %T (=%d)", len(p.Content), tp, sizeOf)
 	}
 	shape := intShape(p.Shape)
-	shapeLength := ShapeToLen(shape)
 	length := len(p.Content) / sizeOf
+	if len(shape) == 0 && length == 1 {
+		// This is a single scalar: adjusts the shape accordingly.
+		shape = []int{1}
+	}
+	shapeLength := ShapeToLen(shape)
 	if shapeLength != length {
 		return nil, nil, nil, fmt.Errorf(
 			"shape %v of length %d does not match the value buffer of length %d=%d/(sizeof(%s)=%d)",
-			shape, shapeLength, length, len(p.Content), reflect.TypeOf(element), unsafe.Sizeof(element),
+			shape, shapeLength, length, len(p.Content), tp, sizeOf,
 		)
 	}
 	return tp, shape, p.Content, nil
