@@ -131,7 +131,7 @@ func (ps *ParserState) find(ptr any) bool {
 		}
 	}
 	if ps.parent == nil {
-		return false
+		return set(ptr, ps.root)
 	}
 	return ps.parent.find(ptr)
 }

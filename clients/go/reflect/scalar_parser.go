@@ -5,6 +5,8 @@ import (
 	"reflect"
 
 	"multiscope/clients/go/remote"
+
+	"github.com/pkg/errors"
 )
 
 type scalarParser struct{}
@@ -29,7 +31,11 @@ func (scalarParser) Parse(state *ParserState, name string, fObj TargetGetter) (r
 	if err != nil {
 		return nil, err
 	}
-	state.Root().(remote.Subscriber).Subscribe(func() error {
+	var sub remote.Subscriber
+	if err := state.Find(&sub); err != nil {
+		return nil, errors.Errorf("cannot find a parent subscriber to register the writer")
+	}
+	sub.Subscribe(func() error {
 		if !writer.ShouldWrite() {
 			return nil
 		}
