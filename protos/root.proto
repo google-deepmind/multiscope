@@ -27,12 +27,18 @@ message Layout {
 }
 
 // Sets the key for the UI settings.
-message SetKeySettingsRequest { string key_settings = 1; }
+message SetKeySettingsRequest { 
+  multiscope.TreeID treeID = 1;
+  string key_settings = 2; 
+}
 
 message SetKeySettingsResponse {}
 
 // Sets the layout to display.
-message SetLayoutRequest { Layout layout = 1; }
+message SetLayoutRequest { 
+  multiscope.TreeID treeID = 1;
+  Layout layout = 2;
+}
 
 message SetLayoutResponse {}
 
@@ -42,7 +48,9 @@ message GetVersionRequest {}
 message GetVersionResponse { string version = 1; }
 
 // Get root info.
-message GetRootInfoRequest {}
+message GetRootInfoRequest {
+  multiscope.TreeID treeID = 1;
+}
 
 message GetRootInfoResponse { RootInfo info = 1; }
 

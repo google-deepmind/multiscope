@@ -17,19 +17,19 @@ import (
 // Service implements the TablesWriter and Writer service.
 type Service struct {
 	pbgrpc.UnimplementedScalarsServer
-	state treeservice.StateProvider
+	state treeservice.IDToState
 }
 
 var _ pbgrpc.ScalarsServer = (*Service)(nil)
 
 // RegisterService registers the TableWriters service to a gRPC server.
-func RegisterService(srv grpc.ServiceRegistrar, state treeservice.StateProvider) {
+func RegisterService(srv grpc.ServiceRegistrar, state treeservice.IDToState) {
 	pbgrpc.RegisterScalarsServer(srv, &Service{state: state})
 }
 
 // NewWriter creates a new vega writer in the tree.
 func (srv *Service) NewWriter(ctx context.Context, req *pb.NewWriterRequest) (*pb.NewWriterResponse, error) {
-	state := srv.state() // use state throughout this RPC lifetime.
+	state := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
 	writer := NewWriter()
 	writerPath, err := writer.AddToTree(state, req.GetPath())
 	if err != nil {
@@ -44,7 +44,7 @@ func (srv *Service) NewWriter(ctx context.Context, req *pb.NewWriterRequest) (*p
 
 // WriteSpec writes a vega spec in the tree.
 func (srv *Service) Write(ctx context.Context, req *pb.WriteRequest) (rep *pb.WriteResponse, err error) {
-	state := srv.state() // use state throughout this RPC lifetime.
+	state := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
 	var writer *Writer
 	if err := core.Set(&writer, state.Root(), req.GetWriter()); err != nil {
 		desc := fmt.Sprintf("cannot get the Writer from the tree: %v", err)

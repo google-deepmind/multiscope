@@ -22,12 +22,3 @@ func All() []treeservice.RegisterServiceCallback {
 		tensor.RegisterService,
 	}
 }
-
-// NewRegistry returns a new registry with all the writers already registered.
-func NewRegistry(state treeservice.State) *treeservice.Registry {
-	registry := treeservice.NewRegistry(state)
-	for _, srv := range All() {
-		registry.RegisterService(srv)
-	}
-	return registry
-}

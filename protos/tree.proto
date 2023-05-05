@@ -11,6 +11,11 @@ option go_package = "multiscope/protos/tree_go_proto";
 // Graph representation of the available streams.
 //==============================================================================
 
+// Identifier of the tree on the server.
+message TreeID {
+  int64 treeID = 1;
+}
+
 // Path of a node in the tree.
 message NodePath {
   repeated string path = 1;
@@ -77,7 +82,8 @@ message Event {
 
 // Request to parse the tree of available data.
 message NodeStructRequest {
-  repeated NodePath paths = 1;
+  TreeID treeID = 1;
+  repeated NodePath paths = 2;
 }
 
 // Subset of the tree of available data.
@@ -95,7 +101,8 @@ message DataRequest {
 
 // Request to query data from nodes in the tree.
 message NodeDataRequest {
-  repeated DataRequest reqs = 1;
+  TreeID treeID = 1;
+  repeated DataRequest reqs = 2;
 }
 
 // Data from nodes in the tree.
@@ -105,16 +112,18 @@ message NodeDataReply {
 
 // Request to send events to the backend.
 message SendEventsRequest {
-  repeated Event events = 1;
+  TreeID treeID = 1;
+  repeated Event events = 2;
 }
 
 // Request for streaming events from the backend. Subscribe to events matching
 // ALL of the provided filters.
 message StreamEventsRequest {
+  TreeID treeID = 1;
   // Only return events matching this path.
-  NodePath path = 1;
+  NodePath path = 2;
   // Only return events matching this typeurl. If empty, matches all events.
-  string type_url = 2;
+  string type_url = 3;
 }
 
 // Errors from processing the events.
@@ -122,18 +131,23 @@ message SendEventsReply {
   repeated string errors = 1;
 }
 
-message ActivePathsRequest {}
+message ActivePathsRequest {
+  TreeID treeID = 1;
+}
 
 message ActivePathsReply {
   repeated NodePath paths = 1;
 }
 
-message ResetStateRequest {}
+message ResetStateRequest {
+  TreeID treeID = 1;
+}
 
 message ResetStateReply {}
 
 message DeleteRequest {
-  NodePath path = 1;
+  TreeID treeID = 1;
+  NodePath path = 2;
 }
 
 message DeleteReply {}

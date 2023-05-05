@@ -8,20 +8,23 @@ import "tree.proto";
 option go_package = "multiscope/protos/text_go_proto";
 
 message Writer {
+  multiscope.TreeID treeID = 1;
   // Path in the Multiscope tree.
-  multiscope.NodePath path = 1;
+  multiscope.NodePath path = 2;
 }
 
 message HTMLWriter {
+  multiscope.TreeID treeID = 1;
   // Path in the Multiscope tree.
-  multiscope.NodePath path = 1;
+  multiscope.NodePath path = 2;
 }
 
 // RPC API
 
 // Request to create a new (raw) text writer in the tree.
 message NewWriterRequest {
-  multiscope.NodePath path = 1;
+  multiscope.TreeID treeID = 1;
+  multiscope.NodePath path = 2;
 }
 
 // Response after creating a new (raw) text writer in the tree.
@@ -31,7 +34,8 @@ message NewWriterResponse {
 
 // Request to create a new HTML writer in the tree.
 message NewHTMLWriterRequest {
-  multiscope.NodePath path = 1;
+  multiscope.TreeID treeID = 1;
+  multiscope.NodePath path = 2;
 }
 
 // Response after creating a new HTML writer in the tree.

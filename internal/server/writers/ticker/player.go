@@ -56,7 +56,7 @@ func NewPlayer(ignorePause bool) *Player {
 	return p
 }
 
-func (p *Player) addToTree(state treeservice.State, path *treepb.NodePath) (*core.Path, error) {
+func (p *Player) addToTree(state *treeservice.State, path *treepb.NodePath) (*core.Path, error) {
 	playerPath, err := core.SetNodeAt(state.Root(), path, p)
 	if err != nil {
 		return nil, err

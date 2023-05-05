@@ -18,19 +18,19 @@ import (
 // Service implements the Tickers service.
 type Service struct {
 	pbgrpc.UnimplementedTickersServer
-	state treeservice.StateProvider
+	state treeservice.IDToState
 }
 
 var _ pbgrpc.TickersServer = (*Service)(nil)
 
 // RegisterService registers the TensorWriters service to a gRPC server.
-func RegisterService(srv grpc.ServiceRegistrar, state treeservice.StateProvider) {
+func RegisterService(srv grpc.ServiceRegistrar, state treeservice.IDToState) {
 	pbgrpc.RegisterTickersServer(srv, &Service{state: state})
 }
 
 // NewPlayer creates a new player in the tree.
 func (srv *Service) NewPlayer(ctx context.Context, req *pb.NewPlayerRequest) (*pb.NewPlayerResponse, error) {
-	state := srv.state() // use state throughout this RPC lifetime.
+	state := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
 	player := NewPlayer(req.IgnorePause)
 	playerPath, err := player.addToTree(state, req.GetPath())
 	if err != nil {
@@ -45,7 +45,7 @@ func (srv *Service) NewPlayer(ctx context.Context, req *pb.NewPlayerRequest) (*p
 
 // StoreFrame goes through all the children of a tree to store their state into some kind of storage.
 func (srv *Service) StoreFrame(ctx context.Context, req *pb.StoreFrameRequest) (*pb.StoreFrameResponse, error) {
-	state := srv.state() // use state throughout this RPC lifetime.
+	state := srv.state.State(treeservice.TreeID(req.Player)) // use state throughout this RPC lifetime.
 	var player *Player
 	if err := core.Set(&player, state.Root(), req.GetPlayer()); err != nil {
 		desc := fmt.Sprintf("cannot get the player from the tree: %v", err)
@@ -59,7 +59,7 @@ func (srv *Service) StoreFrame(ctx context.Context, req *pb.StoreFrameRequest) (
 
 // NewTicker creates a new ticker in the tree.
 func (srv *Service) NewTicker(ctx context.Context, req *pb.NewTickerRequest) (*pb.NewTickerResponse, error) {
-	state := srv.state() // use state throughout this RPC lifetime.
+	state := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
 	ticker := NewTicker()
 	tickerPath, err := ticker.addToTree(state, req.GetPath())
 	if err != nil {
@@ -74,7 +74,7 @@ func (srv *Service) NewTicker(ctx context.Context, req *pb.NewTickerRequest) (*p
 
 // WriteTicker the data of a ticker.
 func (srv *Service) WriteTicker(ctx context.Context, req *pb.WriteTickerRequest) (*pb.WriteTickerResponse, error) {
-	state := srv.state() // use state throughout this RPC lifetime.
+	state := srv.state.State(treeservice.TreeID(req.Ticker)) // use state throughout this RPC lifetime.
 	var ticker *Ticker
 	if err := core.Set(&ticker, state.Root(), req.GetTicker()); err != nil {
 		desc := fmt.Sprintf("cannot get the ticker from the tree: %v", err)

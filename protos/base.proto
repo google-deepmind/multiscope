@@ -19,7 +19,10 @@ message Group {
 }
 
 // Request to create a new ProtoWriter in the tree.
-message NewGroupRequest { multiscope.NodePath path = 1; }
+message NewGroupRequest { 
+  multiscope.TreeID treeID = 1;
+  multiscope.NodePath path = 2; 
+}
 
 // Response after creating a new group in the tree.
 message NewGroupResponse { Group grp = 1; }
@@ -30,15 +33,18 @@ message NewGroupResponse { Group grp = 1; }
 
 // Proto writer in the Multiscope tree.
 message ProtoWriter {
+  multiscope.TreeID treeID = 1;
   // Path in the tree.
-  multiscope.NodePath path = 1;
+  multiscope.NodePath path = 2;
 }
 
 // Request to create a new ProtoWriter in the tree.
 message NewProtoWriterRequest {
-  multiscope.NodePath path = 1;
+  multiscope.TreeID treeID = 1;
+  // Path in the tree.
+  multiscope.NodePath path = 2;
   // An instance of the protocol buffers this writer will write.
-  google.protobuf.Any proto = 2;
+  google.protobuf.Any proto = 3;
 }
 
 // Response after creating a new ProtoWriter in the tree.
@@ -60,16 +66,18 @@ message WriteProtoResponse {}
 
 // Raw writer in the Multiscope tree.
 message RawWriter {
+  multiscope.TreeID treeID = 1;
   // Path in the tree.
-  multiscope.NodePath path = 1;
+  multiscope.NodePath path = 2;
 }
 
 // Request to create a new RawWriter in the tree.
 message NewRawWriterRequest {
+  multiscope.TreeID treeID = 1;
   // Path in the tree.
-  multiscope.NodePath path = 1;
+  multiscope.NodePath path = 2;
   // MIME type of the raw bytes to be written to this writer.
-  string mime = 2;
+  string mime = 3;
 }
 
 // Response after creating a new RawWriter in the tree.
@@ -78,9 +86,9 @@ message NewRawWriterResponse { RawWriter writer = 1; }
 // Request to write raw data.
 message WriteRawRequest {
   // Writer to write the data to.
-  RawWriter writer = 1;
+  RawWriter writer = 2;
   // Data to write.
-  bytes data = 2;
+  bytes data = 3;
 }
 
 message WriteRawResponse {}

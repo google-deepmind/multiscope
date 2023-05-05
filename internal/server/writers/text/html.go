@@ -34,7 +34,7 @@ func NewHTMLWriter() *HTMLWriter {
 // AddToTree adds the writer to the Multiscope tree.
 // Also forwards the activity from the data and specification children nodes to the vega nodes
 // such that the writer is also active when one of the child is active.
-func (w *HTMLWriter) AddToTree(state treeservice.State, path *treepb.NodePath) (*core.Path, error) {
+func (w *HTMLWriter) AddToTree(state *treeservice.State, path *treepb.NodePath) (*core.Path, error) {
 	writerPath, err := core.SetNodeAt(state.Root(), path, w)
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (w *HTMLWriter) AddToTree(state treeservice.State, path *treepb.NodePath) (
 }
 
 // SetForwards sets up the forward from the writer children nodes to the parent.
-func (w *HTMLWriter) SetForwards(state treeservice.State, writerPath *core.Path) {
+func (w *HTMLWriter) SetForwards(state *treeservice.State, writerPath *core.Path) {
 	state.PathLog().Forward(writerPath, writerPath.PathTo(mime.NodeNameHTML))
 	state.PathLog().Forward(writerPath, writerPath.PathTo(mime.NodeNameCSS))
 }

@@ -51,7 +51,7 @@ func (w *ProtoWriter) Write(p proto.Message) error {
 }
 
 // AddToTree adds the proto writer to tree in server state, at the given path.
-func (w *ProtoWriter) AddToTree(state treeservice.State, path *pb.NodePath) (*core.Path, error) {
+func (w *ProtoWriter) AddToTree(state *treeservice.State, path *pb.NodePath) (*core.Path, error) {
 	return core.SetNodeAt(state.Root(), path, w)
 }
 

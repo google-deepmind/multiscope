@@ -4,7 +4,6 @@ package treeservice
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 
 	"multiscope/internal/httpgrpc"
@@ -18,76 +17,83 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
-// TreeServer implements a GRPC server on top of a stream graph.
-type TreeServer struct {
-	pbgrpc.UnimplementedTreeServer
+type (
+	// ID is a tree ID.
+	ID int64
 
-	state      State
-	stateMutex sync.Mutex
-	Registry   *Registry
-
-	toActivePaths *apTreeToChan
-}
-
-type apTreeToChan struct {
-	m   map[pbgrpc.Tree_ActivePathsServer]chan bool
-	mut sync.Mutex
-}
-
-func (a *apTreeToChan) add(s pbgrpc.Tree_ActivePathsServer) chan bool {
-	a.mut.Lock()
-	defer a.mut.Unlock()
-	a.m[s] = make(chan bool)
-	return a.m[s]
-}
-
-func (a *apTreeToChan) del(s pbgrpc.Tree_ActivePathsServer) {
-	a.mut.Lock()
-	defer a.mut.Unlock()
-	delete(a.m, s)
-}
-
-func (a *apTreeToChan) dispatch() {
-	for _, c := range a.m {
-		c <- true
+	// IDToState returns the state of a server and its tree given an ID.
+	IDToState interface {
+		State(ID) *State
 	}
-}
+
+	// RegisterServiceCallback to register a grpc service provided by a node.
+	RegisterServiceCallback func(srv grpc.ServiceRegistrar, idToState IDToState)
+
+	// TreeServer implements a GRPC server on top of a stream graph.
+	TreeServer struct {
+		pbgrpc.UnimplementedTreeServer
+		// Services provided by the different node types
+		services []RegisterServiceCallback
+
+		idToState  IDToState
+		idToServer sync.Map
+	}
+
+	// TreeIDGetter gives access to a tree ID (typically a proto).
+	TreeIDGetter interface {
+		GetTreeID() *pb.TreeID
+	}
+)
 
 var (
 	_ pbgrpc.TreeServer = (*TreeServer)(nil)
 	_ EventDispatcher   = (*TreeServer)(nil)
+	_ IDToState         = (*TreeServer)(nil)
 )
 
+// TreeID returns the ID of a tree given a proto.
+func TreeID(msg TreeIDGetter) ID {
+	if msg == nil {
+		return 0
+	}
+	treeID := msg.GetTreeID()
+	if treeID == nil {
+		return 0
+	}
+	return ID(treeID.TreeID)
+}
+
 // New returns a service given a server state.
-func New(writerRegistry *Registry, state State) *TreeServer {
+func New(services []RegisterServiceCallback, idToState IDToState) *TreeServer {
 	return &TreeServer{
-		state:         state,
-		Registry:      writerRegistry,
-		toActivePaths: &apTreeToChan{m: make(map[pbgrpc.Tree_ActivePathsServer]chan bool)},
+		services:  services,
+		idToState: idToState,
 	}
 }
 
-// State returns the current state of the server.
-func (s *TreeServer) State() State {
-	s.stateMutex.Lock()
-	defer s.stateMutex.Unlock()
-	return s.state
+func (s *TreeServer) stateServer(id ID) *stateServer {
+	if server, ok := s.idToServer.Load(id); ok {
+		return server.(*stateServer)
+	}
+	state := s.idToState.State(id)
+	server := newStateServer(state)
+	s.idToServer.Store(id, server)
+	return server
 }
 
-func (s *TreeServer) stateServer() stateServer {
-	s.stateMutex.Lock()
-	defer s.stateMutex.Unlock()
-	return stateServer{state: s.state, writerRegistry: s.Registry}
+// State returns the current state of the server.
+func (s *TreeServer) State(id ID) *State {
+	return s.stateServer(id).state.state()
 }
 
 // GetNodeStruct browses the structure of the graph.
 func (s *TreeServer) GetNodeStruct(ctx context.Context, req *pb.NodeStructRequest) (*pb.NodeStructReply, error) {
-	return s.stateServer().getNodeStruct(ctx, req)
+	return s.stateServer(TreeID(req)).getNodeStruct(ctx, req)
 }
 
 // GetNodeData requests data from nodes in the graph.
 func (s *TreeServer) GetNodeData(ctx context.Context, req *pb.NodeDataRequest) (*pb.NodeDataReply, error) {
-	return s.stateServer().getNodeData(ctx, req)
+	return s.stateServer(TreeID(req)).getNodeData(ctx, req)
 }
 
 // Dispatch events using the SendEvents entry point.
@@ -119,66 +125,27 @@ func (s *TreeServer) Dispatch(path *core.Path, msg proto.Message) error {
 
 // SendEvents request data from nodes in the graph.
 func (s *TreeServer) SendEvents(ctx context.Context, req *pb.SendEventsRequest) (*pb.SendEventsReply, error) {
-	return s.stateServer().sendEvents(ctx, req)
+	return s.stateServer(TreeID(req)).sendEvents(ctx, req)
 }
 
 // StreamEvents using a continuous gRPC stream for the given path.
 func (s *TreeServer) StreamEvents(req *pb.StreamEventsRequest, server pbgrpc.Tree_StreamEventsServer) error {
-	return s.stateServer().streamEvents(req, server)
+	return s.stateServer(TreeID(req)).streamEvents(req, server)
 }
 
 // ActivePaths streams active paths when the list is modified.
 func (s *TreeServer) ActivePaths(req *pb.ActivePathsRequest, srv pbgrpc.Tree_ActivePathsServer) error {
-	fromReset := s.toActivePaths.add(srv)
-	defer s.toActivePaths.del(srv)
-	return s.activePaths(req, srv, fromReset)
-}
-
-// activePaths streams active paths when the list is modified.
-func (s *TreeServer) activePaths(req *pb.ActivePathsRequest, srv pbgrpc.Tree_ActivePathsServer, fromReset chan bool) error {
-	pathLog := s.stateServer().state.PathLog()
-	ch := pathLog.Subscribe()
-	defer pathLog.Unsubscribe(ch)
-	pathLog.DispatchCurrent()
-
-	ctx := srv.Context()
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case rep := <-ch:
-			if err := srv.Send(rep); err != nil {
-				return err
-			}
-		case <-fromReset:
-			pathLog.Unsubscribe(ch)
-			pathLog = s.stateServer().state.PathLog()
-			ch = pathLog.Subscribe()
-			pathLog.DispatchCurrent()
-		}
-	}
+	return s.stateServer(TreeID(req)).activePaths(req, srv)
 }
 
 // ResetState resets the state of the server.
 func (s *TreeServer) ResetState(ctx context.Context, req *pb.ResetStateRequest) (*pb.ResetStateReply, error) {
-	s.stateMutex.Lock()
-	defer s.stateMutex.Unlock()
-	s.state = s.state.Reset()
-	s.Registry = s.Registry.ReplaceState(s.state)
-	s.toActivePaths.dispatch()
-	return &pb.ResetStateReply{}, nil
+	return s.stateServer(TreeID(req)).resetState(ctx, req)
 }
 
 // Delete a node in the tree.
 func (s *TreeServer) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.DeleteReply, error) {
-	var path []string
-	if req.Path != nil {
-		path = req.Path.Path
-	}
-	if err := s.state.Root().Delete(path); err != nil {
-		return nil, fmt.Errorf("cannot delete node at path %v: %w", path, err)
-	}
-	return &pb.DeleteReply{}, nil
+	return s.stateServer(TreeID(req)).deletePath(ctx, req)
 }
 
 // Desc returns a description of the service.
@@ -191,10 +158,7 @@ func (s *TreeServer) Desc() httpgrpc.Registerer {
 // RegisterServices registers the main stream service to the server as well as all the services provided by the nodes.
 func (s *TreeServer) RegisterServices(grpcServer grpc.ServiceRegistrar) {
 	pbgrpc.RegisterTreeServer(grpcServer, s)
-	if s.Registry == nil {
-		return
-	}
-	for _, service := range s.Registry.Services() {
-		service(grpcServer, s.State)
+	for _, service := range s.services {
+		service(grpcServer, s)
 	}
 }

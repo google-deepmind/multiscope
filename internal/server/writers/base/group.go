@@ -33,7 +33,7 @@ func NewGroup(mime string) *Group {
 }
 
 // AddToTree adds the proto writer to tree in server state, at the given path.
-func (g *Group) AddToTree(state treeservice.State, path *pb.NodePath) (*core.Path, error) {
+func (g *Group) AddToTree(state *treeservice.State, path *pb.NodePath) (*core.Path, error) {
 	return core.SetNodeAt(state.Root(), path, g)
 }
 

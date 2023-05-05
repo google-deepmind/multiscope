@@ -6,34 +6,49 @@ import (
 	"multiscope/internal/server/root"
 	"multiscope/internal/server/treeservice"
 	"multiscope/internal/server/writers"
+	"sync"
 	"time"
 )
 
 const activePathThreshold = 1 * time.Minute
 
-type serverState struct {
-	*treeservice.Shared
+type singleton struct {
+	state *treeservice.State
+	mut   sync.Mutex
+
+	dispatcher treeservice.EventDispatcher
 }
 
-func newState() *serverState {
-	shared := treeservice.NewShared(
+var _ treeservice.IDToState = (*singleton)(nil)
+
+func (s *singleton) newState() {
+	s.state = treeservice.NewState(
 		root.NewRoot(),
 		events.NewRegistry(),
-		pathlog.NewPathLog(activePathThreshold))
-	return &serverState{Shared: shared}
+		pathlog.NewPathLog(activePathThreshold),
+		s.dispatcher)
 }
 
-// Reset the state of Multiscope.
-func (s *serverState) Reset() treeservice.State {
-	state := newState()
-	state.SetDispatcher(s.EventDispatcher())
-	return state
+func (s *singleton) NewState() *treeservice.State {
+	s.mut.Lock()
+	defer s.mut.Unlock()
+	s.newState()
+	return s.state
+}
+
+func (s *singleton) State(id treeservice.ID) *treeservice.State {
+	s.mut.Lock()
+	defer s.mut.Unlock()
+	if s.state == nil {
+		s.newState()
+	}
+	return s.state
 }
 
 // NewServer starts a new Multiscope server.
 func NewServer() *treeservice.TreeServer {
-	state := newState()
-	srv := treeservice.New(writers.NewRegistry(state), state)
-	state.SetDispatcher(srv)
+	state := &singleton{}
+	srv := treeservice.New(writers.All(), state)
+	state.dispatcher = srv
 	return srv
 }

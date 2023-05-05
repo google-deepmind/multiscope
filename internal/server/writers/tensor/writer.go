@@ -38,7 +38,7 @@ type (
 		updts       []updater
 		updateIndex uint
 
-		state    treeservice.State
+		state    *treeservice.State
 		timeline *tlNode
 	}
 )
@@ -76,7 +76,7 @@ func NewWriter() (*Writer, error) {
 	return w, nil
 }
 
-func (w *Writer) addToTree(state treeservice.State, path *treepb.NodePath) (*core.Path, error) {
+func (w *Writer) addToTree(state *treeservice.State, path *treepb.NodePath) (*core.Path, error) {
 	writerPath, err := core.SetNodeAt(state.Root(), path, w)
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (w *Writer) addToTree(state treeservice.State, path *treepb.NodePath) (*cor
 }
 
 // ForwardActive forwards activation up from the children to the writer.
-func (w *Writer) ForwardActive(state treeservice.State, path *core.Path) {
+func (w *Writer) ForwardActive(state *treeservice.State, path *core.Path) {
 	w.state = state
 	for _, updt := range w.updts {
 		updt.forwardActive(path)

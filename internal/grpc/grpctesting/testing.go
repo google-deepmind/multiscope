@@ -19,31 +19,43 @@ import (
 )
 
 type sharedMock struct {
-	*treeservice.Shared
+	state *treeservice.State
+	mut   sync.Mutex
 }
 
-func (mk *sharedMock) Reset() treeservice.State {
-	return NewState(base.NewRoot(), events.NewRegistry(), mk.PathLog())
+func newState(root core.Root, eventRegistry *events.Registry, pathLog *pathlog.PathLog) *treeservice.State {
+	return treeservice.NewState(root, eventRegistry, pathLog, nil)
+}
+
+func (mk *sharedMock) NewState() *treeservice.State {
+	mk.mut.Lock()
+	defer mk.mut.Unlock()
+
+	mk.state = newState(base.NewRoot(), events.NewRegistry(), mk.state.PathLog())
+	return mk.state
+}
+
+func (mk *sharedMock) State(id treeservice.ID) *treeservice.State {
+	mk.mut.Lock()
+	defer mk.mut.Unlock()
+
+	return mk.state
 }
 
 // NewState returns a new mock server state.
 // If pathLog is nil, a default pathLog is used with one minute as active time.
-func NewState(root core.Root, eventRegistry *events.Registry, pathLog *pathlog.PathLog) treeservice.State {
+func NewState(root core.Root, eventRegistry *events.Registry, pathLog *pathlog.PathLog) treeservice.IDToState {
 	if pathLog == nil {
 		pathLog = pathlog.NewPathLog(1 * time.Minute)
 	}
 	return &sharedMock{
-		Shared: treeservice.NewShared(root, eventRegistry, pathLog),
+		state: newState(root, eventRegistry, pathLog),
 	}
 }
 
 // SetupTest starts a grpc server, create a connection to that server, and then returns it alongside with a stream client.
-func SetupTest(state treeservice.State, services ...treeservice.RegisterServiceCallback) (*grpc.ClientConn, pbgrpc.TreeClient, error) {
-	registry := treeservice.NewRegistry(state)
-	for _, service := range services {
-		registry.RegisterService(service)
-	}
-	srv := treeservice.New(registry, state)
+func SetupTest(state treeservice.IDToState, services ...treeservice.RegisterServiceCallback) (*grpc.ClientConn, pbgrpc.TreeClient, error) {
+	srv := treeservice.New(services, state)
 	wg := sync.WaitGroup{}
 	addr, err := scope.RunGRPC(srv, &wg, "localhost:0")
 	if err != nil {

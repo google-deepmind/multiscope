@@ -8,8 +8,9 @@ import "tree.proto";
 option go_package = "multiscope/protos/tensor_go_proto";
 
 message Writer {
+  multiscope.TreeID treeID = 1;
   // Path in the Multiscope tree.
-  multiscope.NodePath path = 1;
+  multiscope.NodePath path = 2;
 }
 
 enum DataType {
@@ -73,7 +74,10 @@ message Tensor {
 }
 
 // Request to create a new TensorWriter in the tree.
-message NewWriterRequest { multiscope.NodePath path = 1; }
+message NewWriterRequest { 
+  multiscope.TreeID treeID = 1;
+  multiscope.NodePath path = 2; 
+}
 
 // Response after creating a new TensorWriter in the tree.
 message NewWriterResponse {

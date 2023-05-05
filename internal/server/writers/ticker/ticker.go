@@ -29,7 +29,7 @@ func NewTicker() *Ticker {
 	}
 }
 
-func (t *Ticker) addToTree(state treeservice.State, path *treepb.NodePath) (*core.Path, error) {
+func (t *Ticker) addToTree(state *treeservice.State, path *treepb.NodePath) (*core.Path, error) {
 	return core.SetNodeAt(state.Root(), path, t)
 }
 

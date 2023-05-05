@@ -1,3 +1,4 @@
+// Package settings store user settings.
 package settings
 
 import (

@@ -38,7 +38,7 @@ func (w *RawWriter) Write(p []byte) error {
 }
 
 // AddToTree adds the raw writer to tree in server state, at the given path.
-func (w *RawWriter) AddToTree(state treeservice.State, path *pb.NodePath) (*core.Path, error) {
+func (w *RawWriter) AddToTree(state *treeservice.State, path *pb.NodePath) (*core.Path, error) {
 	return core.SetNodeAt(state.Root(), path, w)
 }
 

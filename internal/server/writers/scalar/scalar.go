@@ -48,7 +48,7 @@ func (w *Writer) Reset() {
 
 // AddToTree adds the writer to a stream tree.
 // Also set up activity forwarding.
-func (w *Writer) AddToTree(state treeservice.State, path *treepb.NodePath) (*core.Path, error) {
+func (w *Writer) AddToTree(state *treeservice.State, path *treepb.NodePath) (*core.Path, error) {
 	return core.SetNodeAt(state.Root(), path, w)
 }
 
