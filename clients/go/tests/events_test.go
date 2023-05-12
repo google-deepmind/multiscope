@@ -9,7 +9,6 @@ import (
 	"multiscope/clients/go/clienttesting"
 	"multiscope/clients/go/remote"
 	"multiscope/clients/go/scope"
-	"multiscope/internal/server/events"
 	pb "multiscope/protos/tree_go_proto"
 
 	"github.com/google/go-cmp/cmp"
@@ -27,7 +26,7 @@ func TestEvents(t *testing.T) {
 	received := false
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	cb := events.CallbackF(func(ev *scope.Event) (bool, error) {
+	cb := func(ev *scope.Event) error {
 		var want []string = textWriter.Path()
 		var got = ev.GetPath().GetPath()
 		if !cmp.Equal(want, got) {
@@ -35,13 +34,10 @@ func TestEvents(t *testing.T) {
 		}
 		received = true
 		wg.Done()
-		return true, nil
-	})
-	if _, err = clt.EventsManager().Register(textWriter.Path(), func() events.Callback {
-		return cb
-	}); err != nil {
-		t.Fatal(err)
+		return nil
 	}
+	queue := clt.EventsManager().NewQueueForPath(textWriter.Path(), cb)
+	defer queue.Delete()
 	// When Register returns, it is not guaranteed the full pipeline between the client
 	// and the server is completely setup.
 	// Specifically, the client can have a connection but the callback may not be

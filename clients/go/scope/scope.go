@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"multiscope/clients/go/reflect"
 	"multiscope/clients/go/remote"
+	"multiscope/internal/server/events"
 	"multiscope/lib/tensor"
 	treepb "multiscope/protos/tree_go_proto"
 	"time"
@@ -147,7 +148,7 @@ func NewTensorWriter[T tensor.Supported](name string, parent remote.Path) (*remo
 }
 
 // EventsManager returns the registry mapping path to callback of the main Multiscope remote.
-func EventsManager() *remote.Events {
+func EventsManager() *events.Registry {
 	return scopeClient.EventsManager()
 }
 

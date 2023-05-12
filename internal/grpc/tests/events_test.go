@@ -14,8 +14,8 @@ import (
 )
 
 func TestServerDispatchesEvents(t *testing.T) {
-	cbMap := events.NewRegistry()
-	state := grpctesting.NewState(root.NewRoot(), cbMap, nil)
+	reg := events.NewRegistry()
+	state := grpctesting.NewState(root.NewRoot(), reg, nil)
 	client := treeservice.New(nil, state)
 
 	req := &pb.SendEventsRequest{
@@ -29,17 +29,11 @@ func TestServerDispatchesEvents(t *testing.T) {
 	cbPath := []string{"node"}
 	var wg sync.WaitGroup
 	wg.Add(1)
-
-	cb := events.CallbackF(func(event *pb.Event) (bool, error) {
+	queue := reg.NewQueueForPath(cbPath, func(event *pb.Event) error {
 		wg.Done()
-		return true, nil
+		return nil
 	})
-
-	if _, err := cbMap.Register(cbPath, func() events.Callback {
-		return cb
-	}); err != nil {
-		t.Fatal(err)
-	}
+	defer queue.Delete()
 
 	ctx := context.Background()
 	_, err := client.SendEvents(ctx, req)

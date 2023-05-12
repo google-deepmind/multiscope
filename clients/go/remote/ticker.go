@@ -44,7 +44,7 @@ type (
 	}
 )
 
-const measureStepSize = .99
+const measureStepSize = .9
 
 // NewTicker creates a new ticker node in tree.
 func NewTicker(clt *Client, name string, parent Path) (*Ticker, error) {
@@ -73,11 +73,7 @@ func NewTicker(clt *Client, name string, parent Path) (*Ticker, error) {
 	if err := clt.Display().DisplayIfDefault(t.Path()); err != nil {
 		return nil, err
 	}
-	if _, err := clt.EventsManager().Register(t.Path(), func() events.Callback {
-		return events.CallbackF(t.processEvent)
-	}); err != nil {
-		return nil, err
-	}
+	clt.EventsManager().NewQueueForPath(t.Path(), t.processEvent)
 
 	// Subscribe builtin callbacks.
 	t.Subscribe(t.writeData)
@@ -86,17 +82,17 @@ func NewTicker(clt *Client, name string, parent Path) (*Ticker, error) {
 
 var tickerActionURL = string(proto.MessageName(&pb.TickerAction{}))
 
-func (t *Ticker) processEvent(event *treepb.Event) (bool, error) {
+func (t *Ticker) processEvent(event *treepb.Event) error {
 	payload := event.GetPayload()
 	if payload == nil {
-		return false, nil
+		return nil
 	}
 	if events.CoreURL(payload.GetTypeUrl()) != tickerActionURL {
-		return false, nil
+		return nil
 	}
 	action := pb.TickerAction{}
 	if err := anypb.UnmarshalTo(payload, &action, proto.UnmarshalOptions{}); err != nil {
-		return false, err
+		return err
 	}
 	var err error
 	switch a := action.Action.(type) {
@@ -108,7 +104,7 @@ func (t *Ticker) processEvent(event *treepb.Event) (bool, error) {
 	default:
 		err = errors.Errorf("command not supported: %q", a)
 	}
-	return true, err
+	return err
 }
 
 func (t *Ticker) callCallers() error {

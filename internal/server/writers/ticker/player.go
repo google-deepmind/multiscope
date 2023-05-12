@@ -29,10 +29,9 @@ type (
 	// Player is a group node that displays timing data.
 	Player struct {
 		*base.Group
-
-		tline *timeline.Timeline
-
+		tline   *timeline.Timeline
 		control playerControl
+		queue   *events.Queue
 	}
 )
 
@@ -61,19 +60,14 @@ func (p *Player) addToTree(state *treeservice.State, path *treepb.NodePath) (*co
 	if err != nil {
 		return nil, err
 	}
-	_, err = state.Events().Register(playerPath.Path(), func() events.Callback {
-		return events.CallbackF(p.processEvents)
-	})
-	if err != nil {
-		return nil, err
-	}
+	p.queue = state.Events().NewQueueForPath(playerPath.Path(), p.processEvents)
 	return playerPath, nil
 }
 
-func (p *Player) processEvents(ev *treepb.Event) (bool, error) {
+func (p *Player) processEvents(ev *treepb.Event) error {
 	action := &tickerpb.PlayerAction{}
 	if err := anypb.UnmarshalTo(ev.Payload, action, proto.UnmarshalOptions{}); err != nil {
-		return false, err
+		return err
 	}
 	var err error
 	switch act := action.Action.(type) {
@@ -100,7 +94,7 @@ func (p *Player) processEvents(ev *treepb.Event) (bool, error) {
 	default:
 		err = errors.Errorf("player action %T not implemented", act)
 	}
-	return err == nil, err
+	return err
 }
 
 // StoreFrame goes through the tree to store the current state of the nodes into a storage.
@@ -133,6 +127,7 @@ func (p *Player) MarshalData(d *treepb.NodeData, path []string, lastTick uint32)
 
 // Close the player and release the storage memory.
 func (p *Player) Close() error {
+	p.queue.Delete()
 	p.control.close()
 	return p.tline.Close()
 }

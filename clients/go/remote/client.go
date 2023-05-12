@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"multiscope/internal/grpc/client"
+	"multiscope/internal/server/events"
 	"multiscope/internal/server/scope"
 	rootpb "multiscope/protos/root_go_proto"
 	rootpbgrpc "multiscope/protos/root_go_proto"
@@ -89,14 +90,17 @@ func NewClient(conn grpc.ClientConnInterface) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &Client{
+	events, err := newEvents(clt)
+	if err != nil {
+		return nil, err
+	}
+	return &Client{
 		conn:    conn,
 		client:  clt,
-		events:  &Events{clt: clt},
+		events:  events,
 		display: newDisplay(conn),
 		active:  active,
-	}
-	return c, nil
+	}, nil
 }
 
 // Connection returns the connection from the client to the server.
@@ -136,8 +140,8 @@ func (clt *Client) Active() *Active {
 }
 
 // EventsManager returns the event registry mapping paths to callbacks.
-func (clt *Client) EventsManager() *Events {
-	return clt.events
+func (clt *Client) EventsManager() *events.Registry {
+	return clt.events.reg
 }
 
 // NewChildClient creates a group node called name, then returns a new client that will create all nodes inside that group node.

@@ -11,37 +11,28 @@ import (
 
 // Events manages client events by receiving events from the backend and dispatching them locally.
 type Events struct {
-	clt pbgrpc.TreeClient
+	reg *events.Registry
 }
 
-var _ events.Registerer = (*Events)(nil)
-
-// Register a callback to a path.
-func (e *Events) Register(p []string, cbF func() events.Callback) (events.Callback, error) {
-	cb := cbF()
-	pth := Path(p)
-	req := &pb.StreamEventsRequest{
-		Path: pth.NodePath(),
-	}
+func newEvents(clt pbgrpc.TreeClient) (*Events, error) {
+	req := &pb.StreamEventsRequest{}
 	ctx := context.Background()
-	strm, err := e.clt.StreamEvents(ctx, req)
+	strm, err := clt.StreamEvents(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	go e.processEvents(pth, cb, strm)
-	return cb, nil
+	e := &Events{reg: events.NewRegistry()}
+	go e.processEvents(strm)
+	return e, nil
 }
 
-func (e *Events) processEvents(pth Path, cb events.Callback, strm pbgrpc.Tree_StreamEventsClient) {
+func (e *Events) processEvents(strm pbgrpc.Tree_StreamEventsClient) {
 	for {
 		event, err := strm.Recv()
 		if err != nil {
-			log.Printf("cannot receive the next event for path %q: %v", pth, err)
+			log.Printf("cannot receive the next event: %v", err)
 			continue
 		}
-		if _, err := cb.Process(event); err != nil {
-			log.Printf("event callback for path %q returned error: %v", pth, err)
-			continue
-		}
+		e.reg.Process(event)
 	}
 }

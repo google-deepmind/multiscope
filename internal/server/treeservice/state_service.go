@@ -16,7 +16,8 @@ type (
 		mut       sync.Mutex
 	}
 
-	// stateServer is an ephemeral structure created to server a request given an instance of state that is guaranteed not to change during the time of the request.
+	// stateServer is an ephemeral structure created to server a request given
+	// an instance of state that is guaranteed not to change during the time of the request.
 	stateServer struct {
 		state protectedState
 
@@ -184,34 +185,19 @@ func (s *stateServer) sendEvents(ctx context.Context, req *pb.SendEventsRequest)
 
 // StreamEvents using a continuous gRPC stream for the given path.
 func (s *stateServer) streamEvents(req *pb.StreamEventsRequest, server pbgrpc.Tree_StreamEventsServer) error {
-	if req.GetPath() == nil {
-		return fmt.Errorf("path is required")
-	}
 	state := s.state.state()
 	eventRegistry := state.Events()
-	events := eventRegistry.Subscribe(req.GetPath().GetPath(), req.TypeUrl)
-	defer eventRegistry.Unsubscribe(events)
+
 	errCh := make(chan error)
-	go func() {
-		for {
-			event, err := events.Next()
-			if err != nil {
-				errCh <- err
-				break
-			}
-			if event == nil {
-				// This is only reported if server.Context().Done() was not closed.
-				errCh <- fmt.Errorf("internal error: events.Next() = nil in StreamEvents")
-				break
-			}
-			// TODO(vikrantvarma): this will buffer writes (64kb on the client by
-			//  default), and so breaks the last-N semantics of EventQueue. Revisit.
-			if err := server.Send(event); err != nil {
-				errCh <- err
-				break
-			}
+	processEvent := func(event *pb.Event) error {
+		if err := server.Send(event); err != nil {
+			errCh <- err
 		}
-	}()
+		return nil
+	}
+	queue := eventRegistry.NewQueue(processEvent)
+	defer queue.Delete()
+
 	select {
 	case <-server.Context().Done():
 		return server.Context().Err()

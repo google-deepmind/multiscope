@@ -1,7 +1,7 @@
 package events_test
 
 import (
-	"fmt"
+	"sync"
 	"testing"
 
 	"multiscope/internal/server/events"
@@ -13,25 +13,20 @@ type TestCase struct {
 	capture         bool
 	pathsToProcess  []string
 	wantCount       int
-	eventQueue      []*events.EventQueue
+
+	mut sync.Mutex
+	got []*pb.Event
 }
 
-func consume(queue *events.EventQueue) (evts []*pb.Event, err error) {
-	for {
-		var e *pb.Event
-		e, err = queue.Poll()
-		if err != nil {
-			return nil, err
-		}
-		if e == nil {
-			return
-		}
-		evts = append(evts, e)
-	}
+func (tc *TestCase) process(ev *pb.Event) error {
+	tc.mut.Lock()
+	defer tc.mut.Unlock()
+	tc.got = append(tc.got, ev)
+	return nil
 }
 
 func TestEventsDispatchedToSubscribers(t *testing.T) {
-	testCases := []TestCase{
+	testCases := []*TestCase{
 		{
 			pathsToRegister: []string{"node"},
 			pathsToProcess:  []string{"node"},
@@ -66,29 +61,32 @@ func TestEventsDispatchedToSubscribers(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		registry := events.NewRegistry()
+		reg := events.NewRegistry()
 
+		var queues []*events.Queue
 		for _, path := range testCase.pathsToRegister {
-			testCases[i].eventQueue = append(testCases[i].eventQueue, registry.Subscribe([]string{path}, ""))
+			var q *events.Queue
+			if len(path) == 0 {
+				q = reg.NewQueue(testCase.process)
+			} else {
+				q = reg.NewQueueForPath([]string{path}, testCase.process)
+			}
+			queues = append(queues, q)
 		}
 
 		for _, path := range testCase.pathsToProcess {
-			registry.Process(&pb.Event{
+			reg.Process(&pb.Event{
 				Path: &pb.NodePath{Path: []string{path}},
 			})
 		}
 
-		gotCount := 0
-		for _, queue := range testCases[i].eventQueue {
-			evts, err := consume(queue)
-			if err != nil {
-				t.Error(err)
-			}
-			gotCount += len(evts)
+		for _, q := range queues {
+			q.Delete()
 		}
 
+		gotCount := len(testCase.got)
 		if gotCount != testCase.wantCount {
-			t.Errorf("wrong number of events published: got %d want %d", gotCount, testCase.wantCount)
+			t.Errorf("testcase %d: wrong number of events published: got %d want %d", i, gotCount, testCase.wantCount)
 		}
 	}
 }
@@ -108,7 +106,7 @@ func TestUnsubscribedQueueStopsReceivingEvents(t *testing.T) {
 		},
 		{
 			subscribe:      []string{"A", "B"},
-			unsubscribeIdx: []int{0, 0},
+			unsubscribeIdx: []int{0},
 			publish:        []string{"A", "B"},
 			expect:         []int{0, 1},
 		},
@@ -120,80 +118,37 @@ func TestUnsubscribedQueueStopsReceivingEvents(t *testing.T) {
 		},
 	}
 
-	registry := events.NewRegistry()
+	reg := events.NewRegistry()
 	for _, testCase := range testCases {
-		var subscribers []*events.EventQueue
-		for _, s := range testCase.subscribe {
-			subscribers = append(subscribers, registry.Subscribe([]string{s}, ""))
+		var queues []*events.Queue
+		got := make([][]*pb.Event, len(testCase.subscribe))
+		for i, s := range testCase.subscribe {
+			i := i
+			cb := func(ev *pb.Event) error {
+				got[i] = append(got[i], ev)
+				return nil
+			}
+			q := reg.NewQueueForPath([]string{s}, cb)
+			queues = append(queues, q)
 		}
 		for _, idx := range testCase.unsubscribeIdx {
-			registry.Unsubscribe(subscribers[idx])
+			queues[idx].Delete()
+			queues[idx] = nil
 		}
 		for _, p := range testCase.publish {
-			registry.Process(&pb.Event{
+			reg.Process(&pb.Event{
 				Path: &pb.NodePath{Path: []string{p}},
 			})
 		}
-		for i, s := range subscribers {
-			evts, err := consume(s)
-			if err != nil {
-				t.Error(err)
-			}
-			if len(evts) != testCase.expect[i] {
-				t.Errorf("wrong number of events published for path %q, got: %d wanted %d at subscriber idx %d", testCase.subscribe[i], len(evts), testCase.expect[i], i)
+		for _, q := range queues {
+			if q != nil {
+				q.Delete()
 			}
 		}
-	}
-}
-
-func TestPublishRetainsLastQueueSizeEvents(t *testing.T) {
-	registry := events.NewRegistry()
-	var allEvents []*pb.Event
-	queue := registry.Subscribe([]string{}, "")
-
-	for i := 0; i < events.EventQueueSize*2; i++ {
-		allEvents = append(allEvents, &pb.Event{
-			Path: &pb.NodePath{Path: []string{fmt.Sprintf("%d", i)}},
-		})
-		registry.Process(allEvents[i])
-	}
-
-	publishedEvents, err := consume(queue)
-	if err != nil {
-		t.Error(err)
-	}
-	if len(publishedEvents) != events.EventQueueSize {
-		t.Errorf("len(publishedEvents) = %d, wanted %d", len(publishedEvents), events.EventQueueSize)
-	}
-	for i := 0; i < events.EventQueueSize; i++ {
-		expected := allEvents[len(allEvents)-events.EventQueueSize+i]
-		if publishedEvents[i] != expected {
-			t.Errorf("publishedEvents[%d] = %v, expected %v", i, publishedEvents[i], expected)
-		}
-	}
-}
-
-func TestUnsubscribeReturnsNilFromNext(t *testing.T) {
-	registry := events.NewRegistry()
-	ch := make(chan *pb.Event)
-	queue := registry.Subscribe([]string{}, "")
-	go func() {
-		for {
-			e, err := queue.Next()
-			if err != nil {
-				t.Error(err)
+		for i := range testCase.subscribe {
+			if len(got[i]) != testCase.expect[i] {
+				t.Errorf("wrong number of events published for path %q, got: %d wanted %d at subscriber idx %d", testCase.subscribe[i], len(got[i]), testCase.expect[i], i)
 			}
-			ch <- e
 		}
-	}()
-	registry.Process(&pb.Event{
-		Path: &pb.NodePath{Path: []string{}},
-	})
-	if e1 := <-ch; e1 == nil {
-		t.Errorf("queue.Next() = nil, expected non-nil event before Unsubscribe")
-	}
-	registry.Unsubscribe(queue)
-	if e2 := <-ch; e2 != nil {
-		t.Errorf("queue.Next() is non-nil (%v), expected nil after Unsubscribe", e2)
 	}
 }
