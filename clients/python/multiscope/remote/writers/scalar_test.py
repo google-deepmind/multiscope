@@ -3,6 +3,7 @@ import math
 from absl.testing import absltest
 
 import multiscope
+from multiscope.protos import scalar_pb2
 from multiscope.remote.writers import scalar
 
 
@@ -11,6 +12,9 @@ def setUpModule():
 
 
 class MockClient:
+    def __init__(self):
+        self.request = scalar_pb2.WriteRequest()
+
     def Write(self, request):
         self.request = request
 

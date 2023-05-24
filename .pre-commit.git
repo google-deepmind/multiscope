@@ -94,6 +94,15 @@ else
   PASS=false
 fi
 
+# Step: check with google pytype compiler.
+pytype
+if [[ $? == 0 ]]; then
+  printf "\033[32mPytype static analyzer.\033[0m \033[0;30m\033[42mPASS\033[0m\n"
+else
+  printf "\033[31mPython static analyzer.\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+  PASS=false
+fi
+
 # Disable python test because python seems unreliable on MacOS.
 if [[ -z "$ENABLE_PYTHON_CHECKS" ]]; then
   # Cleanup python:

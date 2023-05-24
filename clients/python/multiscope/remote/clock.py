@@ -20,6 +20,8 @@ from multiscope.remote import stream_client
 
 TIMER_AVERAGE_STEPSIZE = 0.01
 
+_TickerAction = ticker_pb2.TickerAction
+
 
 # TODO: this used to be called Clock. Rename everywhere.
 class Ticker(group.ParentNode):
@@ -65,7 +67,7 @@ class Ticker(group.ParentNode):
         # Set up event management.
         events.register_ticker_callback(cb=self._process_event, path=self.path)
         # Notify listeners when an event happens. Primarily used for testing.
-        self._event_listeners: List[Callable[[ticker_pb2.TickerAction], Any]] = []
+        self._event_listeners: List[Callable[[_TickerAction], Any]] = []
 
         # Setup for controlling the ticker across threads.
         # `set()` the event to resume execution when paused.

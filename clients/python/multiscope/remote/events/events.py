@@ -64,7 +64,7 @@ class EventProcessor:
                 cb(event)
 
     def register_callback(
-        self, path: Sequence[str], cb: Callable[pb.Event, None]
+        self, path: Sequence[str], cb: Callable[[pb.Event], None]
     ) -> None:
         """Calls the provided cb with every element of gen in a separate thread."""
         with self.__mutex:
@@ -73,13 +73,13 @@ class EventProcessor:
             self.__path_to_cb[tuple(path)] = callbacks
 
 
-def register_callback(path: Sequence[str], cb: Callable[pb.Event, None]) -> None:
+def register_callback(path: Sequence[str], cb: Callable[[pb.Event], None]) -> None:
     """Calls the provided cb with every element of gen in a separate thread."""
     _event_processor.register_callback(path, cb)
 
 
 def register_ticker_callback(
-    cb: Callable[ticker_pb2.TickerAction, None],
+    cb: Callable[[ticker_pb2.TickerAction], None],
     path: Sequence[str],
 ):
     """Calls the provided cb with every mouse event at the provided path in a separate thread."""
