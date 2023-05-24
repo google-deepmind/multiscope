@@ -1,5 +1,4 @@
 """Interactions with the server."""
-# TODO: this is a minimal implementation, far from the original.
 
 import portpicker
 import threading
@@ -17,6 +16,7 @@ from multiscope.protos import tree_pb2 as pb
 from multiscope.remote import active_paths
 from multiscope.remote import control
 from multiscope.remote import stream_client
+from multiscope.remote.events import events
 
 
 _HTTP_PORT = flags.DEFINE_integer("http_port", 5972, "http port.")
@@ -138,13 +138,15 @@ def _start_server_unsafe(
     # Make sure we can connect to the multiscope server.
     stream_client.TryConnecting(timeout_secs=connection_timeout_secs)
 
-    # TODO: should this be stopped gracefully on exit, or is it fine?
+    # Listen to active paths.
     threading.Thread(
         target=active_paths.run_updates,
         name="active_path_thread",
         daemon=True,
     ).start()
-
+    # List to active events.
+    events._event_processor = events.EventProcessor()
+    events._event_processor.run()
     return http_port, grpc_url
 
 

@@ -48,7 +48,6 @@ func (reg *Registry) Process(event *pb.Event) {
 	if event.Payload == nil {
 		event.Payload = &anypb.Any{}
 	}
-
 	for _, s := range reg.fetchQueues(event) {
 		if !s.write(event) {
 			log.Printf("Dropped event with type %q for path %s because buffer full", event.GetPayload().GetTypeUrl(), prototext.Format(event.GetPath()))

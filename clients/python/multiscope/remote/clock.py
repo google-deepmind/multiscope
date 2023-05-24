@@ -147,9 +147,8 @@ class Ticker(group.ParentNode):
         """Registers `fn` to be called everytime an event is received."""
         self._event_listeners.append(fn)
 
-    def _process_event(self, path, action: ticker_pb2.TickerAction) -> None:
+    def _process_event(self, action: ticker_pb2.TickerAction) -> None:
         """Processes events from the multiscope server."""
-        del path  # Could verify this.
         action_type = action.WhichOneof("action")
         # This implementation executes each command. An alternative is to let
         # them potentially queue up, ignore all but the last one of each type.

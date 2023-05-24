@@ -29,90 +29,64 @@ from multiscope.protos import ticker_pb2
 from multiscope.protos import tree_pb2 as pb
 from multiscope.remote import stream_client
 
-# _mouse_filter = userinputs_pb2.MouseEvent.DESCRIPTOR.full_name
-# _keyboard_filter = userinputs_pb2.KeyboardEvent.DESCRIPTOR.full_name
 _ticker_filter = ticker_pb2.TickerAction.DESCRIPTOR.full_name
 
-_Path = Sequence[str]
-_EventPayload = Tuple[_Path, bytes]
-# _MousePayload = Tuple[_Path, userinputs_pb2.MouseEvent]
-# _KeyboardPayload = Tuple[_Path, userinputs_pb2.KeyboardEvent]
-_TickerPayload = Tuple[_Path, ticker_pb2.TickerAction]
-
-T = TypeVar("T")
+_event_processor = None
 
 
-class EventSubscription(Generic[T], Generator[T, None, None]):
-    """Generator of events for a given path.
+class EventProcessor:
+    """Process events coming from the server."""
 
-    This class exists rather than a generator function because we want the event
-    subscription to happen synchronously on initialization, rather than first time
-    the generator is called.
-    """
+    def __init__(self):
+        self.__path_to_cb = {}
+        self.__mutex = threading.Lock()
+        global _event_processor
 
-    def __init__(
-        self,
-        path: Sequence[str],
-        type_url_filter: str,
-        process: Callable[[_EventPayload], T],
-    ):
-        self._process = process
-        request = pb.StreamEventsRequest()
-        request.path.path.extend(path)
-        request.type_url = type_url_filter
-        self._queue = stream_client.StreamEvents(request=request)
+    def run(self):
+        self.__thread = threading.Thread(
+            target=self.__process,
+            name="process_events",
+            daemon=True,
+        ).start()
 
-    def send(self, value: None) -> T:
-        try:
-            # Blocks forever until the next value is available.
-            event = next(self._queue)
-            path, payload = list(event.path.path), event.payload.value
-            return self._process((path, payload))
-        except:
-            self._queue.cancel()
-            raise
+    def __process(self):
+        """Connect to Multiscope server to start a stream to maintain the list of active paths from client requests.
 
-    def throw(
-        self,
-        typ: Type[BaseException],
-        val: Optional[BaseException] = ...,
-        tb: Optional[types.TracebackType] = ...,
-    ) -> None:  # pytype: disable=annotation-type-mismatch
-        raise StopIteration
+        This function is the main of demon thread updating the list of active paths
+        for Multiscope with respect to how web clients connect to the Mutiscope
+        server.
+        """
+        events = stream_client.StreamEvents(pb.StreamEventsRequest())
+        for event in events:
+            path = tuple(p for p in event.path.path)
+            callbacks = self.__path_to_cb.get(path, [])
+            for cb in callbacks:
+                cb(event)
 
-
-def subscribe_ticker_events(path: Sequence[str]) -> EventSubscription[_TickerPayload]:
-    """Returns a blocking generator of mouse events for the given path."""
-
-    def process(payload: _EventPayload) -> _TickerPayload:
-        event = ticker_pb2.TickerAction()
-        event.ParseFromString(payload[1])
-        return payload[0], event
-
-    return EventSubscription(path=path, type_url_filter=_ticker_filter, process=process)
+    def register_callback(
+        self, path: Sequence[str], cb: Callable[pb.Event, None]
+    ) -> None:
+        """Calls the provided cb with every element of gen in a separate thread."""
+        with self.__mutex:
+            callbacks = self.__path_to_cb.get(path, [])
+            callbacks.append(cb)
+            self.__path_to_cb[tuple(path)] = callbacks
 
 
-def register_callback(
-    gen: Generator[Tuple[_Path, T], None, None], cb: Callable[[_Path, T], None]
-) -> None:
+def register_callback(path: Sequence[str], cb: Callable[pb.Event, None]) -> None:
     """Calls the provided cb with every element of gen in a separate thread."""
-
-    def _handler():
-        try:
-            for path, event in gen:
-                cb(path, event)
-        except:
-            logging.exception("exception raised while handling events")
-            raise
-
-    threading.Thread(target=_handler, daemon=True).start()
+    _event_processor.register_callback(path, cb)
 
 
 def register_ticker_callback(
-    cb: Callable[[_Path, ticker_pb2.TickerAction], None],
-    path: Optional[_Path] = None,
+    cb: Callable[ticker_pb2.TickerAction, None],
+    path: Sequence[str],
 ):
     """Calls the provided cb with every mouse event at the provided path in a separate thread."""
-    if path is None:
-        path = []
-    register_callback(subscribe_ticker_events(path), cb)
+
+    def process(event: pb.Event):
+        action_event = ticker_pb2.TickerAction()
+        action_event.ParseFromString(event.payload.value)
+        cb(action_event)
+
+    register_callback(path, process)

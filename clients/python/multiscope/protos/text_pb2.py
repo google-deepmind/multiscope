@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 from multiscope.protos import tree_pb2 as multiscope_dot_protos_dot_tree__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cmultiscope/protos/text.proto\x12\x0fmultiscope.text\x1a\x1cmultiscope/protos/tree.proto\",\n\x06Writer\x12\"\n\x04path\x18\x01 \x01(\x0b\x32\x14.multiscope.NodePath\"0\n\nHTMLWriter\x12\"\n\x04path\x18\x01 \x01(\x0b\x32\x14.multiscope.NodePath\"6\n\x10NewWriterRequest\x12\"\n\x04path\x18\x01 \x01(\x0b\x32\x14.multiscope.NodePath\"<\n\x11NewWriterResponse\x12\'\n\x06writer\x18\x01 \x01(\x0b\x32\x17.multiscope.text.Writer\":\n\x14NewHTMLWriterRequest\x12\"\n\x04path\x18\x01 \x01(\x0b\x32\x14.multiscope.NodePath\"D\n\x15NewHTMLWriterResponse\x12+\n\x06writer\x18\x01 \x01(\x0b\x32\x1b.multiscope.text.HTMLWriter\"E\n\x0cWriteRequest\x12\'\n\x06writer\x18\x01 \x01(\x0b\x32\x17.multiscope.text.Writer\x12\x0c\n\x04text\x18\x02 \x01(\t\"\x0f\n\rWriteResponse\"M\n\x10WriteHTMLRequest\x12+\n\x06writer\x18\x01 \x01(\x0b\x32\x1b.multiscope.text.HTMLWriter\x12\x0c\n\x04html\x18\x02 \x01(\t\"\x13\n\x11WriteHTMLResponse\"K\n\x0fWriteCSSRequest\x12+\n\x06writer\x18\x01 \x01(\x0b\x32\x1b.multiscope.text.HTMLWriter\x12\x0b\n\x03\x63ss\x18\x02 \x01(\t\"\x12\n\x10WriteCSSResponse2\xb1\x03\n\x04Text\x12T\n\tNewWriter\x12!.multiscope.text.NewWriterRequest\x1a\".multiscope.text.NewWriterResponse\"\x00\x12`\n\rNewHTMLWriter\x12%.multiscope.text.NewHTMLWriterRequest\x1a&.multiscope.text.NewHTMLWriterResponse\"\x00\x12H\n\x05Write\x12\x1d.multiscope.text.WriteRequest\x1a\x1e.multiscope.text.WriteResponse\"\x00\x12T\n\tWriteHTML\x12!.multiscope.text.WriteHTMLRequest\x1a\".multiscope.text.WriteHTMLResponse\"\x00\x12Q\n\x08WriteCSS\x12 .multiscope.text.WriteCSSRequest\x1a!.multiscope.text.WriteCSSResponse\"\x00\x42!Z\x1fmultiscope/protos/text_go_protob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cmultiscope/protos/text.proto\x12\x0fmultiscope.text\x1a\x1cmultiscope/protos/tree.proto\"P\n\x06Writer\x12\"\n\x06treeID\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"T\n\nHTMLWriter\x12\"\n\x06treeID\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"Z\n\x10NewWriterRequest\x12\"\n\x06treeID\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"<\n\x11NewWriterResponse\x12\'\n\x06writer\x18\x01 \x01(\x0b\x32\x17.multiscope.text.Writer\"^\n\x14NewHTMLWriterRequest\x12\"\n\x06treeID\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"D\n\x15NewHTMLWriterResponse\x12+\n\x06writer\x18\x01 \x01(\x0b\x32\x1b.multiscope.text.HTMLWriter\"E\n\x0cWriteRequest\x12\'\n\x06writer\x18\x01 \x01(\x0b\x32\x17.multiscope.text.Writer\x12\x0c\n\x04text\x18\x02 \x01(\t\"\x0f\n\rWriteResponse\"M\n\x10WriteHTMLRequest\x12+\n\x06writer\x18\x01 \x01(\x0b\x32\x1b.multiscope.text.HTMLWriter\x12\x0c\n\x04html\x18\x02 \x01(\t\"\x13\n\x11WriteHTMLResponse\"K\n\x0fWriteCSSRequest\x12+\n\x06writer\x18\x01 \x01(\x0b\x32\x1b.multiscope.text.HTMLWriter\x12\x0b\n\x03\x63ss\x18\x02 \x01(\t\"\x12\n\x10WriteCSSResponse2\xb1\x03\n\x04Text\x12T\n\tNewWriter\x12!.multiscope.text.NewWriterRequest\x1a\".multiscope.text.NewWriterResponse\"\x00\x12`\n\rNewHTMLWriter\x12%.multiscope.text.NewHTMLWriterRequest\x1a&.multiscope.text.NewHTMLWriterResponse\"\x00\x12H\n\x05Write\x12\x1d.multiscope.text.WriteRequest\x1a\x1e.multiscope.text.WriteResponse\"\x00\x12T\n\tWriteHTML\x12!.multiscope.text.WriteHTMLRequest\x1a\".multiscope.text.WriteHTMLResponse\"\x00\x12Q\n\x08WriteCSS\x12 .multiscope.text.WriteCSSRequest\x1a!.multiscope.text.WriteCSSResponse\"\x00\x42!Z\x1fmultiscope/protos/text_go_protob\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'multiscope.protos.text_pb2', globals())
@@ -23,29 +23,29 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z\037multiscope/protos/text_go_proto'
   _WRITER._serialized_start=79
-  _WRITER._serialized_end=123
-  _HTMLWRITER._serialized_start=125
-  _HTMLWRITER._serialized_end=173
-  _NEWWRITERREQUEST._serialized_start=175
-  _NEWWRITERREQUEST._serialized_end=229
-  _NEWWRITERRESPONSE._serialized_start=231
-  _NEWWRITERRESPONSE._serialized_end=291
-  _NEWHTMLWRITERREQUEST._serialized_start=293
-  _NEWHTMLWRITERREQUEST._serialized_end=351
-  _NEWHTMLWRITERRESPONSE._serialized_start=353
-  _NEWHTMLWRITERRESPONSE._serialized_end=421
-  _WRITEREQUEST._serialized_start=423
-  _WRITEREQUEST._serialized_end=492
-  _WRITERESPONSE._serialized_start=494
-  _WRITERESPONSE._serialized_end=509
-  _WRITEHTMLREQUEST._serialized_start=511
-  _WRITEHTMLREQUEST._serialized_end=588
-  _WRITEHTMLRESPONSE._serialized_start=590
-  _WRITEHTMLRESPONSE._serialized_end=609
-  _WRITECSSREQUEST._serialized_start=611
-  _WRITECSSREQUEST._serialized_end=686
-  _WRITECSSRESPONSE._serialized_start=688
-  _WRITECSSRESPONSE._serialized_end=706
-  _TEXT._serialized_start=709
-  _TEXT._serialized_end=1142
+  _WRITER._serialized_end=159
+  _HTMLWRITER._serialized_start=161
+  _HTMLWRITER._serialized_end=245
+  _NEWWRITERREQUEST._serialized_start=247
+  _NEWWRITERREQUEST._serialized_end=337
+  _NEWWRITERRESPONSE._serialized_start=339
+  _NEWWRITERRESPONSE._serialized_end=399
+  _NEWHTMLWRITERREQUEST._serialized_start=401
+  _NEWHTMLWRITERREQUEST._serialized_end=495
+  _NEWHTMLWRITERRESPONSE._serialized_start=497
+  _NEWHTMLWRITERRESPONSE._serialized_end=565
+  _WRITEREQUEST._serialized_start=567
+  _WRITEREQUEST._serialized_end=636
+  _WRITERESPONSE._serialized_start=638
+  _WRITERESPONSE._serialized_end=653
+  _WRITEHTMLREQUEST._serialized_start=655
+  _WRITEHTMLREQUEST._serialized_end=732
+  _WRITEHTMLRESPONSE._serialized_start=734
+  _WRITEHTMLRESPONSE._serialized_end=753
+  _WRITECSSREQUEST._serialized_start=755
+  _WRITECSSREQUEST._serialized_end=830
+  _WRITECSSRESPONSE._serialized_start=832
+  _WRITECSSRESPONSE._serialized_end=850
+  _TEXT._serialized_start=853
+  _TEXT._serialized_end=1286
 # @@protoc_insertion_point(module_scope)
