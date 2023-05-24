@@ -31,8 +31,6 @@ from multiscope.remote import stream_client
 
 _ticker_filter = ticker_pb2.TickerAction.DESCRIPTOR.full_name
 
-_event_processor = None
-
 
 class EventProcessor:
     """Process events coming from the server."""
@@ -71,6 +69,9 @@ class EventProcessor:
             callbacks = self.__path_to_cb.get(path, [])
             callbacks.append(cb)
             self.__path_to_cb[tuple(path)] = callbacks
+
+
+_event_processor = EventProcessor()
 
 
 def register_callback(path: Sequence[str], cb: Callable[[pb.Event], None]) -> None:

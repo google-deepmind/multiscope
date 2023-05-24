@@ -145,7 +145,6 @@ def _start_server_unsafe(
         daemon=True,
     ).start()
     # List to active events.
-    events._event_processor = events.EventProcessor()
     events._event_processor.run()
     return http_port, grpc_url
 
