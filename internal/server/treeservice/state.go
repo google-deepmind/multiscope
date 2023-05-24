@@ -32,8 +32,9 @@ type (
 )
 
 // NewState returns a server state shared across all clients.
-func NewState(root core.Root, evnts *events.Registry, activePaths *pathlog.PathLog, dispatcher EventDispatcher) *State {
+func NewState(factory StateFactory, root core.Root, evnts *events.Registry, activePaths *pathlog.PathLog, dispatcher EventDispatcher) *State {
 	return &State{
+		factory:     factory,
 		root:        root,
 		events:      evnts,
 		activePaths: activePaths,
