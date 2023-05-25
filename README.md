@@ -120,3 +120,7 @@ $ git rebase --continue
 Encountered problems and their solutions:
 
 1. goimports not found, or "Please install goimports" message: you likely don't have Go in your PATH. See above how to set it.
+
+### Disclaimer
+
+Multiscope is still work in progress and is not an official Google product (experimental or otherwise), it is just code that happens to be owned by Google.
