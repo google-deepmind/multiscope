@@ -38,9 +38,14 @@ class EventProcessor:
     def __init__(self):
         self.__path_to_cb = {}
         self.__mutex = threading.Lock()
+        self.__event_stream = None
         global _event_processor
 
     def run(self):
+        self.__event_stream = stream_client.StreamEvents(pb.StreamEventsRequest())
+        ack_event = next(self.__event_stream)
+        if ack_event.payload.type_url:
+            raise ValueError("the server sent an incorrect acknowledgement event")
         self.__thread = threading.Thread(
             target=self.__process,
             name="process_events",
@@ -54,8 +59,7 @@ class EventProcessor:
         for Multiscope with respect to how web clients connect to the Mutiscope
         server.
         """
-        events = stream_client.StreamEvents(pb.StreamEventsRequest())
-        for event in events:
+        for event in self.__event_stream:
             key = tuple(p for p in event.path.path)
             callbacks = self.__path_to_cb.get(key, [])
             for cb in callbacks:
