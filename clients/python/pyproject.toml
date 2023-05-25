@@ -13,6 +13,14 @@ extend-exclude = '''
 )
 '''
 
+[tool.yapf]
+based_on_style = "google"
+
+[tool.yapfignore]
+ignore_patterns = [
+    '**/*_pb2.py',
+    '**/*_pb2_grpc.py',
+]
 
 # NOTE: All relative paths are relative to the location of this file.
 [tool.pytype]

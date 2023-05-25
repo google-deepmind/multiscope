@@ -16,7 +16,8 @@ def main(argv):
     shape = (12, 7, 3)
     for _ in common.step():
         ticker.tick()
-        text.write(np.random.randint(low=0, high=255, size=shape, dtype=np.uint8))
+        text.write(
+            np.random.randint(low=0, high=255, size=shape, dtype=np.uint8))
 
 
 if __name__ == "__main__":

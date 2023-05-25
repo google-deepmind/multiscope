@@ -20,8 +20,7 @@ def _list_all_nodes():
             raise RuntimeError(
                 f"We requested the node structure from the root node, but the root "
                 f"of the returned tree has {len(nodes)} elements and the first node "
-                f"has a non-empty path: {nodes[0].path.path}."
-            )
+                f"has a non-empty path: {nodes[0].path.path}.")
     else:
         return []
 
@@ -50,6 +49,7 @@ def _list_subtree(root):
 
 
 class TestControl(absltest.TestCase):
+
     def setUp(self):
         multiscope.undo_disable()  # In case a test disables it.
         return super().setUp()
@@ -109,11 +109,8 @@ class TestControl(absltest.TestCase):
         data_req = pb.DataRequest(lastTick=0)
         data_req.path.path.extend(w.path)
         node_data_request.reqs.append(data_req)
-        got_text = (
-            stream_client.GetNodeData(node_data_request)
-            .node_data[0]
-            .raw.decode("utf-8")
-        )
+        got_text = (stream_client.GetNodeData(
+            node_data_request).node_data[0].raw.decode("utf-8"))
         self.assertEqual(got_text, text_data)
 
 

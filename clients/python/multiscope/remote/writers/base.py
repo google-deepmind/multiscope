@@ -12,6 +12,7 @@ from multiscope.remote import stream_client
 
 
 class Node(abc.ABC):
+
     def __init__(self, path: Tuple[str, ...]):
         self.path = path
         self.name = self.path[-1]

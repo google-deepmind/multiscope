@@ -17,7 +17,6 @@ from multiscope.remote import events
 from multiscope.remote import group
 from multiscope.remote import stream_client
 
-
 TIMER_AVERAGE_STEPSIZE = 0.01
 
 _TickerAction = ticker_pb2.TickerAction
@@ -145,7 +144,8 @@ class Ticker(group.ParentNode):
         """Returns the current tick of the clock."""
         return self._tick_num
 
-    def _register_event_listener(self, fn: Callable[[ticker_pb2.TickerAction], None]):
+    def _register_event_listener(self, fn: Callable[[ticker_pb2.TickerAction],
+                                                    None]):
         """Registers `fn` to be called everytime an event is received."""
         self._event_listeners.append(fn)
 
@@ -156,9 +156,8 @@ class Ticker(group.ParentNode):
         # them potentially queue up, ignore all but the last one of each type.
         if action_type == "setPeriod":
             # Calling it through the property setter is thread-safe.
-            self.period: datetime.timedelta = int(
-                action.setPeriod.period_ms * 1e6
-            )  # pytype: disable=annotation-type-mismatch
+            self.period: datetime.timedelta = int(action.setPeriod.period_ms *
+                                                  1e6)  # pytype: disable=annotation-type-mismatch
         elif action_type == "command":
             self._process_control_cmd(action.command)
         else:
@@ -247,10 +246,8 @@ class Timer:
         diff = datetime.timedelta(seconds=(cur_time - self._last_sample))
         self._last_sample = cur_time
 
-        self._average = (
-            self._ema_sample_weight * diff.total_seconds()
-            + (1.0 - self._ema_sample_weight) * self._average
-        )
+        self._average = (self._ema_sample_weight * diff.total_seconds() +
+                         (1.0 - self._ema_sample_weight) * self._average)
 
         return diff
 

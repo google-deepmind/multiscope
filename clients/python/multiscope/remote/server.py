@@ -18,7 +18,6 @@ from multiscope.remote import control
 from multiscope.remote import stream_client
 from multiscope.remote.events import events
 
-
 _HTTP_PORT = flags.DEFINE_integer("http_port", 5972, "http port.")
 # TODO: grpc_port=0 picks one that works. Good default, but right now we don't
 # just pick up the selected port. Temporarily disable it.
@@ -29,7 +28,6 @@ _MULTISCOPE_BINARY_PATH = flags.DEFINE_string(
     "~/bin/multiscope_server",
     "The path to the pre-built multiscope binary.",
 )
-
 
 _web_port: Optional[int] = None
 _grpc_url: Optional[str] = None
@@ -91,9 +89,8 @@ def start_server(
     return _web_port
 
 
-def _start_server_unsafe(
-    http_port: int, grpc_port: int, connection_timeout_secs
-) -> Tuple[int, str]:
+def _start_server_unsafe(http_port: int, grpc_port: int,
+                         connection_timeout_secs) -> Tuple[int, str]:
     """Starts the server and returns the http and grpc ports."""
     # TODO: this currently requires:
     #
@@ -110,14 +107,12 @@ def _start_server_unsafe(
     if grpc_port == 0 or not portpicker.is_port_free(grpc_port):
         grpc_port = portpicker.pick_unused_port()
 
-    server_process = subprocess.Popen(
-        [
-            os.path.expanduser(_MULTISCOPE_BINARY_PATH.value),
-            "--http_port=" + str(http_port),
-            "--grpc_port=" + str(grpc_port),
-            "--local=" + str(_LOCAL.value),
-        ]
-    )
+    server_process = subprocess.Popen([
+        os.path.expanduser(_MULTISCOPE_BINARY_PATH.value),
+        "--http_port=" + str(http_port),
+        "--grpc_port=" + str(grpc_port),
+        "--local=" + str(_LOCAL.value),
+    ])
 
     def close_server():
         server_process.terminate()

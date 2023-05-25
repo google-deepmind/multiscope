@@ -7,16 +7,15 @@ from absl import flags
 # from multiscope.remote import clock
 # from remote import group
 
-_STEP_LIMIT = flags.DEFINE_integer("step_limit", None, "Limit on the number of steps.")
+_STEP_LIMIT = flags.DEFINE_integer("step_limit", None,
+                                   "Limit on the number of steps.")
 
 
 def step():
     """step iterates until a maximum number of steps has been reached."""
     time = 0
-    while (
-        _STEP_LIMIT.value is None
-        or time < _STEP_LIMIT.value  # pytype: disable=unsupported-operands
-    ):
+    while (_STEP_LIMIT.value is None or time < _STEP_LIMIT.value  # pytype: disable=unsupported-operands
+          ):
         yield time
         time = time + 1
 

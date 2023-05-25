@@ -42,9 +42,9 @@ def InitializeStub(url: Text) -> None:
 
 
 def TryConnecting(timeout_secs: int):
-    _stub.GetNodeData(
-        pb.NodeDataRequest(reqs=[]), wait_for_ready=True, timeout=timeout_secs
-    )
+    _stub.GetNodeData(pb.NodeDataRequest(reqs=[]),
+                      wait_for_ready=True,
+                      timeout=timeout_secs)
 
 
 def Initialized() -> bool:

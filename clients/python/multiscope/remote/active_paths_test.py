@@ -9,6 +9,7 @@ from multiscope.remote import stream_client
 
 
 class ActivePathTest(absltest.TestCase):
+
     def testActivePath(self):
         """Tests if active_paths calls callbacks."""
         multiscope.start_server()
@@ -30,24 +31,18 @@ class ActivePathTest(absltest.TestCase):
         active_paths.register_callback(tuple(path_a), active_a)
 
         stream_client.GetNodeData(
-            pb.NodeDataRequest(
-                reqs=[
-                    pb.DataRequest(path=pb.NodePath(path=path_ab), lastTick=0),
-                ]
-            )
-        )
+            pb.NodeDataRequest(reqs=[
+                pb.DataRequest(path=pb.NodePath(path=path_ab), lastTick=0),
+            ]))
         is_active_ab.wait()
         self.assertFalse(is_active_a.is_set())
 
         is_active_a.clear()
         is_active_ab.clear()
         stream_client.GetNodeData(
-            pb.NodeDataRequest(
-                reqs=[
-                    pb.DataRequest(path=pb.NodePath(path=path_a), lastTick=0),
-                ]
-            )
-        )
+            pb.NodeDataRequest(reqs=[
+                pb.DataRequest(path=pb.NodePath(path=path_a), lastTick=0),
+            ]))
         is_active_a.wait()
         is_active_ab.wait()
 

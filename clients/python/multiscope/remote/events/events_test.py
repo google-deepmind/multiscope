@@ -19,6 +19,7 @@ def _to_event_pb(path, msg):
 
 
 class EventsTest(absltest.TestCase):
+
     def setUp(self):
         super().setUp()
         multiscope.start_server()

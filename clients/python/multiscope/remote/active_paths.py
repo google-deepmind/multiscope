@@ -10,9 +10,9 @@ from absl import logging
 from multiscope.protos import tree_pb2 as pb
 from multiscope.remote import stream_client
 
-path_to_callables: Mapping[
-    Tuple[str, ...], List[Callable[[bool], None]]
-] = collections.defaultdict(list)
+path_to_callables: Mapping[Tuple[str, ...],
+                           List[Callable[[bool],
+                                         None]]] = collections.defaultdict(list)
 main_lock = threading.Lock()
 
 

@@ -8,7 +8,6 @@ DISABLE_MULTISCOPE = flags.DEFINE_bool(
     "Globally disable multiscope and cause its calls to become no-ops.",
 )
 
-
 # Module local variable that controls whether all calls to multiscope are
 # no-ops. Useful for conditionally disabling multiscope, eg. in tests.
 _disabled = False

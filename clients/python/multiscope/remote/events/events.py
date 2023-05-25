@@ -43,10 +43,12 @@ class EventProcessor:
         global _event_processor
 
     def run(self):
-        self.__event_stream = stream_client.StreamEvents(pb.StreamEventsRequest())
+        self.__event_stream = stream_client.StreamEvents(
+            pb.StreamEventsRequest())
         ack_event = next(self.__event_stream)
         if ack_event.payload.type_url:
-            raise ValueError("the server sent an incorrect acknowledgement event")
+            raise ValueError(
+                "the server sent an incorrect acknowledgement event")
         self.__thread = threading.Thread(
             target=self.__process,
             name="process_events",
@@ -66,9 +68,8 @@ class EventProcessor:
             for cb in callbacks:
                 cb(event)
 
-    def register_callback(
-        self, path: Sequence[str], cb: Callable[[pb.Event], None]
-    ) -> None:
+    def register_callback(self, path: Sequence[str],
+                          cb: Callable[[pb.Event], None]) -> None:
         """Calls the provided cb with every element of gen in a separate thread."""
         key = tuple(path)
         with self.__mutex:
@@ -80,7 +81,8 @@ class EventProcessor:
 _event_processor = EventProcessor()
 
 
-def register_callback(path: Sequence[str], cb: Callable[[pb.Event], None]) -> None:
+def register_callback(path: Sequence[str], cb: Callable[[pb.Event],
+                                                        None]) -> None:
     """Calls the provided cb with every element of gen in a separate thread."""
     _event_processor.register_callback(path, cb)
 

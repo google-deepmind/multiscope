@@ -14,10 +14,9 @@ portpicker = "*"
 termcolor = "*"
 
 [dev-packages]
-black = "*"
-pipenv-setup = {extras = ["black"], version = "*"}
 pytype = "*"
 typing-extensions = "*"
+
 
 [requires]
 python_version = "3.9"

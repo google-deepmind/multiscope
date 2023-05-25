@@ -16,6 +16,7 @@ def setUpModule():
 
 
 class TestTensorWriter(absltest.TestCase):
+
     def testWriter(self):
         """Creates a Tensor writer and then writes to it."""
         w = tensor.TensorWriter("writer")

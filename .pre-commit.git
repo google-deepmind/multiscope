@@ -85,12 +85,12 @@ cd clients/python
 source $(pipenv --venv)/bin/activate
 
 # Step: use the formatter to check all files are correctly formatted.
-black . --check
+yapf -i --recursive multiscope examples
 
 if [[ $? == 0 ]]; then
-  printf "\033[32mPython black formatter.\033[0m \033[0;30m\033[42mPASS\033[0m\n"
+  printf "\033[32mPython yapf formatter.\033[0m \033[0;30m\033[42mPASS\033[0m\n"
 else
-  printf "\033[31mPython black formatter.\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+  printf "\033[31mPython yapf formatter.\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
   PASS=false
 fi
 

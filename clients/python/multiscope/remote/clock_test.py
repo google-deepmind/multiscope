@@ -12,7 +12,6 @@ from multiscope.protos import tree_pb2 as pb
 from multiscope.remote import clock
 from multiscope.remote import stream_client
 
-
 FLAGS = flags.FLAGS
 FLAGS.multiscope_strict_mode = True
 
@@ -40,6 +39,7 @@ def setUpModule():
 
 
 class TickerTest(parameterized.TestCase):
+
     def testCounter(self):
         """Asserts the tick number goes up."""
 
@@ -54,11 +54,9 @@ class TickerTest(parameterized.TestCase):
     def testSetPeriod(self, period_ms: int):
         """Tests that we can set the period from the server."""
         ticker = clock.Ticker("ticker")
-        ticker._register_event_listener(
-            lambda a: self.assertAlmostEqual(
-                period_ms, ticker.period.total_seconds() * 1000
-            )
-        )
+        ticker._register_event_listener(lambda a: self.assertAlmostEqual(
+            period_ms,
+            ticker.period.total_seconds() * 1000))
 
         action = ticker_pb2.TickerAction()
         action.setPeriod.period_ms = period_ms
@@ -73,8 +71,7 @@ class TickerTest(parameterized.TestCase):
         pb_ticker.path.path.extend(["ticker"])
         mock_write = mock.MagicMock()
         mock_tickers_stub.return_value.NewTicker.return_value = FakeTickerResponse(
-            ticker=pb_ticker
-        )
+            ticker=pb_ticker)
         mock_tickers_stub.return_value.WriteTicker = mock_write
 
         ticker = clock.Ticker("ticker")
@@ -83,16 +80,15 @@ class TickerTest(parameterized.TestCase):
 
 
 class TimerTest(parameterized.TestCase):
+
     def testDifference(self):
         limit = 0.1
         timer = clock.Timer(ema_sample_weight=1.0)
         timer.start()
         samples = [timer.sample().total_seconds() for i in range(20)]
         if any([s > limit for s in samples]):
-            self.fail(
-                "Some time differences are higher than the limit "
-                f"({limit}): {samples}."
-            )
+            self.fail("Some time differences are higher than the limit "
+                      f"({limit}): {samples}.")
 
 
 if __name__ == "__main__":

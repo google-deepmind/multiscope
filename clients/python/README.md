@@ -64,6 +64,11 @@ out from the Pipfile.
 ```sh
 pipenv install --dev  # or, if not developing, simply: pipenv install
 ```
+Finally, install the code formatter (adding yapf to dev-packages returns an
+error):
+```sh
+pip install yapf
+```
 
 To read more about pipenv, see https://realpython.com/pipenv-guide/.
 

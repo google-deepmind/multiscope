@@ -24,7 +24,8 @@ def _suppress_exception(msg, func, is_method: bool):
             return func(*args, **kwargs)
         except Exception:  # pylint: disable=broad-except
             if is_method:
-                args[0].enabled = False  # Ensure future calls are silent no-ops.
+                args[
+                    0].enabled = False  # Ensure future calls are silent no-ops.
             logging.warning(msg, exc_info=True)
             return None
 
@@ -32,6 +33,7 @@ def _suppress_exception(msg, func, is_method: bool):
 
 
 def suppress_exception(msg, is_method: bool = False):
+
     @pytype_extensions.Decorator
     def decorator(func):
         return _suppress_exception(msg, func, is_method)
@@ -45,24 +47,20 @@ def init(init_func):
 
     @suppress_exception(
         "Failed to instantiate Multiscope writer, calls to this writer will be "
-        + "ignored"
-    )
+        + "ignored")
     @functools.wraps(init_func)
     def wrapper(self, *args, **kwargs):
         """Mark writer as disabled if exception thrown."""
         self.enabled = False
-        self._reset_epoch = (
-            stream_client.ResetEpoch()
-        )  # pylint: disable=protected-access
+        self._reset_epoch = (stream_client.ResetEpoch())  # pylint: disable=protected-access
         # Early return if all multiscope calls are disabled.
         if control.disabled():
             return
         self.path = ()
         if not stream_client.Initialized():
             raise RuntimeError(
-                "Tried to initialize multiscope writer before calling "
-                + "multiscope.start_server."
-            )
+                "Tried to initialize multiscope writer before calling " +
+                "multiscope.start_server.")
         init_func(self, *args, **kwargs)
         self.enabled = True
 
@@ -82,13 +80,10 @@ def method(method_func):
         """Handle exceptions."""
         if not self.enabled:
             return None
-        if (
-            self._reset_epoch != stream_client.ResetEpoch()
-        ):  # pylint: disable=protected-access
+        if (self._reset_epoch != stream_client.ResetEpoch()):  # pylint: disable=protected-access
             raise RuntimeError(
-                "Cannot use a writer that was instantiated before a call to "
-                + "multiscope.reset()"
-            )
+                "Cannot use a writer that was instantiated before a call to " +
+                "multiscope.reset()")
         return method_func(self, *args, **kwargs)
 
     return wrapper
