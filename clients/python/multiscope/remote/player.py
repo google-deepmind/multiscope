@@ -19,7 +19,7 @@ from multiscope.remote import stream_client
 
 
 class Player(group.ParentNode):
-    """An object that can play back data.
+  """An object that can play back data.
 
     A `Player` enables a panel in Multiscope with controls to play back the data.
     The client needs to call `store` which will cause the server to save all the children
@@ -28,26 +28,26 @@ class Player(group.ParentNode):
     The UI will provide controls to display frames back in time.
     """
 
-    @control.init
-    def __init__(
-        self,
-        name: str,
-        parent: Optional[group.ParentNode] = None,
-        stoppable: bool = True,
-    ):
-        self._tick_num: int = 0
+  @control.init
+  def __init__(
+      self,
+      name: str,
+      parent: Optional[group.ParentNode] = None,
+      stoppable: bool = True,
+  ):
+    self._tick_num: int = 0
 
-        # Make the connection to the multiscope server.
-        self._client = ticker_pb2_grpc.TickersStub(stream_client.channel)
-        path = group.join_path_pb(parent, name)
-        req = ticker_pb2.NewPlayerRequest(path=path, ignorePause=not stoppable)
-        self._player = self._client.NewPlayer(req).player
-        super().__init__(path=tuple(self._player.path.path))
+    # Make the connection to the multiscope server.
+    self._client = ticker_pb2_grpc.TickersStub(stream_client.channel)
+    path = group.join_path_pb(parent, name)
+    req = ticker_pb2.NewPlayerRequest(path=path, ignorePause=not stoppable)
+    self._player = self._client.NewPlayer(req).player
+    super().__init__(path=tuple(self._player.path.path))
 
-    def store_frame(self) -> None:
-        """Store all children nodes in storage."""
-        data = ticker_pb2.PlayerData(tick=self._tick_num)
-        req = ticker_pb2.StoreFrameRequest()
-        req.player.CopyFrom(self._player)
-        req.data.CopyFrom(data)
-        self._client.StoreFrame(req)
+  def store_frame(self) -> None:
+    """Store all children nodes in storage."""
+    data = ticker_pb2.PlayerData(tick=self._tick_num)
+    req = ticker_pb2.StoreFrameRequest()
+    req.player.CopyFrom(self._player)
+    req.data.CopyFrom(data)
+    self._client.StoreFrame(req)

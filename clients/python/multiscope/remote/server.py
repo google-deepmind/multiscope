@@ -39,7 +39,7 @@ def start_server(
     grpc_port: Optional[int] = None,
     connection_timeout_secs: int = 15,
 ) -> Optional[int]:
-    """Starts the Multiscope server.
+  """Starts the Multiscope server.
 
     This function may be called multiple times, but the server will only be
     started once. No exceptions will be thrown even if we fail to start unless the
@@ -63,102 +63,102 @@ def start_server(
        Actually picked port for the multiscope web server. None if multiscope
        is disabled.
     """
-    # Race condition guard.
-    with _lock:
-        if control.disabled():
-            return None
+  # Race condition guard.
+  with _lock:
+    if control.disabled():
+      return None
 
-        global _web_port, _grpc_url
-        if _web_port is not None:
-            logging.warning(
-                "multiscope.start_server called more than once; ignoring. "
-                "Multiscope dashboard already started at: %s",
-                get_dashboard_url(_web_port),
-            )
-            return _web_port
+    global _web_port, _grpc_url
+    if _web_port is not None:
+      logging.warning(
+          "multiscope.start_server called more than once; ignoring. "
+          "Multiscope dashboard already started at: %s",
+          get_dashboard_url(_web_port),
+      )
+      return _web_port
 
-        http_port = port or _HTTP_PORT.value
-        grpc_port = grpc_port or _GRPC_PORT.value
+    http_port = port or _HTTP_PORT.value
+    grpc_port = grpc_port or _GRPC_PORT.value
 
-        _web_port, _grpc_url = _start_server_unsafe(
-            http_port=http_port,
-            grpc_port=grpc_port,
-            connection_timeout_secs=connection_timeout_secs,
-        )
+    _web_port, _grpc_url = _start_server_unsafe(
+        http_port=http_port,
+        grpc_port=grpc_port,
+        connection_timeout_secs=connection_timeout_secs,
+    )
 
-    return _web_port
+  return _web_port
 
 
 def _start_server_unsafe(http_port: int, grpc_port: int,
                          connection_timeout_secs) -> Tuple[int, str]:
-    """Starts the server and returns the http and grpc ports."""
-    # TODO: this currently requires:
-    #
-    # 1. That the multiscope is (built manually and) avaiable at
-    #    _MULTISCOPE_BINARY_PATH. From the root multiscope/server$ directory, run
-    #     go build -o ~/bin/multiscope_server multiscope.go
-    #     Solutions:
-    #     a) Call into Go from Python:
-    #         * Go --> C/C++ (through ctypes or others) --> Python is a path
-    #         * using RPC is suggested.
-    #     b) Build the multiscope server (if needed?).
-    if http_port == 0 or not portpicker.is_port_free(http_port):
-        http_port = portpicker.pick_unused_port()
-    if grpc_port == 0 or not portpicker.is_port_free(grpc_port):
-        grpc_port = portpicker.pick_unused_port()
+  """Starts the server and returns the http and grpc ports."""
+  # TODO: this currently requires:
+  #
+  # 1. That the multiscope is (built manually and) avaiable at
+  #    _MULTISCOPE_BINARY_PATH. From the root multiscope/server$ directory, run
+  #     go build -o ~/bin/multiscope_server multiscope.go
+  #     Solutions:
+  #     a) Call into Go from Python:
+  #         * Go --> C/C++ (through ctypes or others) --> Python is a path
+  #         * using RPC is suggested.
+  #     b) Build the multiscope server (if needed?).
+  if http_port == 0 or not portpicker.is_port_free(http_port):
+    http_port = portpicker.pick_unused_port()
+  if grpc_port == 0 or not portpicker.is_port_free(grpc_port):
+    grpc_port = portpicker.pick_unused_port()
 
-    server_process = subprocess.Popen([
-        os.path.expanduser(_MULTISCOPE_BINARY_PATH.value),
-        "--http_port=" + str(http_port),
-        "--grpc_port=" + str(grpc_port),
-        "--local=" + str(_LOCAL.value),
-    ])
+  server_process = subprocess.Popen([
+      os.path.expanduser(_MULTISCOPE_BINARY_PATH.value),
+      "--http_port=" + str(http_port),
+      "--grpc_port=" + str(grpc_port),
+      "--local=" + str(_LOCAL.value),
+  ])
 
-    def close_server():
-        server_process.terminate()
+  def close_server():
+    server_process.terminate()
 
-    atexit.register(close_server)
+  atexit.register(close_server)
 
-    web_url = get_dashboard_url(http_port)
-    termcolor.cprint(
-        "[Multiscope] Live dashboard: {}".format(web_url),
-        color="blue",
-        attrs=["bold"],
-        flush=True,
-    )
-    grpc_url = f"localhost:{grpc_port}"
+  web_url = get_dashboard_url(http_port)
+  termcolor.cprint(
+      "[Multiscope] Live dashboard: {}".format(web_url),
+      color="blue",
+      attrs=["bold"],
+      flush=True,
+  )
+  grpc_url = f"localhost:{grpc_port}"
 
-    logging.info("Connecting grp_url: %s", grpc_url)
-    stream_client.InitializeStub(grpc_url)
-    # Make sure we can connect to the multiscope server.
-    stream_client.TryConnecting(timeout_secs=connection_timeout_secs)
+  logging.info("Connecting grp_url: %s", grpc_url)
+  stream_client.InitializeStub(grpc_url)
+  # Make sure we can connect to the multiscope server.
+  stream_client.TryConnecting(timeout_secs=connection_timeout_secs)
 
-    # Listen to active paths.
-    threading.Thread(
-        target=active_paths.run_updates,
-        name="active_path_thread",
-        daemon=True,
-    ).start()
-    # Listen to events from the server.
-    events._event_processor.run()
-    return http_port, grpc_url
+  # Listen to active paths.
+  threading.Thread(
+      target=active_paths.run_updates,
+      name="active_path_thread",
+      daemon=True,
+  ).start()
+  # Listen to events from the server.
+  events._event_processor.run()
+  return http_port, grpc_url
 
 
 def server_address() -> str:
-    """Returns the Multiscope gRPC servrer url to connect a Multiscope client."""
-    return _grpc_url
+  """Returns the Multiscope gRPC servrer url to connect a Multiscope client."""
+  return _grpc_url
 
 
 def get_dashboard_url(port: int) -> str:
-    if _LOCAL.value:
-        return f"http://localhost:{port}"
-    else:
-        # TODO: can we figure the host name out?
-        return f"<your_host_name>:{port}"
+  if _LOCAL.value:
+    return f"http://localhost:{port}"
+  else:
+    # TODO: can we figure the host name out?
+    return f"<your_host_name>:{port}"
 
 
 def reset():
-    """Resets the multiscope server state by removing all nodes."""
-    if control.disabled():
-        return
-    stream_client.ResetState(pb.ResetStateRequest())
+  """Resets the multiscope server state by removing all nodes."""
+  if control.disabled():
+    return
+  stream_client.ResetState(pb.ResetStateRequest())

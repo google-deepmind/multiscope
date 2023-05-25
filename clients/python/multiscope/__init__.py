@@ -23,6 +23,5 @@ import multiscope.remote.events
 flags.DEFINE_bool(
     "multiscope_strict_mode",
     default=True,
-    help=
-    "Enable multiscope strict mode, which throws exceptions on multiscope-related errors.",
+    help="Enable multiscope strict mode, which throws exceptions on multiscope-related errors.",
 )

@@ -12,12 +12,12 @@ _STEP_LIMIT = flags.DEFINE_integer("step_limit", None,
 
 
 def step():
-    """step iterates until a maximum number of steps has been reached."""
-    time = 0
-    while (_STEP_LIMIT.value is None or time < _STEP_LIMIT.value  # pytype: disable=unsupported-operands
-          ):
-        yield time
-        time = time + 1
+  """step iterates until a maximum number of steps has been reached."""
+  time = 0
+  while (_STEP_LIMIT.value is None or time < _STEP_LIMIT.value  # pytype: disable=unsupported-operands
+        ):
+    yield time
+    time = time + 1
 
 
 # # TODO: untested.

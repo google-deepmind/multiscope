@@ -34,48 +34,46 @@ _ticker_filter = ticker_pb2.TickerAction.DESCRIPTOR.full_name
 
 
 class EventProcessor:
-    """Process events coming from the server."""
+  """Process events coming from the server."""
 
-    def __init__(self):
-        self.__path_to_cb = {}
-        self.__mutex = threading.Lock()
-        self.__event_stream: Iterable = None
-        global _event_processor
+  def __init__(self):
+    self.__path_to_cb = {}
+    self.__mutex = threading.Lock()
+    self.__event_stream: Iterable = None
+    global _event_processor
 
-    def run(self):
-        self.__event_stream = stream_client.StreamEvents(
-            pb.StreamEventsRequest())
-        ack_event = next(self.__event_stream)
-        if ack_event.payload.type_url:
-            raise ValueError(
-                "the server sent an incorrect acknowledgement event")
-        self.__thread = threading.Thread(
-            target=self.__process,
-            name="process_events",
-            daemon=True,
-        ).start()
+  def run(self):
+    self.__event_stream = stream_client.StreamEvents(pb.StreamEventsRequest())
+    ack_event = next(self.__event_stream)
+    if ack_event.payload.type_url:
+      raise ValueError("the server sent an incorrect acknowledgement event")
+    self.__thread = threading.Thread(
+        target=self.__process,
+        name="process_events",
+        daemon=True,
+    ).start()
 
-    def __process(self):
-        """Connect to Multiscope server to start a stream to maintain the list of active paths from client requests.
+  def __process(self):
+    """Connect to Multiscope server to start a stream to maintain the list of active paths from client requests.
 
         This function is the main of demon thread updating the list of active paths
         for Multiscope with respect to how web clients connect to the Mutiscope
         server.
         """
-        for event in self.__event_stream:
-            key = tuple(p for p in event.path.path)
-            callbacks = self.__path_to_cb.get(key, [])
-            for cb in callbacks:
-                cb(event)
+    for event in self.__event_stream:
+      key = tuple(p for p in event.path.path)
+      callbacks = self.__path_to_cb.get(key, [])
+      for cb in callbacks:
+        cb(event)
 
-    def register_callback(self, path: Sequence[str],
-                          cb: Callable[[pb.Event], None]) -> None:
-        """Calls the provided cb with every element of gen in a separate thread."""
-        key = tuple(path)
-        with self.__mutex:
-            callbacks = self.__path_to_cb.get(key, [])
-            callbacks.append(cb)
-            self.__path_to_cb[key] = callbacks
+  def register_callback(self, path: Sequence[str], cb: Callable[[pb.Event],
+                                                                None]) -> None:
+    """Calls the provided cb with every element of gen in a separate thread."""
+    key = tuple(path)
+    with self.__mutex:
+      callbacks = self.__path_to_cb.get(key, [])
+      callbacks.append(cb)
+      self.__path_to_cb[key] = callbacks
 
 
 _event_processor = EventProcessor()
@@ -83,19 +81,19 @@ _event_processor = EventProcessor()
 
 def register_callback(path: Sequence[str], cb: Callable[[pb.Event],
                                                         None]) -> None:
-    """Calls the provided cb with every element of gen in a separate thread."""
-    _event_processor.register_callback(path, cb)
+  """Calls the provided cb with every element of gen in a separate thread."""
+  _event_processor.register_callback(path, cb)
 
 
 def register_ticker_callback(
     path: Sequence[str],
     cb: Callable[[ticker_pb2.TickerAction], None],
 ):
-    """Calls the provided cb with every mouse event at the provided path in a separate thread."""
+  """Calls the provided cb with every mouse event at the provided path in a separate thread."""
 
-    def process(event: pb.Event):
-        action_event = ticker_pb2.TickerAction()
-        action_event.ParseFromString(event.payload.value)
-        cb(action_event)
+  def process(event: pb.Event):
+    action_event = ticker_pb2.TickerAction()
+    action_event.ParseFromString(event.payload.value)
+    cb(action_event)
 
-    register_callback(path, process)
+  register_callback(path, process)

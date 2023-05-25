@@ -14,17 +14,17 @@ _disabled = False
 
 
 def undo_disable():
-    """If the `multiscope_disable` flag is not set, this re-enables multiscope."""
-    global _disabled
-    _disabled = False
+  """If the `multiscope_disable` flag is not set, this re-enables multiscope."""
+  global _disabled
+  _disabled = False
 
 
 def disable():
-    """All multiscope calls become no-ops."""
-    global _disabled
-    _disabled = True
+  """All multiscope calls become no-ops."""
+  global _disabled
+  _disabled = True
 
 
 def disabled():
-    """Returns true if multiscope is disabled."""
-    return _disabled or DISABLE_MULTISCOPE.value
+  """Returns true if multiscope is disabled."""
+  return _disabled or DISABLE_MULTISCOPE.value

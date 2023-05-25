@@ -18,68 +18,67 @@ channel: Optional[grpc.Channel] = None
 
 
 def InitializeStub(url: Text) -> None:
-    """Initializes the connection to the multiscope server."""
-    global _stub
-    if _stub is not None:
-        raise AssertionError("GRPC stub already initialized")
+  """Initializes the connection to the multiscope server."""
+  global _stub
+  if _stub is not None:
+    raise AssertionError("GRPC stub already initialized")
 
-    global channel
-    creds = grpc.local_channel_credentials(grpc.LocalConnectionType.LOCAL_TCP)
-    channel = grpc.secure_channel(
-        url,
-        credentials=creds,
-        # Remove all grpc limits on max message size to support writing very
-        # large messages (eg the mujoco scene init message).
-        #
-        # This effectively limits the message to the default protobuf max message
-        # size. See also http://yaqs/5863428325507072.
-        options=[
-            ("grpc.max_send_message_length", -1),
-            ("grpc.max_receive_message_length", -1),
-        ],
-    )
-    _stub = pb_grpc.TreeStub(channel)
+  global channel
+  creds = grpc.local_channel_credentials(grpc.LocalConnectionType.LOCAL_TCP)
+  channel = grpc.secure_channel(
+      url,
+      credentials=creds,
+      # Remove all grpc limits on max message size to support writing very
+      # large messages (eg the mujoco scene init message).
+      #
+      # This effectively limits the message to the default protobuf max message
+      # size. See also http://yaqs/5863428325507072.
+      options=[
+          ("grpc.max_send_message_length", -1),
+          ("grpc.max_receive_message_length", -1),
+      ],
+  )
+  _stub = pb_grpc.TreeStub(channel)
 
 
 def TryConnecting(timeout_secs: int):
-    _stub.GetNodeData(pb.NodeDataRequest(reqs=[]),
-                      wait_for_ready=True,
-                      timeout=timeout_secs)
+  _stub.GetNodeData(
+      pb.NodeDataRequest(reqs=[]), wait_for_ready=True, timeout=timeout_secs)
 
 
 def Initialized() -> bool:
-    return _stub is not None
+  return _stub is not None
 
 
 def ResetEpoch() -> int:
-    """Returns the number of times ResetState has been called."""
-    with _mu:
-        return _reset_epoch
+  """Returns the number of times ResetState has been called."""
+  with _mu:
+    return _reset_epoch
 
 
 def GetNodeStruct(*args, **kwargs):
-    return _stub.GetNodeStruct(*args, **kwargs)
+  return _stub.GetNodeStruct(*args, **kwargs)
 
 
 def GetNodeData(*args, **kwargs):
-    return _stub.GetNodeData(*args, **kwargs)
+  return _stub.GetNodeData(*args, **kwargs)
 
 
 def StreamEvents(*args, **kwargs):
-    return _stub.StreamEvents(*args, **kwargs)
+  return _stub.StreamEvents(*args, **kwargs)
 
 
 def SendEvents(*args, **kwargs):
-    return _stub.SendEvents(*args, **kwargs)
+  return _stub.SendEvents(*args, **kwargs)
 
 
 def ActivePaths(*args, **kwargs):
-    return _stub.ActivePaths(*args, **kwargs)
+  return _stub.ActivePaths(*args, **kwargs)
 
 
 def ResetState(*args, **kwargs):
-    global _reset_epoch
-    with _mu:
-        res = _stub.ResetState(*args, **kwargs)
-        _reset_epoch += 1
-        return res
+  global _reset_epoch
+  with _mu:
+    res = _stub.ResetState(*args, **kwargs)
+    _reset_epoch += 1
+    return res
