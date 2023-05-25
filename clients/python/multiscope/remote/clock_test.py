@@ -1,3 +1,17 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from absl import flags
 from typing import Any, NamedTuple
 from unittest import mock
@@ -65,8 +79,7 @@ class TickerTest(parameterized.TestCase):
   @mock.patch.object(ticker_pb2_grpc, "TickersStub")
   def testWrite(self, mock_tickers_stub):
     # Mocks and dynamically constructed interfaces (which protos are in python)
-    # don't play super nice together. See http://go/python-tips/049 for tips
-    # on this.
+    # don't play super nice together.
     pb_ticker = ticker_pb2.Ticker()
     pb_ticker.path.path.extend(["ticker"])
     mock_write = mock.MagicMock()
