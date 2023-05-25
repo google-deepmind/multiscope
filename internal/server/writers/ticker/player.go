@@ -22,7 +22,6 @@ import (
 	"multiscope/internal/server/treeservice"
 	"multiscope/internal/server/writers/base"
 	"multiscope/internal/server/writers/ticker/timeline"
-	pb "multiscope/protos/ticker_go_proto"
 	tickerpb "multiscope/protos/ticker_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 
@@ -91,13 +90,13 @@ func (p *Player) processEvents(ev *treepb.Event) error {
 	case *tickerpb.PlayerAction_Command:
 		switch act.Command {
 		case tickerpb.Command_CMD_STEP:
-			err = p.tline.SetTickView(&pb.SetTickView{
-				TickCommand: &pb.SetTickView_Offset{Offset: 1},
+			err = p.tline.SetTickView(&tickerpb.SetTickView{
+				TickCommand: &tickerpb.SetTickView_Offset{Offset: 1},
 			})
 			p.control.pause()
 		case tickerpb.Command_CMD_STEPBACK:
-			err = p.tline.SetTickView(&pb.SetTickView{
-				TickCommand: &pb.SetTickView_Offset{Offset: -1},
+			err = p.tline.SetTickView(&tickerpb.SetTickView{
+				TickCommand: &tickerpb.SetTickView_Offset{Offset: -1},
 			})
 			p.control.pause()
 		default:
