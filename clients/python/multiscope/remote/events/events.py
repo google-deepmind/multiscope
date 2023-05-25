@@ -16,6 +16,7 @@ from typing import (
     Callable,
     Generator,
     Generic,
+    Iterable,
     Optional,
     Sequence,
     Tuple,
@@ -38,7 +39,7 @@ class EventProcessor:
     def __init__(self):
         self.__path_to_cb = {}
         self.__mutex = threading.Lock()
-        self.__event_stream = None
+        self.__event_stream: Iterable = None
         global _event_processor
 
     def run(self):
