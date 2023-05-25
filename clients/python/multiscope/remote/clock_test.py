@@ -81,8 +81,7 @@ class TickerTest(parameterized.TestCase):
     @mock.patch.object(ticker_pb2_grpc, "TickersStub")
     def testWrite(self, mock_tickers_stub):
         # Mocks and dynamically constructed interfaces (which protos are in python)
-        # don't play super nice together. See http://go/python-tips/049 for tips
-        # on this.
+        # don't play super nice together.
         pb_ticker = ticker_pb2.Ticker()
         pb_ticker.path.path.extend(["ticker"])
         mock_write = mock.MagicMock()

@@ -35,7 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err = w.Write("<a href='http://go/multiscope/'>Multiscope</a>"); err != nil {
+	if err = w.Write("<a href='https://www.google.com/search?q=multiscope'>Multiscope</a>"); err != nil {
 		log.Fatal(err)
 	}
 	if err = w.WriteCSS("a { color: black; }"); err != nil {
