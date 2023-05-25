@@ -22,6 +22,8 @@ import (
 	"multiscope/internal/server/core"
 	pb "multiscope/protos/tree_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
+
+	"github.com/pkg/errors"
 )
 
 type (
@@ -199,11 +201,15 @@ func (s *stateServer) sendEvents(ctx context.Context, req *pb.SendEventsRequest)
 
 // StreamEvents using a continuous gRPC stream for the given path.
 func (s *stateServer) streamEvents(req *pb.StreamEventsRequest, server pbgrpc.Tree_StreamEventsServer) error {
+	// Register the client to the event registry.
 	state := s.state.state()
 	eventRegistry := state.Events()
 
+	ack := sync.WaitGroup{}
+	ack.Add(1)
 	errCh := make(chan error)
 	processEvent := func(event *pb.Event) error {
+		ack.Wait() // Wait for the acknowledgement to be sent before sending events to the client.
 		if err := server.Send(event); err != nil {
 			errCh <- err
 		}
@@ -212,6 +218,13 @@ func (s *stateServer) streamEvents(req *pb.StreamEventsRequest, server pbgrpc.Tr
 	queue := eventRegistry.NewQueue(processEvent)
 	defer queue.Delete()
 
+	// Now that everything is setup, send an acknowledgement event.
+	if err := server.Send(&pb.Event{}); err != nil {
+		return errors.Errorf("cannot send acknowledgement event to the client: %v", err)
+	}
+	ack.Done()
+
+	// Wait for an error.
 	select {
 	case <-server.Context().Done():
 		return server.Context().Err()

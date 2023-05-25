@@ -52,9 +52,14 @@ class EventProcessor:
     def __init__(self):
         self.__path_to_cb = {}
         self.__mutex = threading.Lock()
+        self.__event_stream = None
         global _event_processor
 
     def run(self):
+        self.__event_stream = stream_client.StreamEvents(pb.StreamEventsRequest())
+        ack_event = next(self.__event_stream)
+        if ack_event.payload.type_url:
+            raise ValueError("the server sent an incorrect acknowledgement event")
         self.__thread = threading.Thread(
             target=self.__process,
             name="process_events",
@@ -68,10 +73,9 @@ class EventProcessor:
         for Multiscope with respect to how web clients connect to the Mutiscope
         server.
         """
-        events = stream_client.StreamEvents(pb.StreamEventsRequest())
-        for event in events:
-            path = tuple(p for p in event.path.path)
-            callbacks = self.__path_to_cb.get(path, [])
+        for event in self.__event_stream:
+            key = tuple(p for p in event.path.path)
+            callbacks = self.__path_to_cb.get(key, [])
             for cb in callbacks:
                 cb(event)
 
@@ -79,10 +83,11 @@ class EventProcessor:
         self, path: Sequence[str], cb: Callable[[pb.Event], None]
     ) -> None:
         """Calls the provided cb with every element of gen in a separate thread."""
+        key = tuple(path)
         with self.__mutex:
-            callbacks = self.__path_to_cb.get(path, [])
+            callbacks = self.__path_to_cb.get(key, [])
             callbacks.append(cb)
-            self.__path_to_cb[tuple(path)] = callbacks
+            self.__path_to_cb[key] = callbacks
 
 
 _event_processor = EventProcessor()
@@ -94,8 +99,8 @@ def register_callback(path: Sequence[str], cb: Callable[[pb.Event], None]) -> No
 
 
 def register_ticker_callback(
-    cb: Callable[[ticker_pb2.TickerAction], None],
     path: Sequence[str],
+    cb: Callable[[ticker_pb2.TickerAction], None],
 ):
     """Calls the provided cb with every mouse event at the provided path in a separate thread."""
 

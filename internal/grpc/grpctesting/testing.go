@@ -37,16 +37,20 @@ type sharedMock struct {
 	mut   sync.Mutex
 }
 
-func newState(root core.Root, eventRegistry *events.Registry, pathLog *pathlog.PathLog) *treeservice.State {
-	return treeservice.NewState(root, eventRegistry, pathLog, nil)
+func newState(root core.Root, eventRegistry *events.Registry, pathLog *pathlog.PathLog) *sharedMock {
+	if pathLog == nil {
+		pathLog = pathlog.NewPathLog(1 * time.Minute)
+	}
+	mock := &sharedMock{}
+	mock.state = treeservice.NewState(mock, root, eventRegistry, pathLog, nil)
+	return mock
 }
 
 func (mk *sharedMock) NewState() *treeservice.State {
 	mk.mut.Lock()
 	defer mk.mut.Unlock()
 
-	mk.state = newState(base.NewRoot(), events.NewRegistry(), mk.state.PathLog())
-	return mk.state
+	return newState(base.NewRoot(), events.NewRegistry(), mk.state.PathLog()).state
 }
 
 func (mk *sharedMock) State(id treeservice.ID) *treeservice.State {
@@ -59,12 +63,7 @@ func (mk *sharedMock) State(id treeservice.ID) *treeservice.State {
 // NewState returns a new mock server state.
 // If pathLog is nil, a default pathLog is used with one minute as active time.
 func NewState(root core.Root, eventRegistry *events.Registry, pathLog *pathlog.PathLog) treeservice.IDToState {
-	if pathLog == nil {
-		pathLog = pathlog.NewPathLog(1 * time.Minute)
-	}
-	return &sharedMock{
-		state: newState(root, eventRegistry, pathLog),
-	}
+	return newState(root, eventRegistry, pathLog)
 }
 
 // SetupTest starts a grpc server, create a connection to that server, and then returns it alongside with a stream client.

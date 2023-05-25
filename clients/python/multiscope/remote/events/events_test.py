@@ -40,34 +40,30 @@ class EventsTest(absltest.TestCase):
     def testSubscribe(self):
         """Tests if we can subscribe to events."""
 
+        wait = threading.Lock()
+        wait.acquire()
+
+        collected_action = None
+
+        def collect_event(action):
+            nonlocal collected_action
+            collected_action = action
+            wait.release()
+
         # Register the callback
         path = ["this", "is", "a", "path"]
-        queue = events.subscribe_ticker_events(path)
-
+        events.register_ticker_callback(path, collect_event)
         # Create an event
         data = ticker_pb2.TickerAction(command=ticker_pb2.Command.CMD_RUN)
         event = _to_event_pb(path, data)
         req = pb.SendEventsRequest()
         req.events.append(event)
 
-        # Continuously send events in the background. This is necessary because the
-        # server responds with the grpc unary stream straight away, but cannot tell
-        # us when the subscription above is actually registered.
-        def send_events():
-            while True:
-                stream_client.SendEvents(req)
-                time.sleep(1)
+        stream_client.SendEvents(req)
 
-        threading.Thread(
-            target=send_events,
-            daemon=True,
-        ).start()
-
-        # Checks that the returned event has everything we need
-        ret_path, ret_payload = next(queue)
-        self.assertIsNotNone(ret_payload)
-        self.assertEqual(path, ret_path)
-        self.assertEqual(data, ret_payload)
+        wait.acquire()
+        self.assertIsNotNone(collected_action)
+        self.assertEqual(data, collected_action)
 
 
 if __name__ == "__main__":

@@ -37,6 +37,7 @@ var _ treeservice.IDToState = (*singleton)(nil)
 
 func (s *singleton) newState() {
 	s.state = treeservice.NewState(
+		s,
 		root.NewRoot(),
 		events.NewRegistry(),
 		pathlog.NewPathLog(activePathThreshold),
