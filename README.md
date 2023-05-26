@@ -36,7 +36,7 @@ export PATH="$PATH:$(go env GOPATH)/bin"
 
 Note that the last line only adds Go to the PATH in the current terminal session. To add it permanently, add the same line to your terminal program's configuration file.
 
-### Compile the the web assembly code
+### Compile the web assembly code
 
 ```
 cd multiscope

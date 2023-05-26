@@ -12,5 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package internal includes implemetations shared between the client and the server.
+// Package internal includes implementations shared between the client and the server.
 package internal

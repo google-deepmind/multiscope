@@ -29,7 +29,7 @@ def setUpModule():
 class TestTextWriter(absltest.TestCase):
 
   def testWriter(self):
-    """Creates an TextWriter and then writes to it."""
+    """Creates a TextWriter and then writes to it."""
     w = text.TextWriter("writer")
     w.write("Test! Hello World.")
 

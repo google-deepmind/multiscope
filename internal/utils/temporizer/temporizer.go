@@ -34,7 +34,7 @@ type Temporizer[T comparable] struct {
 	pendingActive   bool
 }
 
-// NewTemporizer returns a Temporizer given a setter funtion to call only once in a while.
+// NewTemporizer returns a Temporizer given a setter function to call only once in a while.
 // The structure is thread-safe, meaning that Set can be called from multiple Go routine.
 func NewTemporizer[T comparable](cb func(v T)) *Temporizer[T] {
 	return &Temporizer[T]{
