@@ -25,6 +25,7 @@ import (
 	"multiscope/internal/template"
 	"multiscope/web"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/go-chi/chi/v5"
@@ -62,6 +63,10 @@ func RunHTTP(srv *treeservice.TreeServer, wg *sync.WaitGroup, addr string) error
 		}
 	})
 	r.Get("/res/*", func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, ".wasm") {
+			r.URL.Path += ".gz"
+			w.Header().Add("Content-Encoding", "gzip")
+		}
 		http.FileServer(http.FS(root)).ServeHTTP(w, r)
 	})
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {

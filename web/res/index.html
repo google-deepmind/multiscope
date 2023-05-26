@@ -16,41 +16,43 @@
 -->
 
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto Sans"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto Sans" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="res/style.css" />
     <link rel="stylesheet" href="res/layout.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.2/pako.min.js"></script>
     <script src="res/wasm_exec.js"></script>
     <script src="res/wasm.js"></script>
     <script>
-var globalWASMBuffer;
+        var globalWASMBuffer;
 
-async function loadWASM(wasmURL) {
-  globalWASMBuffer = pako.ungzip(await (await fetch(wasmURL)).arrayBuffer());
-}
+        async function loadWASM(wasmURL) {
+            globalWASMBuffer = await (await fetch(wasmURL)).arrayBuffer();
+        }
 
-loadWASM("{{.wasmURL}}").then(function () {
-  runWASM(globalWASMBuffer);
-});
+        loadWASM("{{.wasmURL}}").then(function() {
+            runWASM(globalWASMBuffer);
+        });
     </script>
-  </head>
-  <body>
+</head>
+
+<body>
     <div class="container">
-      <header></header>
-      <main class="container_main">
-        <!-- Left sidebar -->
-        <aside class="container_left"></aside>
+        <header></header>
+        <main class="container_main">
+            <!-- Left sidebar -->
+            <aside class="container_left"></aside>
 
-        <!-- Main content -->
-        <div class="container_middle"></div>
+            <!-- Main content -->
+            <div class="container_middle"></div>
 
-        <!-- Right sidebar -->
-        <nav class="container_right"></nav>
-      </main>
-      <footer></footer>
+            <!-- Right sidebar -->
+            <nav class="container_right"></nav>
+        </main>
+        <footer></footer>
     </div>
-  </body>
+</body>
+
 </html>
