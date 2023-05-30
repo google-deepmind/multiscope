@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+multiscope-client = {editable = true, path = "."}
+protobuf = "*"
+absl-py = "*"
+grpcio-tools = "*"
+grpcio = "*"
+numpy = "*"
+portpicker = "*"
+termcolor = "*"
+
+[dev-packages]
+yapf = "*"
+pytype = "*"
+typing-extensions = "*"
+
+
+[requires]
+python_version = "3.9"

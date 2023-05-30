@@ -1,0 +1,129 @@
+// Copyright 2023 DeepMind Technologies Limited
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Protocol buffer to stream tensors.
+syntax = "proto3";
+
+package multiscope.tensors;
+
+import "tree.proto";
+
+option go_package = "multiscope/protos/tensor_go_proto";
+
+message Writer {
+  multiscope.TreeID treeID = 1;
+  // Path in the Multiscope tree.
+  multiscope.NodePath path = 2;
+}
+
+enum DataType {
+  DT_INVALID = 0;
+
+  DT_FLOAT32 = 1;
+  DT_FLOAT64 = 2;
+
+  DT_UINT8 = 4;
+  DT_UINT16 = 17;
+  DT_UINT32 = 22;
+  DT_UINT64 = 23;
+
+  DT_INT8 = 6;
+  DT_INT16 = 5;
+  DT_INT32 = 3;
+  DT_INT64 = 9;
+}
+
+// Dimensions of a tensor.
+message Shape {
+  // One dimension of the tensor.
+  message Dim {
+    // Size of the tensor in that dimension.
+    int64 size = 1;
+
+    // Optional name of the tensor dimension.
+    string name = 2;
+  };
+
+  // Dimensions of the tensor, such as {"input", 30}, {"output", 40}
+  // for a 30 x 40 2D tensor.  If an entry has size -1, this
+  // corresponds to a dimension of unknown size. The names are
+  // optional.
+  //
+  // The order of entries in "dim" matters: It indicates the layout of the
+  // values in the tensor in-memory representation.
+  //
+  // The first entry in "dim" is the outermost dimension used to layout the
+  // values, the last entry is the innermost dimension.  This matches the
+  // in-memory layout of RowMajor Eigen tensors.
+  repeated Dim dim = 2;
+};
+
+message Tensor {
+  DataType dtype = 1;
+
+  // Shape of the tensor.  TODO(mdevin): sort out the 0-rank issues.
+  Shape shape = 2;
+
+  // Only one of the representations below is set, one of "tensor_contents" and
+  // the "xxx_val" attributes.  We are not using oneof because as oneofs cannot
+  // contain repeated fields it would require another extra set of messages.
+
+  // Serialized raw tensor content from either Tensor::AsProtoTensorContent or
+  // memcpy in tensorflow::grpc::EncodeTensorToByteBuffer. This representation
+  // can be used for all tensor types. The purpose of this representation is to
+  // reduce serialization overhead during RPC call by avoiding serialization of
+  // many repeated small items.
+  bytes content = 4 [ ctype = CORD ];
+}
+
+// Request to create a new TensorWriter in the tree.
+message NewWriterRequest { 
+  multiscope.TreeID treeID = 1;
+  multiscope.NodePath path = 2; 
+}
+
+// Response after creating a new TensorWriter in the tree.
+message NewWriterResponse {
+  Writer writer = 1;
+
+  multiscope.NodePath defaultPanelPath = 2;
+}
+
+// Request to write a tensor.
+message WriteRequest {
+  // Writer to write the data to.
+  Writer writer = 1;
+  // Data to write.
+  Tensor tensor = 2;
+}
+
+message WriteResponse {}
+
+message ResetWriterRequest {
+  // Writer to reset.
+  Writer writer = 1;
+}
+
+message ResetWriterResponse {}
+
+service Tensors {
+  // Create a new tensor writer node in Multiscope.
+  rpc NewWriter(NewWriterRequest) returns (NewWriterResponse) {}
+
+  // Reset the data of a writer.
+  rpc ResetWriter(ResetWriterRequest) returns (ResetWriterResponse) {}
+
+  // Write tensor data to Multiscope.
+  rpc Write(WriteRequest) returns (WriteResponse) {}
+}

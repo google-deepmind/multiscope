@@ -1,0 +1,97 @@
+// Copyright 2023 DeepMind Technologies Limited
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Protocol buffer to stream scientific data.
+syntax = "proto3";
+
+package multiscope;
+
+import "tree.proto";
+
+option go_package = "multiscope/protos/ui_go_proto";
+
+// Worker acknowledgement.
+message WorkerAck {}
+
+// Message to connect to the httpgrpc server.
+message Connect {
+  string scheme = 1;
+  string host = 2;
+}
+
+// Message to pull data from the server.
+message Pull {
+  repeated uint32 actives = 1;
+}
+
+// Panel registers a panel in the puller webworker.
+message Panel {
+  uint32 id = 1;
+  repeated multiscope.NodePath paths = 2;
+  repeated uint32 transferables = 3;
+  string renderer = 4;
+}
+
+// StyleChange is sent to the workers to change the theme.
+message StyleChange {
+  string theme = 1;
+  string fontFamily = 2;
+  double fontSize = 3;
+}
+
+message ElementSize {
+  int32 width = 10;
+  int32 height = 11;
+}
+
+// ParentResize is sent when the parent of a renderer is changing its size.
+message ParentResize {
+  uint32 panelID = 1;
+
+  ElementSize childSize = 10;
+}
+
+// Event dispatched from the main thread to the renderers.
+message UIEvent {
+  oneof event {
+    StyleChange style = 10;
+    ParentResize resize = 11;
+  }
+}
+
+message RegisterPanel {
+  Panel panel = 1;
+  ElementSize preferredSize = 2;
+}
+
+// ToPuller is the message sent to the puller webworker.
+message ToPuller {
+  oneof query {
+    Pull pull = 1;
+    RegisterPanel registerPanel = 2;
+    Panel unregisterPanel = 3;
+    UIEvent event = 4;
+  }
+}
+
+// Data for a panel.
+message PanelData {
+  repeated multiscope.NodeData nodes = 1;
+}
+
+// Message storing the data to be displayed by the main thread.
+message DisplayData {
+  string err = 1;
+  map<uint32, PanelData> data = 2;
+}

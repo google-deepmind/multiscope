@@ -1,0 +1,196 @@
+// Copyright 2023 DeepMind Technologies Limited
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Protocol buffer to stream scientific data.
+syntax = "proto3";
+
+package multiscope.ticker;
+
+import "google/protobuf/duration.proto";
+import "tree.proto";
+
+option go_package = "multiscope/protos/ticker_go_proto";
+
+
+/////////////////////////
+// Actions
+/////////////////////////
+
+// Set the period at which an experiment runs.
+message SetPeriod {
+  // Duration of the period set by the user.
+  int64 period_ms = 1;
+}
+
+// Command controls the experiment.
+enum Command {
+  CMD_NONE = 0;
+  CMD_PAUSE = 1;
+  CMD_RUN = 2;
+  CMD_STEP = 3;
+  CMD_STEPBACK = 4;
+}
+
+// SetTickView sets at which tick the data should be displayed.
+message SetTickView {
+  oneof tickCommand {
+    // Value of the tick to display.
+    int64 to_display = 1;
+
+    // Offset the tick at which to display the data.
+    int64 offset = 2;
+  }
+}
+
+/////////////////////////
+// Player
+/////////////////////////
+
+// Player in the Multiscope tree.
+message Player {
+  multiscope.TreeID treeID = 1;
+  // Path in the tree.
+  multiscope.NodePath path = 2;
+}
+
+// Request to create a new player in the tree.
+message NewPlayerRequest {
+  multiscope.TreeID treeID = 1;
+  // Path in the tree.
+  multiscope.NodePath path = 2;
+
+  // Force the player to ignore when the UI sends a pause signal.
+  // This is useful when the reader cannot stop reading the data.
+  bool ignorePause = 3;
+}
+
+// Response after creating a new player in the tree.
+message NewPlayerResponse { Player player = 1; }
+
+// Data sends to the player from an experiment.
+message PlayerData {
+  int64 tick = 1;
+}
+
+// Request to store a frame in the player.
+// All the children of the player (supporting the functionality)
+// will store their data associated with the current frame number.
+message StoreFrameRequest {
+  // Path to the player.
+  Player player = 1;
+
+  // Data to send to the player.
+  PlayerData data = 2;
+}
+
+// Response after storing a frame.
+message StoreFrameResponse {}
+
+// Time line information.
+message TimeLine {
+  int64 display_tick = 1;
+  int64 history_length = 2;
+  int64 oldest_tick = 3;
+  string storage_capacity = 4;
+}
+
+// Information about the player sent to the UI.
+message PlayerInfo {
+  TimeLine timeline = 1;
+}
+
+// Action event for a player.
+message PlayerAction {
+  oneof action {
+    SetPeriod setPeriod = 1;
+    Command command = 2;
+    SetTickView tickView = 3;
+  }
+}
+
+/////////////////////////
+// Ticker
+/////////////////////////
+
+// Ticker in the Multiscope tree.
+message Ticker {
+  multiscope.TreeID treeID = 1;
+  // Path in the tree.
+  multiscope.NodePath path = 2;
+}
+
+// Request to create a new ticker in the tree.
+message NewTickerRequest { 
+  multiscope.TreeID treeID = 1;
+  multiscope.NodePath path = 2; 
+}
+
+// Response after creating a new ticker in the tree.
+message NewTickerResponse { Ticker ticker = 1; }
+
+// Data sends from the client to the server.
+message TickerData {
+  message Periods {
+    // Total period between two ticks.
+    google.protobuf.Duration total = 1;
+    // Average time spent in experiment code.
+    google.protobuf.Duration experiment = 2;
+    // Average time spent writing data from the ticker.
+    google.protobuf.Duration callbacks = 3;
+    // Average time forced to be idle.
+    google.protobuf.Duration idle = 4;
+  }
+  // Current tick number.
+  int64 tick = 2;
+  // Timing statistics about the ticker.
+  Periods periods = 3;
+}
+
+// Write actions for a ticker.
+message TickerAction {
+  oneof action {
+    SetPeriod setPeriod = 1;
+    Command command = 2;
+  }
+}
+
+// Request to write ticker data.
+message WriteTickerRequest {
+  // Path to the ticker.
+  Ticker ticker = 1;
+
+  // Data about the current state of the ticker.
+  TickerData data = 2;
+}
+
+// Response after writing ticker data.
+message WriteTickerResponse {}
+
+/////////////////////////
+// Service
+/////////////////////////
+
+service Tickers {
+  // Create a new ticker node in Multiscope.
+  rpc NewTicker(NewTickerRequest) returns (NewTickerResponse) {}
+
+  // Write ticker data.
+  rpc WriteTicker(WriteTickerRequest) returns (WriteTickerResponse) {}
+
+  // Create a new player node in Multiscope.
+  rpc NewPlayer(NewPlayerRequest) returns (NewPlayerResponse) {}
+
+  // Write ticker data.
+  rpc StoreFrame(StoreFrameRequest) returns (StoreFrameResponse) {}
+}

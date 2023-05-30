@@ -1,0 +1,146 @@
+#!/bin/zsh
+
+autoload -U colors
+colors
+
+GOFMT=`which gofmt`
+
+if [[ ! -x "$GOFMT" ]]; then
+  printf "\t\033[41mPlease install gofmt.\033[0m"
+  exit 1
+fi
+
+find . \( -name "*.go" ! -name "*.pb.go" \) -exec $GOFMT -w {} \;
+
+REVIVE=`which revive`
+
+if [[ ! -x "$REVIVE" ]]; then
+  printf "\t\033[41mPlease install revive (https://github.com/mgechev/revive).\033[0m"
+  exit 1
+fi
+
+PIPENV=`which pipenv`
+
+if [[ ! -x "$PIPENV" ]]; then
+  printf "\t\033[41mPlease install pipenv (https://pipenv.pypa.io/en/latest/install/).\033[0m"
+  exit 1
+fi
+
+
+FOLDERS=`find . -type f -name "*.go" -exec dirname "{}" \; | awk -F "/" '{print $2}' | awk 'NF' | sort -u`
+
+PASS=true
+
+for FOLDER in $(echo $FOLDERS)
+do
+  ENV="GOOS= GOARCH="
+  # Formatting Go code.
+  CMD="$ENV $GOFMT -s -w $FOLDER"
+  echo $CMD
+  zsh -c "$CMD"
+  if [[ $? == 0 ]]; then
+    printf "\033[32m$GOFMT $FOLDER\033[0m \033[0;30m\033[42mPASS\033[0m\n"
+  else
+    printf "\033[31m$GOFMT $FOLDER\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+    PASS=false
+  fi
+
+  # Running the linter.
+  if [[ $FOLDER == 'wasm' ]]; then
+	  ENV="GOOS=js GOARCH=wasm"
+  else
+  	  EMV="GOOS= GOARCH="
+  fi
+  CMD="$ENV $REVIVE --config .revive.toml $FOLDER/..."
+  echo $CMD
+  zsh -c "$CMD"
+  if [[ $? == 0 ]]; then
+    printf "\033[32m$REVIVE $FOLDER\033[0m \033[0;30m\033[42mPASS\033[0m\n"
+  else
+    printf "\033[31m$REVIVE $FOLDER\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+    PASS=false
+  fi
+
+  # Running the tests.
+  CMD="$ENV go test -vet=all ./$FOLDER/..."
+  echo $CMD
+  zsh -c "$CMD"
+  if [[ $? == 0 ]]; then
+    printf "\033[32mTests $FOLDER\033[0m \033[0;30m\033[42mPASS\033[0m\n"
+  else
+    printf "\033[31mTests $FOLDER\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+    PASS=false
+  fi
+done
+
+# Check the python client for formatting and run the fast tests.
+# This all needs to happen inside the pipenv shell (managed environment).
+
+# Step: Find the base directory (where this script is).
+BASE=$( dirname -- "$( readlink -f -- "$0"; )"; )
+cd "$BASE"
+
+# Step: Fetch the python virtual environment used for development.
+cd clients/python
+source $(pipenv --venv)/bin/activate
+
+# Step: use the formatter to check all files are correctly formatted.
+yapf -i --recursive multiscope examples
+
+if [[ $? == 0 ]]; then
+  printf "\033[32mPython yapf formatter.\033[0m \033[0;30m\033[42mPASS\033[0m\n"
+else
+  printf "\033[31mPython yapf formatter.\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+  PASS=false
+fi
+
+# Step: check with google pytype compiler.
+pytype
+if [[ $? == 0 ]]; then
+  printf "\033[32mPytype static analyzer.\033[0m \033[0;30m\033[42mPASS\033[0m\n"
+else
+  printf "\033[31mPython static analyzer.\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+  PASS=false
+fi
+
+# Disable python test because python seems unreliable on MacOS.
+if [[ -z "$ENABLE_PYTHON_CHECKS" ]]; then
+  # Cleanup python:
+  deactivate
+
+  printf "$fg[yellow]"
+  printf "**********************************\n"
+  printf "* WARNING PYTHON CHECKS DISABLED *\n"
+  printf "**********************************\n"
+  printf "$fg[default]"
+  if ! $PASS; then
+    printf "$fg[red]PRE-COMMIT HOOK FAILED$fg[default]\n"
+    exit 1
+  else
+    printf "$fg[green]PRE-COMMIT HOOK SUCCEEDED$fg[default]\n"
+    exit 0
+  fi
+fi
+
+
+# Step: run the tests.
+python multiscope/run_tests.py --only_fast_tests=True
+
+if [[ $? == 0 ]]; then
+  printf "\033[32mPython tests.\033[0m \033[0;30m\033[42mPASS\033[0m\n"
+else
+  printf "\033[31mPython tests.\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
+  PASS=false
+fi
+
+# Step Final: cleanup.
+deactivate
+
+if ! $PASS; then
+  printf "\033[0;30m\033[41mPRE-COMMIT HOOK FAILED\033[0m\n"
+  exit 1
+else
+  printf "\033[0;30m\033[42mPRE-COMMIT HOOK SUCCEEDED\033[0m\n"
+fi
+
+exit 0

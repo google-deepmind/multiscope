@@ -1,0 +1,99 @@
+// Copyright 2023 DeepMind Technologies Limited
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Protocol buffer to stream text data.
+syntax = "proto3";
+
+package multiscope.text;
+
+import "tree.proto";
+
+option go_package = "multiscope/protos/text_go_proto";
+
+message Writer {
+  multiscope.TreeID treeID = 1;
+  // Path in the Multiscope tree.
+  multiscope.NodePath path = 2;
+}
+
+message HTMLWriter {
+  multiscope.TreeID treeID = 1;
+  // Path in the Multiscope tree.
+  multiscope.NodePath path = 2;
+}
+
+// RPC API
+
+// Request to create a new (raw) text writer in the tree.
+message NewWriterRequest {
+  multiscope.TreeID treeID = 1;
+  multiscope.NodePath path = 2;
+}
+
+// Response after creating a new (raw) text writer in the tree.
+message NewWriterResponse {
+  Writer writer = 1;
+}
+
+// Request to create a new HTML writer in the tree.
+message NewHTMLWriterRequest {
+  multiscope.TreeID treeID = 1;
+  multiscope.NodePath path = 2;
+}
+
+// Response after creating a new HTML writer in the tree.
+message NewHTMLWriterResponse {
+  HTMLWriter writer = 1;
+}
+
+// Request to write text to a Writer.
+message WriteRequest {
+  Writer writer = 1;
+  string text = 2;
+}
+
+message WriteResponse {}
+
+// Request to write HTML to a HTML writer.
+message WriteHTMLRequest {
+  HTMLWriter writer = 1;
+  string html = 2;
+}
+
+message WriteHTMLResponse {}
+
+// Request to write CSS to a HTML writer.
+message WriteCSSRequest {
+  HTMLWriter writer = 1;
+  string css = 2;
+}
+
+message WriteCSSResponse {}
+
+service Text {
+  // Create a new raw writer node in Multiscope.
+  rpc NewWriter(NewWriterRequest) returns (NewWriterResponse) {}
+
+  // Create a new HTML writer node in Multiscope.
+  rpc NewHTMLWriter(NewHTMLWriterRequest) returns (NewHTMLWriterResponse) {}
+
+  // Write raw text to Multiscope.
+  rpc Write(WriteRequest) returns (WriteResponse) {}
+
+  // Write HTML text to Multiscope.
+  rpc WriteHTML(WriteHTMLRequest) returns (WriteHTMLResponse) {}
+
+  // Write CSS text to Multiscope.
+  rpc WriteCSS(WriteCSSRequest) returns (WriteCSSResponse) {}
+}

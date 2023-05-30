@@ -1,0 +1,187 @@
+// Copyright 2023 DeepMind Technologies Limited
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Protocol buffer to stream scientific data.
+syntax = "proto3";
+
+package multiscope;
+
+import "google/protobuf/any.proto";
+
+option go_package = "multiscope/protos/tree_go_proto";
+
+//==============================================================================
+// Graph representation of the available streams.
+//==============================================================================
+
+// Identifier of the tree on the server.
+message TreeID {
+  int64 treeID = 1;
+}
+
+// Path of a node in the tree.
+message NodePath {
+  repeated string path = 1;
+}
+
+// A node and its information in the graph.
+message Node {
+  // Set when an error occurred on the server.
+  string error = 1;
+  // Path of the node in the graph.
+  NodePath path = 2;
+  // Name of the node.
+  string name = 3;
+  // List of IDs of children of this node.
+  repeated Node children = 4;
+  // High-level type of the data represented by this node and its children.
+  string mime = 5;
+  // True if the node has at least one child. This is always true if the
+  // `children` field has at least one element. If this is true and the
+  // `children` field is empty, then the children may be fetched by making
+  // another request.
+  //
+  // With this feature we avoid having to include the complete subtree under
+  // Node, but at the same time inform users if they should make further queries
+  // of the structure.
+  bool has_children = 6;
+}
+
+// Data streamed from a node.
+message NodeData {
+  // Set when an error occurred on the server.
+  string error = 1;
+  // Path of the node in the graph.
+  NodePath path = 2;
+  // Tick number set by the writer. It should increase everytime some data
+  // is written.
+  uint32 tick = 3;
+  // Payload.
+  oneof data {
+    bytes raw = 6 [ctype = CORD];
+    google.protobuf.Any pb = 7;
+  }
+  // MIME type of the `data` field. If `data` is `raw` bytes, this field
+  // specifies its MIME type. If `data` is an Any `pb`, this field must be set
+  // to `application/x-protobuf` as per go/multiscope-rfc #12.
+  string mime = 8;
+}
+
+//==============================================================================
+// Events exchanged between the front-end and the back-end.
+//==============================================================================
+
+message Event {
+  // Path to the source of the event.
+  NodePath path = 1;
+
+  // Custom message specific to the event type (ie. KeyPress, MouseMove etc.)
+  google.protobuf.Any payload = 2;
+}
+
+//==============================================================================
+// Types for the service.
+//==============================================================================
+
+// Request to parse the tree of available data.
+message NodeStructRequest {
+  TreeID treeID = 1;
+  repeated NodePath paths = 2;
+}
+
+// Subset of the tree of available data.
+message NodeStructReply {
+  repeated Node nodes = 1;
+}
+
+message DataRequest {
+  NodePath path = 1;
+  // Last tick seen. The server will not send data back if
+  // the last tick matches the current tick on the server.
+  // Set to 0 to force the server to send back the data.
+  uint32 lastTick = 2;
+}
+
+// Request to query data from nodes in the tree.
+message NodeDataRequest {
+  TreeID treeID = 1;
+  repeated DataRequest reqs = 2;
+}
+
+// Data from nodes in the tree.
+message NodeDataReply {
+  repeated NodeData node_data = 1;
+}
+
+// Request to send events to the backend.
+message SendEventsRequest {
+  TreeID treeID = 1;
+  repeated Event events = 2;
+}
+
+// Request for streaming events from the backend.
+message StreamEventsRequest {
+  TreeID treeID = 1;
+}
+
+// Errors from processing the events.
+message SendEventsReply {
+  repeated string errors = 1;
+}
+
+message ActivePathsRequest {
+  TreeID treeID = 1;
+}
+
+message ActivePathsReply {
+  repeated NodePath paths = 1;
+}
+
+message ResetStateRequest {
+  TreeID treeID = 1;
+}
+
+message ResetStateReply {}
+
+message DeleteRequest {
+  TreeID treeID = 1;
+  NodePath path = 2;
+}
+
+message DeleteReply {}
+
+service Tree {
+  // Browse the structure of the graph.
+  rpc GetNodeStruct(NodeStructRequest) returns (NodeStructReply) {}
+
+  // Request data from nodes in the graph.
+  rpc GetNodeData(NodeDataRequest) returns (NodeDataReply) {}
+
+  // Send events to the backend.
+  rpc SendEvents(SendEventsRequest) returns (SendEventsReply) {}
+
+  // Reset the state of the server including the full tree as well as the events
+  // registry.
+  rpc ResetState(ResetStateRequest) returns (ResetStateReply) {}
+
+  // Returns the list of paths for which the data needs to be written if
+  // possible.
+  rpc ActivePaths(ActivePathsRequest) returns (stream ActivePathsReply) {}
+
+  // Request a stream of events from the backend.
+  rpc StreamEvents(StreamEventsRequest) returns (stream Event) {}
+
+  // Delete a node and its children in the tree.
+  rpc Delete(DeleteRequest) returns (DeleteReply) {}
+}

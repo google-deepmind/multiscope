@@ -1,0 +1,14 @@
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.pdf
+*.ps
+*.dvi
+*.synctex.gz
+*~
+*.egg-info/
+clients/python/build/*
+__pycache__
+*.py[cod]

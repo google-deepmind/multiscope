@@ -1,0 +1,129 @@
+// Copyright 2023 DeepMind Technologies Limited
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Protocol buffers & services for creating and using basic writers and groups.
+syntax = "proto3";
+
+package multiscope.base;
+
+import "google/protobuf/any.proto";
+import "tree.proto";
+
+option go_package = "multiscope/protos/base_go_proto";
+
+// **************
+// GROUP
+// **************
+
+// Parent node in the Multiscope tree.
+message Group {
+  // Path in the tree.
+  multiscope.NodePath path = 1;
+}
+
+// Request to create a new ProtoWriter in the tree.
+message NewGroupRequest { 
+  multiscope.TreeID treeID = 1;
+  multiscope.NodePath path = 2; 
+}
+
+// Response after creating a new group in the tree.
+message NewGroupResponse { Group grp = 1; }
+
+// **************
+//  PROTO WRITER
+// **************
+
+// Proto writer in the Multiscope tree.
+message ProtoWriter {
+  multiscope.TreeID treeID = 1;
+  // Path in the tree.
+  multiscope.NodePath path = 2;
+}
+
+// Request to create a new ProtoWriter in the tree.
+message NewProtoWriterRequest {
+  multiscope.TreeID treeID = 1;
+  // Path in the tree.
+  multiscope.NodePath path = 2;
+  // An instance of the protocol buffers this writer will write.
+  google.protobuf.Any proto = 3;
+}
+
+// Response after creating a new ProtoWriter in the tree.
+message NewProtoWriterResponse { ProtoWriter writer = 1; }
+
+// Request to write a proto.
+message WriteProtoRequest {
+  // Writer to write the data to.
+  ProtoWriter writer = 1;
+  // Data to write.
+  google.protobuf.Any proto = 2;
+}
+
+message WriteProtoResponse {}
+
+// ************
+//  RAW WRITER
+// ************
+
+// Raw writer in the Multiscope tree.
+message RawWriter {
+  multiscope.TreeID treeID = 1;
+  // Path in the tree.
+  multiscope.NodePath path = 2;
+}
+
+// Request to create a new RawWriter in the tree.
+message NewRawWriterRequest {
+  multiscope.TreeID treeID = 1;
+  // Path in the tree.
+  multiscope.NodePath path = 2;
+  // MIME type of the raw bytes to be written to this writer.
+  string mime = 3;
+}
+
+// Response after creating a new RawWriter in the tree.
+message NewRawWriterResponse { RawWriter writer = 1; }
+
+// Request to write raw data.
+message WriteRawRequest {
+  // Writer to write the data to.
+  RawWriter writer = 2;
+  // Data to write.
+  bytes data = 3;
+}
+
+message WriteRawResponse {}
+
+// *********
+//  SERVICE
+// *********
+
+service BaseWriters {
+  // Create a new group in Multiscope.
+  rpc NewGroup(NewGroupRequest) returns (NewGroupResponse) {}
+
+ // Create a new proto writer node in Multiscope.
+  rpc NewProtoWriter(NewProtoWriterRequest) returns (NewProtoWriterResponse) {}
+
+  // Write proto data to Multiscope.
+  rpc WriteProto(WriteProtoRequest) returns (WriteProtoResponse) {}
+
+  // Create a new raw writer node in Multiscope.
+  rpc NewRawWriter(NewRawWriterRequest) returns (NewRawWriterResponse) {}
+
+  // Write raw data to Multiscope.
+  rpc WriteRaw(WriteRawRequest) returns (WriteRawResponse) {}
+}
