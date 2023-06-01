@@ -15,11 +15,13 @@
 package scope
 
 import (
+	"multiscope/internal/server/core"
 	"multiscope/internal/server/events"
 	"multiscope/internal/server/pathlog"
 	"multiscope/internal/server/root"
 	"multiscope/internal/server/treeservice"
 	"multiscope/internal/server/writers"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -27,13 +29,17 @@ import (
 const activePathThreshold = 1 * time.Minute
 
 type singleton struct {
-	state *treeservice.State
-	mut   sync.Mutex
+	treeID core.TreeID
+	state  *treeservice.State
+	mut    sync.Mutex
 
 	dispatcher treeservice.EventDispatcher
 }
 
-var _ treeservice.IDToState = (*singleton)(nil)
+var (
+	_ treeservice.URLToState   = (*singleton)(nil)
+	_ treeservice.StateFactory = (*singleton)(nil)
+)
 
 func (s *singleton) newState() {
 	s.state = treeservice.NewState(
@@ -44,6 +50,10 @@ func (s *singleton) newState() {
 		s.dispatcher)
 }
 
+func (s *singleton) TreeID() core.TreeID {
+	return s.treeID
+}
+
 func (s *singleton) NewState() *treeservice.State {
 	s.mut.Lock()
 	defer s.mut.Unlock()
@@ -51,18 +61,20 @@ func (s *singleton) NewState() *treeservice.State {
 	return s.state
 }
 
-func (s *singleton) State(id treeservice.ID) *treeservice.State {
+func (s *singleton) ToState(url *url.URL) (*treeservice.State, error) {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 	if s.state == nil {
 		s.newState()
 	}
-	return s.state
+	return s.state, nil
 }
+
+func (s *singleton) Delete(core.TreeID) {}
 
 // NewServer starts a new Multiscope server.
 func NewServer() *treeservice.TreeServer {
-	state := &singleton{}
+	state := &singleton{treeID: 1}
 	srv := treeservice.New(writers.All(), state)
 	state.dispatcher = srv
 	return srv

@@ -35,7 +35,6 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Root_GetVersion_FullMethodName     = "/multiscope.root.Root/GetVersion"
 	Root_GetRootInfo_FullMethodName    = "/multiscope.root.Root/GetRootInfo"
 	Root_SetKeySettings_FullMethodName = "/multiscope.root.Root/SetKeySettings"
 	Root_SetLayout_FullMethodName      = "/multiscope.root.Root/SetLayout"
@@ -45,8 +44,6 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RootClient interface {
-	// Get the version of the proto API.
-	GetVersion(ctx context.Context, in *GetVersionRequest, opts ...grpc.CallOption) (*GetVersionResponse, error)
 	// Return info at the root node.
 	GetRootInfo(ctx context.Context, in *GetRootInfoRequest, opts ...grpc.CallOption) (*GetRootInfoResponse, error)
 	// Set the key for the UI settings.
@@ -61,15 +58,6 @@ type rootClient struct {
 
 func NewRootClient(cc grpc.ClientConnInterface) RootClient {
 	return &rootClient{cc}
-}
-
-func (c *rootClient) GetVersion(ctx context.Context, in *GetVersionRequest, opts ...grpc.CallOption) (*GetVersionResponse, error) {
-	out := new(GetVersionResponse)
-	err := c.cc.Invoke(ctx, Root_GetVersion_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *rootClient) GetRootInfo(ctx context.Context, in *GetRootInfoRequest, opts ...grpc.CallOption) (*GetRootInfoResponse, error) {
@@ -103,8 +91,6 @@ func (c *rootClient) SetLayout(ctx context.Context, in *SetLayoutRequest, opts .
 // All implementations must embed UnimplementedRootServer
 // for forward compatibility
 type RootServer interface {
-	// Get the version of the proto API.
-	GetVersion(context.Context, *GetVersionRequest) (*GetVersionResponse, error)
 	// Return info at the root node.
 	GetRootInfo(context.Context, *GetRootInfoRequest) (*GetRootInfoResponse, error)
 	// Set the key for the UI settings.
@@ -118,9 +104,6 @@ type RootServer interface {
 type UnimplementedRootServer struct {
 }
 
-func (UnimplementedRootServer) GetVersion(context.Context, *GetVersionRequest) (*GetVersionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
-}
 func (UnimplementedRootServer) GetRootInfo(context.Context, *GetRootInfoRequest) (*GetRootInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRootInfo not implemented")
 }
@@ -141,24 +124,6 @@ type UnsafeRootServer interface {
 
 func RegisterRootServer(s grpc.ServiceRegistrar, srv RootServer) {
 	s.RegisterService(&Root_ServiceDesc, srv)
-}
-
-func _Root_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetVersionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RootServer).GetVersion(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Root_GetVersion_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RootServer).GetVersion(ctx, req.(*GetVersionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _Root_GetRootInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -222,10 +187,6 @@ var Root_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "multiscope.root.Root",
 	HandlerType: (*RootServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetVersion",
-			Handler:    _Root_GetVersion_Handler,
-		},
 		{
 			MethodName: "GetRootInfo",
 			Handler:    _Root_GetRootInfo_Handler,

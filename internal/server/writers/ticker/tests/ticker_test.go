@@ -29,16 +29,17 @@ import (
 
 func TestFastTicker(t *testing.T) {
 	state := grpctesting.NewState(root.NewRoot(), nil, nil)
-	conn, clt, err := grpctesting.SetupTest(state, ticker.RegisterService)
+	clt, err := grpctesting.SetupTest(state, ticker.RegisterService)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	defer conn.Close()
-	tickerClt := pbgrpc.NewTickersClient(conn)
+	defer clt.Conn().Close()
+	tickerClt := pbgrpc.NewTickersClient(clt.Conn())
 
 	ctx := context.Background()
 	rep, err := tickerClt.NewTicker(ctx, &pb.NewTickerRequest{
+		TreeId: clt.TreeID(),
 		Path: &treepb.NodePath{
 			Path: []string{tickertesting.Ticker01Name},
 		},

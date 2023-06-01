@@ -15,7 +15,6 @@
 package reflect
 
 import (
-	"fmt"
 	"reflect"
 
 	"multiscope/clients/go/remote"
@@ -56,7 +55,7 @@ func (scalarParser) Parse(state *ParserState, name string, fObj TargetGetter) (r
 		o := fObj()
 		f, ok := toFloat(o)
 		if !ok {
-			return fmt.Errorf("cannot convert %q with %v of type %T to float64", name, o, o)
+			return errors.Errorf("cannot convert %q with %v of type %T to float64", name, o, o)
 		}
 		return writer.WriteFloat64(map[string]float64{
 			name: f,

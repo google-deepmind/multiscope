@@ -59,14 +59,14 @@ message SetTickView {
 
 // Player in the Multiscope tree.
 message Player {
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   // Path in the tree.
   multiscope.NodePath path = 2;
 }
 
 // Request to create a new player in the tree.
 message NewPlayerRequest {
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   // Path in the tree.
   multiscope.NodePath path = 2;
 
@@ -125,14 +125,14 @@ message PlayerAction {
 
 // Ticker in the Multiscope tree.
 message Ticker {
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   // Path in the tree.
   multiscope.NodePath path = 2;
 }
 
 // Request to create a new ticker in the tree.
 message NewTickerRequest { 
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   multiscope.NodePath path = 2; 
 }
 

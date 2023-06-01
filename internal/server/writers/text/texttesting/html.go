@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"multiscope/internal/grpc/client"
 	"multiscope/internal/mime"
-	pbgrpc "multiscope/protos/tree_go_proto"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -35,7 +34,7 @@ const (
 var HTML01Data = []string{"Hello World", "Hello<br>World"}
 
 // CheckHTML01 checks the data that can be read from the html01 node.
-func CheckHTML01(clt pbgrpc.TreeClient, path []string, i int) error {
+func CheckHTML01(clt client.Client, path []string, i int) error {
 	ctx := context.Background()
 	nodes, err := client.PathToNodes(ctx, clt,
 		path,

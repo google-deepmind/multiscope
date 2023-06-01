@@ -22,6 +22,7 @@ import (
 	"multiscope/clients/go/clienttesting"
 	"multiscope/clients/go/reflect"
 	"multiscope/clients/go/remote"
+	"multiscope/internal/fmtx"
 	"multiscope/internal/grpc/client"
 
 	"github.com/google/go-cmp/cmp"
@@ -49,27 +50,29 @@ func (p *customParser) Parse(state *reflect.ParserState, name string, fObj refle
 	if err != nil {
 		return nil, err
 	}
-	writer.Write(customNodeData)
+	if err := writer.Write(customNodeData); err != nil {
+		return nil, err
+	}
 	return grp, nil
 }
 
 func TestParser(t *testing.T) {
 	clt, err := clienttesting.Start()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatErrorf("cannot start client: %w", err))
 	}
 	reflect.RegisterParser(&customParser{})
 	ticker, toParse, err := createToParseTestingNodes(clt)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatErrorf("cannot create testing nodes: %w", err))
 	}
 	// Force all the nodes to be active.
-	if err := clienttesting.ForceActive(clt.TreeClient(), ticker.Path()); err != nil {
-		t.Fatal(err)
+	if err := clienttesting.ForceActive(clt, ticker.Path()); err != nil {
+		t.Fatal(fmtx.FormatErrorf("cannot force active nodes: %w", err))
 	}
 	// Tick to write the data.
 	if err := ticker.Tick(); err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatErrorf("cannot tick: %w", err))
 	}
 	// Check the data that has been written.
 	dataGot, err := queryTreeUntilNotEmpty(clt, ticker, toNodePaths(reflectDataWant))
@@ -87,14 +90,14 @@ func TestParser(t *testing.T) {
 		ticker.Path().Append(nodeName, customNodeName),
 	}
 	ctx := context.Background()
-	nodes, err := client.PathToNodes(ctx, clt.TreeClient(), paths...)
+	nodes, err := client.PathToNodes(ctx, clt, paths...)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if nodes[0].GetError() != "" {
 		t.Fatalf("bonus node error: %s", nodes[0].GetError())
 	}
-	data, err := client.NodesData(ctx, clt.TreeClient(), nodes)
+	data, err := client.NodesData(ctx, clt, nodes)
 	if err != nil {
 		t.Fatal(err)
 	}

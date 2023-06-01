@@ -22,7 +22,7 @@ import "tree.proto";
 option go_package = "multiscope/protos/scalar_go_proto";
 
 message Writer {
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   // Path in the Multiscope tree.
   multiscope.NodePath path = 2;
 }
@@ -31,7 +31,7 @@ message Writer {
 
 // Request to create a new writer in the tree.
 message NewWriterRequest {
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   multiscope.NodePath path = 2;
 }
 

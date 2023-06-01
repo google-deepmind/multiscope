@@ -28,13 +28,14 @@ option go_package = "multiscope/protos/base_go_proto";
 
 // Parent node in the Multiscope tree.
 message Group {
+  multiscope.TreeID tree_id = 1;
   // Path in the tree.
-  multiscope.NodePath path = 1;
+  multiscope.NodePath path = 2;
 }
 
 // Request to create a new ProtoWriter in the tree.
 message NewGroupRequest { 
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   multiscope.NodePath path = 2; 
 }
 
@@ -47,14 +48,14 @@ message NewGroupResponse { Group grp = 1; }
 
 // Proto writer in the Multiscope tree.
 message ProtoWriter {
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   // Path in the tree.
   multiscope.NodePath path = 2;
 }
 
 // Request to create a new ProtoWriter in the tree.
 message NewProtoWriterRequest {
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   // Path in the tree.
   multiscope.NodePath path = 2;
   // An instance of the protocol buffers this writer will write.
@@ -80,14 +81,14 @@ message WriteProtoResponse {}
 
 // Raw writer in the Multiscope tree.
 message RawWriter {
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   // Path in the tree.
   multiscope.NodePath path = 2;
 }
 
 // Request to create a new RawWriter in the tree.
 message NewRawWriterRequest {
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   // Path in the tree.
   multiscope.NodePath path = 2;
   // MIME type of the raw bytes to be written to this writer.

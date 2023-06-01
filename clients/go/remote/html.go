@@ -16,10 +16,11 @@ package remote
 
 import (
 	"context"
-	"errors"
 
 	pb "multiscope/protos/text_go_proto"
 	pbgrpc "multiscope/protos/text_go_proto"
+
+	"github.com/pkg/errors"
 )
 
 // HTMLWriter writes raw text to Multiscope.
@@ -35,14 +36,15 @@ func NewHTMLWriter(clt *Client, name string, parent Path) (*HTMLWriter, error) {
 	ctx := context.Background()
 	path := clt.toChildPath(name, parent)
 	rep, err := clttw.NewHTMLWriter(ctx, &pb.NewHTMLWriterRequest{
-		Path: path.NodePath(),
+		TreeId: clt.TreeID(),
+		Path:   path.NodePath(),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("cannot create HTMLWriter: %v", err)
 	}
 	writer := rep.GetWriter()
 	if writer == nil {
-		return nil, errors.New("server has returned a nil HTMLWriter")
+		return nil, errors.Errorf("server has returned a nil HTMLWriter")
 	}
 	writerPath := toPath(writer)
 	if err := clt.Display().DisplayIfDefault(writerPath); err != nil {
@@ -61,6 +63,9 @@ func (w *HTMLWriter) Write(html string) error {
 		Writer: w.writer,
 		Html:   html,
 	})
+	if err != nil {
+		return errors.Errorf("cannot write HTML  data: %v", err)
+	}
 	return err
 }
 
@@ -70,5 +75,8 @@ func (w *HTMLWriter) WriteCSS(css string) error {
 		Writer: w.writer,
 		Css:    css,
 	})
+	if err != nil {
+		return errors.Errorf("cannot write CSS data: %v", err)
+	}
 	return err
 }

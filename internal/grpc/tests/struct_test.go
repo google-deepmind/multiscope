@@ -96,15 +96,17 @@ func toPaths(nameToNode map[string]*pb.Node, name string) []*pb.NodePath {
 func TestServerStruct(t *testing.T) {
 	root, nameToPath := buildGraph()
 	state := grpctesting.NewState(root, nil, nil)
-	conn, clt, err := grpctesting.SetupTest(state)
+	clt, err := grpctesting.SetupTest(state)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	defer conn.Close()
+	defer clt.Conn().Close()
 	ctx := context.Background()
 	// Get the path to root
-	rep, err := clt.GetNodeStruct(ctx, &pb.NodeStructRequest{})
+	rep, err := clt.TreeClient().GetNodeStruct(ctx, &pb.NodeStructRequest{
+		TreeId: clt.TreeID(),
+	})
 	if err != nil {
 		t.Errorf("error getting the path to root: %v", err)
 	}
@@ -114,8 +116,9 @@ func TestServerStruct(t *testing.T) {
 		return
 	}
 	// Get the children of g1
-	rep, err = clt.GetNodeStruct(ctx, &pb.NodeStructRequest{
-		Paths: toPaths(nameToNode, "g1"),
+	rep, err = clt.TreeClient().GetNodeStruct(ctx, &pb.NodeStructRequest{
+		TreeId: clt.TreeID(),
+		Paths:  toPaths(nameToNode, "g1"),
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -127,8 +130,9 @@ func TestServerStruct(t *testing.T) {
 		return
 	}
 	// Get the children of g3
-	rep, err = clt.GetNodeStruct(ctx, &pb.NodeStructRequest{
-		Paths: toPaths(nameToNode, "g3"),
+	rep, err = clt.TreeClient().GetNodeStruct(ctx, &pb.NodeStructRequest{
+		TreeId: clt.TreeID(),
+		Paths:  toPaths(nameToNode, "g3"),
 	})
 	if err != nil {
 		t.Fatal(err)

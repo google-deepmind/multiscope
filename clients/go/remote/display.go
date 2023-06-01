@@ -19,21 +19,23 @@ import (
 	rootpb "multiscope/protos/root_go_proto"
 	rootpbgrpc "multiscope/protos/root_go_proto"
 
-	"google.golang.org/grpc"
+	"github.com/pkg/errors"
 )
 
 // Display is the client to call functions on the server related to display on the dashboard.
 type Display struct {
-	clt rootpbgrpc.RootClient
+	clt        *Client
+	rootClient rootpbgrpc.RootClient
 	// Decides if new panels are added to the initial layout by default.
 	globalDisplayByDefault bool
 
 	list *rootpb.LayoutList
 }
 
-func newDisplay(conn grpc.ClientConnInterface) *Display {
+func newDisplay(clt *Client) *Display {
 	return &Display{
-		clt:                    rootpbgrpc.NewRootClient(conn),
+		clt:                    clt,
+		rootClient:             rootpbgrpc.NewRootClient(clt.conn),
 		globalDisplayByDefault: true,
 		list:                   &rootpb.LayoutList{},
 	}
@@ -50,12 +52,16 @@ func (d *Display) DisplayIfDefault(path Path) error {
 		return nil
 	}
 	d.list.Displayed = append(d.list.Displayed, path.NodePath())
-	_, err := d.clt.SetLayout(context.Background(), &rootpb.SetLayoutRequest{
+	_, err := d.rootClient.SetLayout(context.Background(), &rootpb.SetLayoutRequest{
+		TreeId: d.clt.treeID,
 		Layout: &rootpb.Layout{
 			Layout: &rootpb.Layout_List{
 				List: d.list,
 			},
 		},
 	})
-	return err
+	if err != nil {
+		return errors.Errorf("cannot set display by default: %v", err)
+	}
+	return nil
 }

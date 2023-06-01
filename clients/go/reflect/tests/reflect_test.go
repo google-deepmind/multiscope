@@ -112,7 +112,7 @@ func checkTreeData(clt *remote.Client, ticker *remote.Ticker, paths [][]string) 
 	const ctName = "ct:*reflect_test.ChildType"
 	const expName = "Exp:*reflect_test.ChildType"
 	ctx := context.Background()
-	nodes, err := client.PathToNodes(ctx, clt.TreeClient(), paths...)
+	nodes, err := client.PathToNodes(ctx, clt, paths...)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func checkTreeData(clt *remote.Client, ticker *remote.Ticker, paths [][]string) 
 			return nil, fmt.Errorf("%v error: %v", paths[i], node.GetError())
 		}
 	}
-	data, err := client.NodesData(ctx, clt.TreeClient(), nodes)
+	data, err := client.NodesData(ctx, clt, nodes)
 	if err != nil {
 		return nil, err
 	}

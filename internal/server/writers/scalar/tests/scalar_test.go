@@ -26,12 +26,12 @@ import (
 func TestScalarWriter(t *testing.T) {
 	rootNode := root.NewRoot()
 	state := grpctesting.NewState(rootNode, nil, nil)
-	conn, clt, err := grpctesting.SetupTest(state)
+	clt, err := grpctesting.SetupTest(state)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	defer conn.Close()
+	defer clt.Conn().Close()
 	scalarWriter := scalar.NewWriter()
 	rootNode.AddChild(scalartesting.Scalar01Name, scalarWriter)
 	for _, v := range scalartesting.Scalar01Data {

@@ -39,15 +39,16 @@ func NewPlayer(clt *Client, name string, ignorePause bool, parent Path) (*Player
 	ctx := context.Background()
 	path := clt.toChildPath(name, parent)
 	rep, err := p.clt.NewPlayer(ctx, &pb.NewPlayerRequest{
+		TreeId:      clt.TreeID(),
 		Path:        path.NodePath(),
 		IgnorePause: ignorePause,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("cannot create a new Player: %v", err)
 	}
 	p.player = rep.GetPlayer()
 	if p.player == nil {
-		return nil, errors.New("server has returned a nil ticker")
+		return nil, errors.Errorf("server has returned a nil ticker")
 	}
 	p.ClientNode = NewClientNode(clt, toPath(p.player))
 	if err := clt.Display().DisplayIfDefault(p.Path()); err != nil {
@@ -66,6 +67,9 @@ func (p *Player) StoreFrame() error {
 			Tick: int64(p.tick),
 		},
 	})
+	if err != nil {
+		return errors.Errorf("cannot store frame: %v", err)
+	}
 	return err
 }
 

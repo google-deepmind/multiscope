@@ -16,9 +16,11 @@ package remote
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"multiscope/internal/control"
+	"multiscope/internal/fmtx"
 	"multiscope/internal/period"
 	"multiscope/internal/server/events"
 	pb "multiscope/protos/ticker_go_proto"
@@ -74,10 +76,11 @@ func NewTicker(clt *Client, name string, parent Path) (*Ticker, error) {
 	ctx := context.Background()
 	path := clt.toChildPath(name, parent)
 	rep, err := t.clt.NewTicker(ctx, &pb.NewTickerRequest{
-		Path: path.NodePath(),
+		TreeId: clt.TreeID(),
+		Path:   path.NodePath(),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("cannot create Ticker: %v", err)
 	}
 	t.ticker = rep.GetTicker()
 	if t.ticker == nil {
@@ -125,11 +128,14 @@ func (t *Ticker) callCallers() error {
 	t.callbackPeriod.Start()
 	defer t.callbackPeriod.Sample()
 
-	var err error
+	var gErr error
 	for _, caller := range t.callers {
-		err = multierr.Append(err, caller())
+		if err := caller(); err != nil {
+			err = fmt.Errorf("caller %q error: %v", fmtx.FuncName(caller), err)
+			gErr = multierr.Append(gErr, err)
+		}
 	}
-	return err
+	return gErr
 }
 
 func (t *Ticker) writeData() error {

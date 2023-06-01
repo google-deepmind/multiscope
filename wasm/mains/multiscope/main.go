@@ -18,33 +18,54 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 
-	pb "multiscope/protos/ui_go_proto"
+	"multiscope/internal/httpgrpc"
+	"multiscope/internal/version"
+	treepb "multiscope/protos/tree_go_proto"
+	uipb "multiscope/protos/ui_go_proto"
 	"multiscope/wasm/puller"
 	"multiscope/wasm/ui/fatal"
 	"multiscope/wasm/ui/uimain"
-	"multiscope/wasm/version"
 	"multiscope/wasm/worker"
 
+	"github.com/pkg/errors"
 	"honnef.co/go/js/dom/v2"
 
 	_ "multiscope/wasm/injector/switchtheme"
 	_ "multiscope/wasm/panels"
 )
 
-func grpcAddr() *pb.Connect {
+func grpcAddr() *uipb.Connect {
 	document := dom.GetWindow().Document().(dom.HTMLDocument)
 	baseURI := document.BaseURI()
 	uri, err := url.Parse(baseURI)
 	if err != nil {
-		fmt.Printf("cannot parse url %q: %v\n", baseURI, uri)
+		fmt.Printf("cannot parse url %q: %v\n", baseURI, err)
 	}
-	return &pb.Connect{
+	return &uipb.Connect{
 		Scheme: uri.Scheme,
 		Host:   uri.Host,
+		RawUrl: baseURI,
 	}
+}
+
+// Check the version of the gRPC API.
+// Returns an error if it does not match.
+func getTreeID(addr *uipb.Connect) (*treepb.TreeID, error) {
+	conn := httpgrpc.Connect(addr.Scheme, addr.Host)
+	treeClient := treepb.NewTreeClient(conn)
+	req := &treepb.GetTreeIDRequest{Url: addr.RawUrl}
+	resp, err := treeClient.GetTreeID(context.Background(), req)
+	if err != nil {
+		return nil, errors.Errorf("cannot get a tree ID: %v", err)
+	}
+	if resp.Version != version.Version {
+		return nil, errors.Errorf("frontend client version %q does not match the server gRPC API version %q.\nYou may need to recompile the WASM frontend client, restart the server, then reload the page", resp.Version, version.Version)
+	}
+	return resp.TreeId, nil
 }
 
 func pullDataMain(wkr *worker.Worker) {
@@ -62,7 +83,8 @@ func main() {
 
 	// Main thread.
 	serverAddr := grpcAddr()
-	if err := version.Check(serverAddr); err != nil {
+	var err error
+	if serverAddr.TreeId, err = getTreeID(serverAddr); err != nil {
 		fatal.Display(err)
 		return
 	}

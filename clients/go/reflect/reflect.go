@@ -16,12 +16,13 @@
 package reflect
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 
 	"log"
 	"multiscope/clients/go/remote"
+
+	"github.com/pkg/errors"
 )
 
 type (
@@ -190,18 +191,24 @@ func (ps *ParserState) Parse(name string, fObj TargetGetter, skipTo Parser) (rem
 		if err != nil {
 			return nil, err
 		}
-		node.Write(fmt.Sprintf("No parser found for type %T.", obj))
+		if err := node.Write(fmt.Sprintf("No parser found for type %T.", obj)); err != nil {
+			return nil, err
+		}
 		return node, nil
 	}
-	return prsr.Parse(ps, name, fObj)
+	node, err := prsr.Parse(ps, name, fObj)
+	if err != nil {
+		return nil, fmt.Errorf("error while parsing %T with parser %T: %w", obj, prsr, err)
+	}
+	return node, err
 }
 
 func (ps *ParserState) reflect(root remote.Node, name string, obj any, skipTo Parser) (remote.Node, error) {
 	if obj == nil {
-		return nil, errors.New("cannot explore a nil instance")
+		return nil, errors.Errorf("cannot explore a nil instance")
 	}
 	if reflect.TypeOf(obj).Kind() != reflect.Ptr {
-		return nil, fmt.Errorf("cannot explore type %T because it is not a pointer", obj)
+		return nil, errors.Errorf("cannot explore type %T because it is not a pointer", obj)
 	}
 	return ps.Parse(name, func() any {
 		return obj

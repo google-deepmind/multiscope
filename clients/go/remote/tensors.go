@@ -16,12 +16,13 @@ package remote
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"multiscope/lib/tensor"
 	pb "multiscope/protos/tensor_go_proto"
 	pbgrpc "multiscope/protos/tensor_go_proto"
+
+	"github.com/pkg/errors"
 )
 
 type (
@@ -44,14 +45,15 @@ func NewTensorWriterPB(clt *Client, name string, parent Path) (*TensorWriterPB, 
 	ctx := context.Background()
 	path := clt.toChildPath(name, parent)
 	rep, err := clttw.NewWriter(ctx, &pb.NewWriterRequest{
-		Path: path.NodePath(),
+		TreeId: clt.TreeID(),
+		Path:   path.NodePath(),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("cannot create a TensorWriter: %v", err)
 	}
 	writer := rep.GetWriter()
 	if writer == nil {
-		return nil, errors.New("server has returned a nil TensorWriter")
+		return nil, errors.Errorf("server has returned a nil TensorWriter")
 	}
 	displayPath := rep.DefaultPanelPath
 	if displayPath != nil && len(displayPath.Path) > 0 {
@@ -91,5 +93,8 @@ func (w *TensorWriter[T]) Write(tns tensor.Tensor[T]) error {
 	if err != nil {
 		return fmt.Errorf("cannot marshal tensor: %v", err)
 	}
-	return w.WritePB(tensorPB)
+	if err := w.WritePB(tensorPB); err != nil {
+		return errors.Errorf("cannot write tensor data: %v", err)
+	}
+	return nil
 }

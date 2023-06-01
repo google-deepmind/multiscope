@@ -33,7 +33,8 @@ func NewGroup(clt *Client, name string, parent Path) (*Group, error) {
 	clw := pbgrpc.NewBaseWritersClient(clt.Connection())
 	path := clt.toChildPath(name, parent)
 	rep, err := clw.NewGroup(context.Background(), &pb.NewGroupRequest{
-		Path: path.NodePath(),
+		TreeId: clt.TreeID(),
+		Path:   path.NodePath(),
 	})
 	if err != nil {
 		return nil, err

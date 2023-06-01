@@ -59,6 +59,7 @@ func TestEvents(t *testing.T) {
 	time.Sleep(5 * time.Second)
 	ctx := context.Background()
 	req := &pb.SendEventsRequest{
+		TreeId: clt.TreeID(),
 		Events: []*pb.Event{
 			{
 				Path: textWriter.Path().NodePath(),

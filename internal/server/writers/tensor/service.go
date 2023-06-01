@@ -44,7 +44,10 @@ func RegisterService(srv grpc.ServiceRegistrar, state treeservice.IDToState) {
 
 // NewWriter creates a new writer for tensor in the tree.
 func (srv *Service) NewWriter(ctx context.Context, req *pb.NewWriterRequest) (*pb.NewWriterResponse, error) {
-	state := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	writer, err := NewWriter()
 	if err != nil {
 		desc := fmt.Sprintf("cannot create a new Writer: %v", err)
@@ -56,7 +59,8 @@ func (srv *Service) NewWriter(ctx context.Context, req *pb.NewWriterRequest) (*p
 	}
 	return &pb.NewWriterResponse{
 		Writer: &pb.Writer{
-			Path: writerPath.PB(),
+			TreeId: req.TreeId,
+			Path:   writerPath.PB(),
 		},
 		DefaultPanelPath: writerPath.PathTo(NodeNameImage).PB(),
 	}, nil
@@ -64,7 +68,10 @@ func (srv *Service) NewWriter(ctx context.Context, req *pb.NewWriterRequest) (*p
 
 // ResetWriter resets a tensor writer in the tree.
 func (srv *Service) ResetWriter(ctx context.Context, req *pb.ResetWriterRequest) (*pb.ResetWriterResponse, error) {
-	state := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	var writer *Writer
 	if err := core.Set(&writer, state.Root(), req.GetWriter()); err != nil {
 		desc := fmt.Sprintf("cannot get the Writer from the tree: %v", err)
@@ -79,7 +86,10 @@ func (srv *Service) ResetWriter(ctx context.Context, req *pb.ResetWriterRequest)
 
 // WriteTensor writes data to a given node in the tree.
 func (srv *Service) Write(ctx context.Context, req *pb.WriteRequest) (rep *pb.WriteResponse, err error) {
-	state := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	var writer *Writer
 	if err := core.Set(&writer, state.Root(), req.GetWriter()); err != nil {
 		desc := fmt.Sprintf("cannot get the Writer from the tree: %v", err)

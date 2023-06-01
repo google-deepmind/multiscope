@@ -41,7 +41,10 @@ func RegisterService(srv grpc.ServiceRegistrar, state treeservice.IDToState) {
 
 // NewWriter creates a new raw writer in the tree.
 func (srv *Service) NewWriter(ctx context.Context, req *pb.NewWriterRequest) (*pb.NewWriterResponse, error) {
-	state := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	writer := NewWriter()
 	writerPath, err := core.SetNodeAt(state.Root(), req.GetPath(), writer)
 	if err != nil {
@@ -49,14 +52,18 @@ func (srv *Service) NewWriter(ctx context.Context, req *pb.NewWriterRequest) (*p
 	}
 	return &pb.NewWriterResponse{
 		Writer: &pb.Writer{
-			Path: writerPath.PB(),
+			TreeId: req.TreeId,
+			Path:   writerPath.PB(),
 		},
 	}, nil
 }
 
 // NewHTMLWriter creates a new HTML writer in the tree.
 func (srv *Service) NewHTMLWriter(ctx context.Context, req *pb.NewHTMLWriterRequest) (*pb.NewHTMLWriterResponse, error) {
-	state := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	writer := NewHTMLWriter()
 	writerPath, err := writer.AddToTree(state, req.GetPath())
 	if err != nil {
@@ -64,14 +71,18 @@ func (srv *Service) NewHTMLWriter(ctx context.Context, req *pb.NewHTMLWriterRequ
 	}
 	return &pb.NewHTMLWriterResponse{
 		Writer: &pb.HTMLWriter{
-			Path: writerPath.PB(),
+			TreeId: req.TreeId,
+			Path:   writerPath.PB(),
 		},
 	}, nil
 }
 
 // Write writes raw text to a Writer in the tree.
 func (srv *Service) Write(ctx context.Context, req *pb.WriteRequest) (rep *pb.WriteResponse, err error) {
-	state := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	var writer *Writer
 	if err := core.Set(&writer, state.Root(), req.GetWriter()); err != nil {
 		desc := fmt.Sprintf("cannot get the Writer from the tree: %v", err)
@@ -85,7 +96,10 @@ func (srv *Service) Write(ctx context.Context, req *pb.WriteRequest) (rep *pb.Wr
 
 // WriteHTML writes HTML text to a HTMLWriter in the tree.
 func (srv *Service) WriteHTML(ctx context.Context, req *pb.WriteHTMLRequest) (rep *pb.WriteHTMLResponse, err error) {
-	state := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	var writer *HTMLWriter
 	if err := core.Set(&writer, state.Root(), req.GetWriter()); err != nil {
 		desc := fmt.Sprintf("cannot get the HTMLWriter from the tree: %v", err)
@@ -99,7 +113,10 @@ func (srv *Service) WriteHTML(ctx context.Context, req *pb.WriteHTMLRequest) (re
 
 // WriteCSS writes CSS text to a HTMLWriter in the tree.
 func (srv *Service) WriteCSS(ctx context.Context, req *pb.WriteCSSRequest) (rep *pb.WriteCSSResponse, err error) {
-	state := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	var writer *HTMLWriter
 	if err := core.Set(&writer, state.Root(), req.GetWriter()); err != nil {
 		desc := fmt.Sprintf("cannot get the HTMLWriter from the tree: %v", err)

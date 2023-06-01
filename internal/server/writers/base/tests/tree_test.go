@@ -30,11 +30,11 @@ import (
 
 func TestProtoWriter(t *testing.T) {
 	state := grpctesting.NewState(root.NewRoot(), nil, nil)
-	conn, clt, err := grpctesting.SetupTest(state, base.RegisterService)
+	clt, err := grpctesting.SetupTest(state, base.RegisterService)
 	if err != nil {
 		t.Fatalf("testing.Start(base.RegisterService): %v", err)
 	}
-	writerClt := basepbgrpc.NewBaseWritersClient(conn)
+	writerClt := basepbgrpc.NewBaseWritersClient(clt.Conn())
 
 	ctx := context.Background()
 
@@ -48,8 +48,9 @@ func TestProtoWriter(t *testing.T) {
 	}
 
 	pwReq := &basepb.NewProtoWriterRequest{
-		Path:  path,
-		Proto: examplePb}
+		TreeId: clt.TreeID(),
+		Path:   path,
+		Proto:  examplePb}
 	rep, err := writerClt.NewProtoWriter(ctx, pwReq)
 	if err != nil {
 		t.Fatalf("writerClt.NewProtoWriter(%v, %v): %v", ctx, pwReq, err)
@@ -76,11 +77,11 @@ func TestProtoWriter(t *testing.T) {
 
 func TestRawWriter(t *testing.T) {
 	state := grpctesting.NewState(root.NewRoot(), nil, nil)
-	conn, clt, err := grpctesting.SetupTest(state, base.RegisterService)
+	clt, err := grpctesting.SetupTest(state, base.RegisterService)
 	if err != nil {
 		t.Fatalf("testing.Start(tree.RegisterService): %v", err)
 	}
-	writerClt := basepbgrpc.NewBaseWritersClient(conn)
+	writerClt := basepbgrpc.NewBaseWritersClient(clt.Conn())
 
 	ctx := context.Background()
 
@@ -89,8 +90,9 @@ func TestRawWriter(t *testing.T) {
 	}
 
 	rwReq := &basepb.NewRawWriterRequest{
-		Path: path,
-		Mime: "TEST_BYTES"}
+		TreeId: clt.TreeID(),
+		Path:   path,
+		Mime:   "TEST_BYTES"}
 	rep, err := writerClt.NewRawWriter(ctx, rwReq)
 	if err != nil {
 		t.Fatalf("writerClt.NewRawWriter(%v, %v): %v", ctx, rwReq, err)

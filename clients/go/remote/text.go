@@ -16,10 +16,11 @@ package remote
 
 import (
 	"context"
-	"errors"
 
 	pb "multiscope/protos/text_go_proto"
 	pbgrpc "multiscope/protos/text_go_proto"
+
+	"github.com/pkg/errors"
 )
 
 // TextWriter writes raw text to Multiscope.
@@ -35,14 +36,15 @@ func NewTextWriter(clt *Client, name string, parent Path) (*TextWriter, error) {
 	ctx := context.Background()
 	path := clt.toChildPath(name, parent)
 	rep, err := clttw.NewWriter(ctx, &pb.NewWriterRequest{
-		Path: path.NodePath(),
+		TreeId: clt.TreeID(),
+		Path:   path.NodePath(),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("cannot create TextWriter: %v", err)
 	}
 	writer := rep.GetWriter()
 	if writer == nil {
-		return nil, errors.New("server has returned a nil TextWriter")
+		return nil, errors.Errorf("server has returned a nil TextWriter")
 	}
 	writerPath := toPath(writer)
 	if err := clt.Display().DisplayIfDefault(writerPath); err != nil {
@@ -61,5 +63,8 @@ func (w *TextWriter) Write(text string) error {
 		Writer: w.writer,
 		Text:   text,
 	})
-	return err
+	if err != nil {
+		return errors.Errorf("cannot write text data: %v", err)
+	}
+	return nil
 }

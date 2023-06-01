@@ -28,6 +28,9 @@ message WorkerAck {}
 message Connect {
   string scheme = 1;
   string host = 2;
+  multiscope.TreeID tree_id = 3;
+
+  string raw_url = 4;
 }
 
 // Message to pull data from the server.

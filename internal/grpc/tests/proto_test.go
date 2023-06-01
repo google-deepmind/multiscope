@@ -32,12 +32,12 @@ func TestProtoWriter(t *testing.T) {
 	rootNode := root.NewRoot()
 	// Setup the connection.
 	state := grpctesting.NewState(rootNode, nil, nil)
-	conn, clt, err := grpctesting.SetupTest(state)
+	clt, err := grpctesting.SetupTest(state)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	defer conn.Close()
+	defer clt.Conn().Close()
 	ctx := context.Background()
 
 	// Adding a node to the tree.

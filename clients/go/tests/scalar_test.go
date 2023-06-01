@@ -36,7 +36,7 @@ func TestScalarWriter(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if err := scalartesting.CheckScalar01(clt.TreeClient(), scalarWriter.Path()); err != nil {
+	if err := scalartesting.CheckScalar01(clt, scalarWriter.Path()); err != nil {
 		t.Error(err)
 	}
 }

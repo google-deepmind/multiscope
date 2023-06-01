@@ -35,6 +35,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
+	Tree_GetTreeID_FullMethodName     = "/multiscope.Tree/GetTreeID"
 	Tree_GetNodeStruct_FullMethodName = "/multiscope.Tree/GetNodeStruct"
 	Tree_GetNodeData_FullMethodName   = "/multiscope.Tree/GetNodeData"
 	Tree_SendEvents_FullMethodName    = "/multiscope.Tree/SendEvents"
@@ -48,6 +49,11 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TreeClient interface {
+	// Get a tree ID. It is up to the server to decide if this is a
+	// new tree or if the tree is shared amongst other clients.
+	//
+	// The returned TreeID needs to be used for all subsequent request.
+	GetTreeID(ctx context.Context, in *GetTreeIDRequest, opts ...grpc.CallOption) (*GetTreeIDReply, error)
 	// Browse the structure of the graph.
 	GetNodeStruct(ctx context.Context, in *NodeStructRequest, opts ...grpc.CallOption) (*NodeStructReply, error)
 	// Request data from nodes in the graph.
@@ -72,6 +78,15 @@ type treeClient struct {
 
 func NewTreeClient(cc grpc.ClientConnInterface) TreeClient {
 	return &treeClient{cc}
+}
+
+func (c *treeClient) GetTreeID(ctx context.Context, in *GetTreeIDRequest, opts ...grpc.CallOption) (*GetTreeIDReply, error) {
+	out := new(GetTreeIDReply)
+	err := c.cc.Invoke(ctx, Tree_GetTreeID_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *treeClient) GetNodeStruct(ctx context.Context, in *NodeStructRequest, opts ...grpc.CallOption) (*NodeStructReply, error) {
@@ -187,6 +202,11 @@ func (c *treeClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc
 // All implementations must embed UnimplementedTreeServer
 // for forward compatibility
 type TreeServer interface {
+	// Get a tree ID. It is up to the server to decide if this is a
+	// new tree or if the tree is shared amongst other clients.
+	//
+	// The returned TreeID needs to be used for all subsequent request.
+	GetTreeID(context.Context, *GetTreeIDRequest) (*GetTreeIDReply, error)
 	// Browse the structure of the graph.
 	GetNodeStruct(context.Context, *NodeStructRequest) (*NodeStructReply, error)
 	// Request data from nodes in the graph.
@@ -210,6 +230,9 @@ type TreeServer interface {
 type UnimplementedTreeServer struct {
 }
 
+func (UnimplementedTreeServer) GetTreeID(context.Context, *GetTreeIDRequest) (*GetTreeIDReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTreeID not implemented")
+}
 func (UnimplementedTreeServer) GetNodeStruct(context.Context, *NodeStructRequest) (*NodeStructReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNodeStruct not implemented")
 }
@@ -242,6 +265,24 @@ type UnsafeTreeServer interface {
 
 func RegisterTreeServer(s grpc.ServiceRegistrar, srv TreeServer) {
 	s.RegisterService(&Tree_ServiceDesc, srv)
+}
+
+func _Tree_GetTreeID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTreeIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TreeServer).GetTreeID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Tree_GetTreeID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TreeServer).GetTreeID(ctx, req.(*GetTreeIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Tree_GetNodeStruct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -383,6 +424,10 @@ var Tree_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "multiscope.Tree",
 	HandlerType: (*TreeServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetTreeID",
+			Handler:    _Tree_GetTreeID_Handler,
+		},
 		{
 			MethodName: "GetNodeStruct",
 			Handler:    _Tree_GetNodeStruct_Handler,

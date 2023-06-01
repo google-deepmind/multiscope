@@ -27,19 +27,19 @@ import (
 func TestServerClient(t *testing.T) {
 	root := base.NewRoot()
 	state := grpctesting.NewState(root, nil, nil)
-	conn, client, err := grpctesting.SetupTest(state)
+	client, err := grpctesting.SetupTest(state)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	defer conn.Close()
+	defer client.Conn().Close()
 	const nChild = 5
 	for i := 0; i < nChild; i++ {
 		root.AddChild(fmt.Sprintf("child%d", i), base.NewGroup(""))
 	}
 	ctx := context.Background()
-	structRequest := &pb.NodeStructRequest{}
-	reply, err := client.GetNodeStruct(ctx, structRequest)
+	structRequest := &pb.NodeStructRequest{TreeId: client.TreeID()}
+	reply, err := client.TreeClient().GetNodeStruct(ctx, structRequest)
 	if err != nil {
 		t.Error(err)
 	}
@@ -62,16 +62,16 @@ func TestServerClient(t *testing.T) {
 func TestHasChildren(t *testing.T) {
 	root := base.NewRoot()
 	state := grpctesting.NewState(root, nil, nil)
-	conn, client, err := grpctesting.SetupTest(state)
+	client, err := grpctesting.SetupTest(state)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	defer conn.Close()
+	defer client.Conn().Close()
 
 	ctx := context.Background()
-	structRequest := &pb.NodeStructRequest{}
-	reply, err := client.GetNodeStruct(ctx, structRequest)
+	structRequest := &pb.NodeStructRequest{TreeId: client.TreeID()}
+	reply, err := client.TreeClient().GetNodeStruct(ctx, structRequest)
 	if err != nil {
 		t.Error(err)
 	}
@@ -82,7 +82,7 @@ func TestHasChildren(t *testing.T) {
 		t.Fatalf("node.GetHasChildren() = true, want false")
 	}
 	root.AddChild("", base.NewGroup(""))
-	reply, err = client.GetNodeStruct(ctx, structRequest)
+	reply, err = client.TreeClient().GetNodeStruct(ctx, structRequest)
 	if err != nil {
 		t.Error(err)
 	}
