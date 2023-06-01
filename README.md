@@ -123,4 +123,6 @@ Encountered problems and their solutions:
 
 ### Disclaimer
 
-Multiscope is still work in progress and is not an official Google product (experimental or otherwise), it is just code that happens to be owned by Google.
+Multiscope is still work in progress and is not an official Google or DeepMind
+product (experimental or otherwise), it is just code that happens to be owned by
+Google DeepMind.
