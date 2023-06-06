@@ -61,7 +61,6 @@ func New(messager *worker.Worker) *Puller {
 	p := &Puller{
 		queries:  make(chan queryS, 1),
 		messager: messager,
-		req:      newRequest(),
 		reg:      newPanelRegistry(),
 	}
 	if err := p.init(); err != nil {
@@ -85,6 +84,8 @@ func (p *Puller) init() error {
 		return errors.Errorf("invalid host: %q", connect.Host)
 	}
 	p.treeClient = treepbgrpc.NewTreeClient(httpgrpc.Connect(connect.Scheme, connect.Host))
+	p.req = newRequest(connect.TreeId)
+
 	go p.receiveQuery()
 	return nil
 }

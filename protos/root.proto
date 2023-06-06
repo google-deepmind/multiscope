@@ -56,11 +56,6 @@ message SetLayoutRequest {
 
 message SetLayoutResponse {}
 
-// Get the API version.
-message GetVersionRequest {}
-
-message GetVersionResponse { string version = 1; }
-
 // Get root info.
 message GetRootInfoRequest {
   multiscope.TreeID tree_id = 1;

@@ -65,7 +65,7 @@ func NewUI(pullerWorker *worker.Worker, c *uipb.Connect) *UI {
 	}
 	gui.owner = ui.NewOwner(gui, gui.window.Document().(dom.HTMLDocument))
 	conn := httpgrpc.Connect(gui.addr.Scheme, gui.addr.Host)
-	rootInfo, err := fetchRootInfo(conn)
+	rootInfo, err := fetchRootInfo(conn, c.TreeId)
 	if err != nil {
 		gui.DisplayErr(err)
 	}
@@ -122,9 +122,11 @@ func (gui *UI) onStyleChange(s *style.Style) {
 	})
 }
 
-func fetchRootInfo(conn grpc.ClientConnInterface) (*rootpb.RootInfo, error) {
+func fetchRootInfo(conn grpc.ClientConnInterface, id *treepb.TreeID) (*rootpb.RootInfo, error) {
 	rootClient := rootpb.NewRootClient(conn)
-	resp, err := rootClient.GetRootInfo(context.Background(), &rootpb.GetRootInfoRequest{})
+	resp, err := rootClient.GetRootInfo(context.Background(), &rootpb.GetRootInfoRequest{
+		TreeId: id,
+	})
 	if err != nil {
 		return &rootpb.RootInfo{}, err
 	}
@@ -229,8 +231,8 @@ func (gui *UI) MainLoop() {
 }
 
 // TreeClient returns the connection to the server.
-func (gui *UI) TreeClient() treepb.TreeClient {
-	return gui.treeClient
+func (gui *UI) TreeClient() (treepb.TreeClient, *treepb.TreeID) {
+	return gui.treeClient, gui.addr.TreeId
 }
 
 // Run a function in the background.

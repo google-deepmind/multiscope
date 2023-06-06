@@ -39,7 +39,7 @@ type (
 		Settings() *settings.Settings
 
 		// TreeClient returns the connection to the server.
-		TreeClient() treepb.TreeClient
+		TreeClient() (treepb.TreeClient, *treepb.TreeID)
 
 		// Dashboard returns the main dashboard displaying the panels.
 		Dashboard() Dashboard

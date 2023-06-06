@@ -42,11 +42,12 @@ func NewImageWriter(clt *Client, name string, parent Path) (*ImageWriter, error)
 	clw := pbgrpc.NewBaseWritersClient(clt.Connection())
 	path := clt.toChildPath(name, parent)
 	rep, err := clw.NewRawWriter(context.Background(), &pb.NewRawWriterRequest{
-		Path: path.NodePath(),
-		Mime: mime.PNG,
+		TreeId: clt.TreeID(),
+		Path:   path.NodePath(),
+		Mime:   mime.PNG,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("cannot create ImageWriter: %v", err)
 	}
 	writer := rep.GetWriter()
 	if writer == nil {
