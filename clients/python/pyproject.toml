@@ -78,6 +78,7 @@ strict_primitive_comparisons = false
 disable = [
     'pyi-error',
     'module-attr',
+    'import-error',
 ]
 # Don't report errors.
 report_errors = true
