@@ -12,6 +12,7 @@ grpcio = "*"
 numpy = "*"
 portpicker = "*"
 termcolor = "*"
+six = "*"
 
 [dev-packages]
 yapf = "*"
