@@ -68,10 +68,14 @@ func (el *Element) refresh(src any) error {
 }
 
 func (el *Element) fetchNode(path []string) (*treepb.Node, error) {
-	req := &treepb.NodeStructRequest{Paths: []*treepb.NodePath{
-		{Path: path},
-	}}
-	rep, err := el.ui.TreeClient().GetNodeStruct(context.Background(), req)
+	treeClient, treeID := el.ui.TreeClient()
+	req := &treepb.NodeStructRequest{
+		TreeId: treeID,
+		Paths: []*treepb.NodePath{
+			{Path: path},
+		},
+	}
+	rep, err := treeClient.GetNodeStruct(context.Background(), req)
 	if err != nil {
 		return nil, err
 	}

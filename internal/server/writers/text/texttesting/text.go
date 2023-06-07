@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"multiscope/internal/grpc/client"
 	"multiscope/internal/mime"
-	pbgrpc "multiscope/protos/tree_go_proto"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -32,7 +31,7 @@ const Text01Name = "text01"
 var Text01Data = []string{"Hello World", "Hello\nWorld", "Bonjour tout le monde"}
 
 // CheckText01 checks the data exported by a text node.
-func CheckText01(clt pbgrpc.TreeClient, path []string, i int) error {
+func CheckText01(clt client.Client, path []string, i int) error {
 	ctx := context.Background()
 	nodes, err := client.PathToNodes(ctx, clt, path)
 	if err != nil {

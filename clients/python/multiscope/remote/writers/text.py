@@ -27,13 +27,20 @@ class TextWriter(base.Writer):
   """Writes text on the Multiscope page."""
 
   @control.init
-  def __init__(self, name: str, parent: Optional[group.ParentNode] = None):
-    self._client = text_pb2_grpc.TextStub(stream_client.channel)
+  def __init__(
+      self,
+      py_client: stream_client.Client,
+      name: str,
+      parent: Optional[group.ParentNode] = None,
+  ):
+    self._py_client = py_client
+    self._client = text_pb2_grpc.TextStub(self._py_client.Channel())
     path = group.join_path_pb(parent, name)
-    req = text_pb2.NewWriterRequest(path=path)
+    req = text_pb2.NewWriterRequest(tree_id=self._py_client.TreeID(), path=path)
     self.writer = self._client.NewWriter(req).writer
     super().__init__(path=tuple(self.writer.path.path))
-    active_paths.register_callback(self.path, self._set_should_write)
+    self._py_client.ActivePaths().register_callback(self.path,
+                                                    self._set_should_write)
 
     # TODO(b/251324180): re-enable once fixed.
     # self._set_display()

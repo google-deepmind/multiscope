@@ -23,6 +23,7 @@ import (
 	"image/draw"
 	"log"
 	"multiscope/clients/go/scope"
+	"multiscope/internal/fmtx"
 	"runtime"
 	"sync"
 )
@@ -115,20 +116,20 @@ func (b *bounce) UpdateImage() *image.RGBA {
 func runBounce(wg *sync.WaitGroup, name string, size int) {
 	ticker, err := scope.NewTicker(name, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmtx.FormatError(err))
 	}
 	b := newBounce(ticker, size, 3, 4, 200, 300)
 	w1, err := scope.NewImageWriter("image", ticker.Path())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmtx.FormatError(err))
 	}
 	w2, err := scope.NewScalarWriter("values", ticker.Path())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmtx.FormatError(err))
 	}
 	w3, err := scope.NewTextWriter("text", ticker.Path())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmtx.FormatError(err))
 	}
 	wg.Done()
 	for true {

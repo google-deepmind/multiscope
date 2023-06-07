@@ -17,17 +17,16 @@ package clienttesting
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"multiscope/clients/go/remote"
 	"multiscope/internal/grpc/client"
 	"multiscope/internal/server/core"
 	"multiscope/internal/server/scope"
 	pb "multiscope/protos/tree_go_proto"
-	pbgrpc "multiscope/protos/tree_go_proto"
 	"sync"
 	"time"
 
+	"github.com/pkg/errors"
 	"go.uber.org/multierr"
 )
 
@@ -41,11 +40,11 @@ func Start() (*remote.Client, error) {
 	}
 	ctx := context.Background()
 	// Connect the client.
-	return remote.Connect(ctx, fmt.Sprintf("localhost:%d", addr.Port))
+	return remote.Connect(ctx, fmt.Sprintf("localhost:%d", addr.Port), nil)
 }
 
 // ForceActive forces a path and its children to be active by requesting data from them.
-func ForceActive(clt pbgrpc.TreeClient, paths ...[]string) error {
+func ForceActive(clt client.Client, paths ...[]string) error {
 	var err error
 	var nodes []*pb.Node
 	ctx := context.Background()
@@ -88,7 +87,7 @@ func checkPathToNodesResponse(nodes []*pb.Node) error {
 	for _, node := range nodes {
 		errS := node.GetError()
 		if len(errS) > 0 {
-			err = multierr.Append(err, errors.New(errS))
+			err = multierr.Append(err, errors.Errorf(errS))
 		}
 	}
 	return err
@@ -102,14 +101,14 @@ func CheckBecomeActive(clt *remote.Client, childPath []string, writer remote.Wit
 	}
 	// Query one of the child.
 	ctx := context.Background()
-	nodes, err := client.PathToNodes(ctx, clt.TreeClient(), childPath)
+	nodes, err := client.PathToNodes(ctx, clt, childPath)
 	if err != nil {
 		return err
 	}
 	if err := checkPathToNodesResponse(nodes); err != nil {
 		return err
 	}
-	if _, err := client.NodesData(ctx, clt.TreeClient(), nodes); err != nil {
+	if _, err := client.NodesData(ctx, clt, nodes); err != nil {
 		return err
 	}
 	// Check that the writer becomes active.

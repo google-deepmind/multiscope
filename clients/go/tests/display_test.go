@@ -29,13 +29,12 @@ import (
 )
 
 func checkDisplayed(clt *remote.Client, want []string) error {
-	treeClt := clt.TreeClient()
 	ctx := context.Background()
-	nodes, err := client.PathToNodes(ctx, treeClt, []string{})
+	nodes, err := client.PathToNodes(ctx, clt, []string{})
 	if err != nil {
 		return err
 	}
-	data, err := client.NodesData(ctx, treeClt, nodes)
+	data, err := client.NodesData(ctx, clt, nodes)
 	if err != nil {
 		return err
 	}

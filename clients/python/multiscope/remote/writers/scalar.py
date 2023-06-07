@@ -26,29 +26,36 @@ from multiscope.remote.writers import base
 class ScalarWriter(base.Writer):
   """Display a time series plot on the Multiscope page.
 
-    This Writer writes dictionaries of floats or sequences of floats. Example:
+  This Writer writes dictionaries of floats or sequences of floats. Example:
 
-    ```
-    scalar_writer.write({
-        'b': 5.7,
-        'a': [1, 2, 3],
-    })
-    ```
+  ```
+  scalar_writer.write({
+      'b': 5.7,
+      'a': [1, 2, 3],
+  })
+  ```
 
-    will result in four entries, `'b': 5.7, 'a1':1, 'a2':2, 'a3':3`,
-    on multiscope.
-    """
+  will result in four entries, `'b': 5.7, 'a1':1, 'a2':2, 'a3':3`,
+  on multiscope.
+  """
 
   @control.init
-  def __init__(self, name: str, parent: Optional[group.ParentNode] = None):
-
-    self._client = scalar_pb2_grpc.ScalarsStub(stream_client.channel)
+  def __init__(
+      self,
+      py_client: stream_client.Client,
+      name: str,
+      parent: Optional[group.ParentNode] = None,
+  ):
+    self._py_client = py_client
+    self._client = scalar_pb2_grpc.ScalarsStub(self._py_client.Channel())
     path = group.join_path_pb(parent, name)
-    req = scalar_pb2.NewWriterRequest(path=path)
+    req = scalar_pb2.NewWriterRequest(
+        tree_id=self._py_client.TreeID(), path=path)
     self.writer = self._client.NewWriter(req).writer
 
     super().__init__(path=tuple(self.writer.path.path))
-    active_paths.register_callback(self.path, self._set_should_write)
+    self._py_client.Events().register_callback(self.path,
+                                               self._set_should_write)
 
     # TODO(b/251324180): this did not originally call `self._set_display()`
     # in the constructor. Consider making it consistent.

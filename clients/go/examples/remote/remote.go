@@ -34,7 +34,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "no gRPC server address specified. Please use the --serv_addr flag.\n")
 		os.Exit(1)
 	}
-	client, err := remote.Connect(context.Background(), *servAddr)
+	client, err := remote.Connect(context.Background(), *servAddr, nil)
 	if err != nil {
 		log.Fatalf("cannot connect to multiscope: %v", err)
 	}

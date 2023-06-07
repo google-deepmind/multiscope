@@ -22,6 +22,7 @@ import (
 
 	"multiscope/clients/go/clienttesting"
 	"multiscope/clients/go/remote"
+	"multiscope/internal/fmtx"
 	"multiscope/internal/grpc/client"
 	"multiscope/internal/server/writers/ticker/storage"
 	"multiscope/internal/server/writers/ticker/tickertesting"
@@ -34,59 +35,59 @@ import (
 func TestPlayerTimeline(t *testing.T) {
 	clt, err := clienttesting.Start()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 
 	// Create the tree.
 	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, nil)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	writer, err := remote.NewHTMLWriter(clt, tickertesting.Ticker01HTMLWriterName, player.Path())
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 
 	const nTicks = 10
 	// Write some data.
 	for i := 0; i < nTicks; i++ {
 		if err := writer.WriteCSS("css:" + fmt.Sprint(i)); err != nil {
-			t.Fatal(err)
+			t.Fatal(fmtx.FormatError(err))
 		}
 		if err := writer.Write("html:" + fmt.Sprint(i)); err != nil {
-			t.Fatal(err)
+			t.Fatal(fmtx.FormatError(err))
 		}
 		if err := player.StoreFrame(); err != nil {
-			t.Fatal(err)
+			t.Fatal(fmtx.FormatError(err))
 		}
 	}
 
-	if err := tickertesting.CheckPlayerTimeline01(clt.TreeClient(), player.Path(), writer.Path()); err != nil {
-		t.Error(err)
+	if err := tickertesting.CheckPlayerTimeline01(clt, player.Path(), writer.Path()); err != nil {
+		t.Error(fmtx.FormatError(err))
 	}
 	if err := player.Close(); err != nil {
-		t.Fatalf("cannot close player: %v", err)
+		t.Fatal(fmtx.FormatErrorf("cannot close player: %v", err))
 	}
 }
 
 func TestPlayerTimelineCleanup(t *testing.T) {
 	clt, err := clienttesting.Start()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 
 	// Create the tree.
 	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, nil)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 
 	writer, err := remote.NewTextWriter(clt, "TextWriter", player.Path())
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	if err := writer.Write(""); err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 
 	// Shrink the storage.
@@ -98,45 +99,45 @@ func TestPlayerTimelineCleanup(t *testing.T) {
 	for i := uint64(0); i < nTicks; i++ {
 		// Each write is 10 bytes.
 		if err := writer.Write(fmt.Sprintf("%s  %02d", padding, i)); err != nil {
-			t.Fatal(err)
+			t.Fatal(fmtx.FormatError(err))
 		}
 		if err := player.StoreFrame(); err != nil {
-			t.Fatal(err)
+			t.Fatal(fmtx.FormatError(err))
 		}
 	}
 	// Display the oldest tick.
-	if err := tickertesting.SendSetDisplayTick(clt.TreeClient(), player.Path(), 0); err != nil {
-		t.Fatal(err)
+	if err := tickertesting.SendSetDisplayTick(clt, player.Path(), 0); err != nil {
+		t.Fatal(fmtx.FormatError(err))
 	}
 	// Check the data returned by the timeline.
 	// Get the nodes given the path.
 	ctx := context.Background()
-	nodes, err := client.PathToNodes(ctx, clt.TreeClient(), writer.Path())
+	nodes, err := client.PathToNodes(ctx, clt, writer.Path())
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
-	data, err := client.NodesData(ctx, clt.TreeClient(), nodes)
+	data, err := client.NodesData(ctx, clt, nodes)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	textGot, err := client.ToRaw(data[0])
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	textWant := fmt.Sprintf("%s  %02d", padding, 60)
 	if string(textGot) != textWant {
 		t.Errorf("got %s, want %s", string(textGot), textWant)
 	}
 	// Check the timeline display.
-	if nodes, err = client.PathToNodes(ctx, clt.TreeClient(), player.Path()); err != nil {
-		t.Fatal(err)
+	if nodes, err = client.PathToNodes(ctx, clt, player.Path()); err != nil {
+		t.Fatal(fmtx.FormatError(err))
 	}
-	if data, err = client.NodesData(ctx, clt.TreeClient(), nodes); err != nil {
-		t.Fatal(err)
+	if data, err = client.NodesData(ctx, clt, nodes); err != nil {
+		t.Fatal(fmtx.FormatError(err))
 	}
 	display := &pb.PlayerInfo{}
 	if err = client.ToProto(data[0], display); err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	tlGot := display.Timeline
 	tlWant := &pb.TimeLine{
@@ -156,28 +157,28 @@ func TestPlayerTimelineCleanup(t *testing.T) {
 func TestPlayerEmptyTimeline(t *testing.T) {
 	clt, err := clienttesting.Start()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 
 	// Create the tree.
 	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, nil)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	writer, err := remote.NewTextWriter(clt, "TextWriter", player.Path())
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 
 	ctx := context.Background()
-	nodes, err := client.PathToNodes(ctx, clt.TreeClient(), writer.Path())
+	nodes, err := client.PathToNodes(ctx, clt, writer.Path())
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	// Requesting data when no tick has occurred yet.
-	data, err := client.NodesData(ctx, clt.TreeClient(), nodes)
+	data, err := client.NodesData(ctx, clt, nodes)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	const errWant = "data for tick 0 does not exist"
 	errGot := data[0].GetError()
@@ -186,10 +187,10 @@ func TestPlayerEmptyTimeline(t *testing.T) {
 	}
 	// Requesting data when a tick has occurred, but no data has been written.
 	if err := player.StoreFrame(); err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
-	if data, err = client.NodesData(ctx, clt.TreeClient(), nodes); err != nil {
-		t.Fatal(err)
+	if data, err = client.NodesData(ctx, clt, nodes); err != nil {
+		t.Fatal(fmtx.FormatError(err))
 	}
 	errGot = data[0].GetError()
 	if errGot != "" {

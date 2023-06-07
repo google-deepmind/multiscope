@@ -51,3 +51,8 @@ func FormatError(err error) error {
 	}
 	return errors.New(s)
 }
+
+// FormatErrorf adds a prefix, then returns a formatted error.
+func FormatErrorf(format string, a ...any) error {
+	return FormatError(fmt.Errorf(format, a...))
+}

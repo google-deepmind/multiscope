@@ -15,49 +15,60 @@
 
 import collections
 import threading
-
 from typing import Callable, List, Mapping, Tuple
 
 from absl import logging
-
 from multiscope.protos import tree_pb2 as pb
 from multiscope.remote import stream_client
 
-path_to_callables: Mapping[Tuple[str, ...],
-                           List[Callable[[bool],
-                                         None]]] = collections.defaultdict(list)
-main_lock = threading.Lock()
 
+class ActivePath:
+  """Dispatch active events to writers."""
 
-def _call(f: Callable[[bool], None], is_active: bool):
-  try:
-    f(is_active)
-  except Exception:  # pylint: disable=broad-except
-    logging.warning("active_paths callback error", exc_info=True)
+  def __init__(self, py_client):
+    self._path_to_callables: Mapping[Tuple[str, ...], List[Callable[
+        [bool], None]]] = collections.defaultdict(list)
+    self._main_lock = threading.Lock()
+    self._py_client = py_client
 
+  def _call(self, f: Callable[[bool], None], is_active: bool):
+    try:
+      f(is_active)
+    except Exception:  # pylint: disable=broad-except
+      logging.warning("active_paths callback error", exc_info=True)
 
-def run_updates():
-  """Connect to Multiscope server to start a stream to maintain the list of active paths from client requests.
+  def run(self):
+    """Run the active path update thread."""
+    # Listen to active paths.
+    threading.Thread(
+        target=self._run_updates,
+        name="active_path_thread",
+        daemon=True,
+    ).start()
+
+  def _run_updates(self):
+    """Connect to Multiscope server to start a stream to maintain the list of active paths from client requests.
 
     This function is the main of demon thread updating the list of active paths
     for Multiscope with respect to how web clients connect to the Mutiscope
     server.
     """
-  updates = stream_client.ActivePaths(pb.ActivePathsRequest())
-  last_active = set()
-  for paths in updates:
-    current_active = {tuple(pbpath.path) for pbpath in paths.paths}
-    with main_lock:
-      for path in current_active:
-        for func in path_to_callables.get(path, []):
-          _call(func, True)
-      for path in last_active - current_active:
-        for func in path_to_callables.get(path, []):
-          _call(func, False)
-    last_active = current_active
+    updates = self._py_client.TreeClient().ActivePaths(
+        pb.ActivePathsRequest(tree_id=self._py_client.TreeID()))
+    last_active = set()
+    for paths in updates:
+      current_active = {tuple(pbpath.path) for pbpath in paths.paths}
+      with self._main_lock:
+        for path in current_active:
+          for func in self._path_to_callables.get(path, []):
+            self._call(func, True)
+        for path in last_active - current_active:
+          for func in self._path_to_callables.get(path, []):
+            self._call(func, False)
+      last_active = current_active
 
-
-def register_callback(path: Tuple[str, ...], callback: Callable[[bool], None]):
-  """Register a callback for a given path."""
-  with main_lock:
-    path_to_callables[path].append(callback)
+  def register_callback(self, path: Tuple[str, ...], callback: Callable[[bool],
+                                                                        None]):
+    """Register a callback for a given path."""
+    with self._main_lock:
+      self._path_to_callables[path].append(callback)

@@ -14,3 +14,13 @@
 
 // Package fmtx provides helper function for formatting text.
 package fmtx
+
+import (
+	"reflect"
+	"runtime"
+)
+
+// FuncName returns the name of a function.
+func FuncName(i any) string {
+	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+}

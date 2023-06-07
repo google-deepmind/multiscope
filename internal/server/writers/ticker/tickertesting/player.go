@@ -20,14 +20,13 @@ import (
 	"fmt"
 	"multiscope/internal/grpc/client"
 	pb "multiscope/protos/ticker_go_proto"
-	pbgrpc "multiscope/protos/tree_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 	"time"
 )
 
 var errTickerDisplayNotModified = errors.New("the ticker action did not modify the display")
 
-func queryDisplayTick(clt pbgrpc.TreeClient, tickerPath []string) (int64, error) {
+func queryDisplayTick(clt client.Client, tickerPath []string) (int64, error) {
 	ctx := context.Background()
 	data, err := client.NodesData(ctx, clt, []*treepb.Node{{
 		Path: &treepb.NodePath{
@@ -46,7 +45,7 @@ func queryDisplayTick(clt pbgrpc.TreeClient, tickerPath []string) (int64, error)
 	return display.Timeline.DisplayTick, nil
 }
 
-func sendEventWaitForUpdate(clt pbgrpc.TreeClient, tickerPath []string, action *pb.PlayerAction) error {
+func sendEventWaitForUpdate(clt client.Client, tickerPath []string, action *pb.PlayerAction) error {
 	old, err := queryDisplayTick(clt, tickerPath)
 	if err != nil {
 		return err
@@ -71,7 +70,7 @@ func sendEventWaitForUpdate(clt pbgrpc.TreeClient, tickerPath []string, action *
 }
 
 // SendSetDisplayTick sends an event to a ticker to set the tick being displayed.
-func SendSetDisplayTick(clt pbgrpc.TreeClient, tickerPath []string, tick int64) error {
+func SendSetDisplayTick(clt client.Client, tickerPath []string, tick int64) error {
 	return sendEventWaitForUpdate(clt, tickerPath, &pb.PlayerAction{
 		Action: &pb.PlayerAction_TickView{
 			TickView: &pb.SetTickView{
@@ -83,7 +82,7 @@ func SendSetDisplayTick(clt pbgrpc.TreeClient, tickerPath []string, tick int64) 
 	})
 }
 
-func sendOffsetDisplayTick(clt pbgrpc.TreeClient, tickerPath []string, delta int64) error {
+func sendOffsetDisplayTick(clt client.Client, tickerPath []string, delta int64) error {
 	return sendEventWaitForUpdate(clt, tickerPath, &pb.PlayerAction{
 		Action: &pb.PlayerAction_TickView{
 			TickView: &pb.SetTickView{
@@ -95,7 +94,7 @@ func sendOffsetDisplayTick(clt pbgrpc.TreeClient, tickerPath []string, delta int
 	})
 }
 
-func checkDisplayedValues(clt pbgrpc.TreeClient, nodes []*treepb.Node, tick int) error {
+func checkDisplayedValues(clt client.Client, nodes []*treepb.Node, tick int) error {
 	ctx := context.Background()
 	data, err := client.NodesData(ctx, clt, nodes)
 	if err != nil {
@@ -121,7 +120,7 @@ func checkDisplayedValues(clt pbgrpc.TreeClient, nodes []*treepb.Node, tick int)
 }
 
 // CheckPlayerTimeline01 checks the timeline by sending events to the player.
-func CheckPlayerTimeline01(clt pbgrpc.TreeClient, tickerPath, writerPath []string) error {
+func CheckPlayerTimeline01(clt client.Client, tickerPath, writerPath []string) error {
 	// Get the nodes given the path.
 	nodes, err := client.PathToNodes(context.Background(), clt,
 		append(append([]string{}, writerPath...), "html"),

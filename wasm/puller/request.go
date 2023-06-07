@@ -33,10 +33,10 @@ type (
 	}
 )
 
-func newRequest() *request {
+func newRequest(treeID *treepb.TreeID) *request {
 	return &request{
 		paths:   make(map[core.Key]*pathPointers),
-		request: &treepb.NodeDataRequest{},
+		request: &treepb.NodeDataRequest{TreeId: treeID},
 	}
 }
 

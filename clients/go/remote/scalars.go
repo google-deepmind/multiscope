@@ -37,10 +37,11 @@ func NewScalarWriter(clt *Client, name string, parent Path) (*ScalarWriter, erro
 	ctx := context.Background()
 	path := clt.toChildPath(name, parent)
 	rep, err := clw.NewWriter(ctx, &pb.NewWriterRequest{
-		Path: path.NodePath(),
+		TreeId: clt.TreeID(),
+		Path:   path.NodePath(),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("cannot create ScalarWriter: %v", err)
 	}
 	writer := rep.GetWriter()
 	if writer == nil {

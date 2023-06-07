@@ -14,11 +14,6 @@ class RootStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetVersion = channel.unary_unary(
-                '/multiscope.root.Root/GetVersion',
-                request_serializer=multiscope_dot_protos_dot_root__pb2.GetVersionRequest.SerializeToString,
-                response_deserializer=multiscope_dot_protos_dot_root__pb2.GetVersionResponse.FromString,
-                )
         self.GetRootInfo = channel.unary_unary(
                 '/multiscope.root.Root/GetRootInfo',
                 request_serializer=multiscope_dot_protos_dot_root__pb2.GetRootInfoRequest.SerializeToString,
@@ -38,13 +33,6 @@ class RootStub(object):
 
 class RootServicer(object):
     """Missing associated documentation comment in .proto file."""
-
-    def GetVersion(self, request, context):
-        """Get the version of the proto API.
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
     def GetRootInfo(self, request, context):
         """Return info at the root node.
@@ -70,11 +58,6 @@ class RootServicer(object):
 
 def add_RootServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetVersion': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetVersion,
-                    request_deserializer=multiscope_dot_protos_dot_root__pb2.GetVersionRequest.FromString,
-                    response_serializer=multiscope_dot_protos_dot_root__pb2.GetVersionResponse.SerializeToString,
-            ),
             'GetRootInfo': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRootInfo,
                     request_deserializer=multiscope_dot_protos_dot_root__pb2.GetRootInfoRequest.FromString,
@@ -99,23 +82,6 @@ def add_RootServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class Root(object):
     """Missing associated documentation comment in .proto file."""
-
-    @staticmethod
-    def GetVersion(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/multiscope.root.Root/GetVersion',
-            multiscope_dot_protos_dot_root__pb2.GetVersionRequest.SerializeToString,
-            multiscope_dot_protos_dot_root__pb2.GetVersionResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetRootInfo(request,

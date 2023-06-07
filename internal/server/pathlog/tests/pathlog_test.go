@@ -29,7 +29,6 @@ import (
 	pbgrpc "multiscope/protos/tree_go_proto"
 
 	"github.com/google/go-cmp/cmp"
-	"google.golang.org/grpc"
 )
 
 func checkActiveFromGRPC(clt pbgrpc.Tree_ActivePathsClient, want []core.Key) error {
@@ -84,19 +83,19 @@ func buildTree() core.Root {
 	return root
 }
 
-func connectToServer(root core.Root) (conn *grpc.ClientConn, clt pbgrpc.TreeClient, pathLog *pathlog.PathLog, err error) {
+func connectToServer(root core.Root) (clt *grpctesting.Client, pathLog *pathlog.PathLog, err error) {
 	pathLog = pathlog.NewPathLog(activeThreshold)
 	state := grpctesting.NewState(root, nil, pathLog)
-	conn, clt, err = grpctesting.SetupTest(state)
+	clt, err = grpctesting.SetupTest(state)
 	return
 }
 
 func TestLogPathGRPC(t *testing.T) {
-	conn, clt, pathLog, err := connectToServer(buildTree())
+	clt, pathLog, err := connectToServer(buildTree())
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close()
+	defer clt.Conn().Close()
 	ctx := context.Background()
 
 	// Query the server and check the data.
@@ -105,7 +104,9 @@ func TestLogPathGRPC(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	activeClient, err := clt.ActivePaths(ctx, &pb.ActivePathsRequest{})
+	activeClient, err := clt.TreeClient().ActivePaths(ctx, &pb.ActivePathsRequest{
+		TreeId: clt.TreeID(),
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,11 +145,11 @@ func toPath(root core.Root, key core.Key) *core.Path {
 
 func TestLogPathForward(t *testing.T) {
 	root := buildTree()
-	conn, clt, pathLog, err := connectToServer(root)
+	clt, pathLog, err := connectToServer(root)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close()
+	defer clt.Conn().Close()
 	ctx := context.Background()
 
 	// Add some forwards
@@ -163,7 +164,9 @@ func TestLogPathForward(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	activeClient, err := clt.ActivePaths(ctx, &pb.ActivePathsRequest{})
+	activeClient, err := clt.TreeClient().ActivePaths(ctx, &pb.ActivePathsRequest{
+		TreeId: clt.TreeID(),
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

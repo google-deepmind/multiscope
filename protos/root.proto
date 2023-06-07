@@ -42,7 +42,7 @@ message Layout {
 
 // Sets the key for the UI settings.
 message SetKeySettingsRequest { 
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   string key_settings = 2; 
 }
 
@@ -50,27 +50,20 @@ message SetKeySettingsResponse {}
 
 // Sets the layout to display.
 message SetLayoutRequest { 
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
   Layout layout = 2;
 }
 
 message SetLayoutResponse {}
 
-// Get the API version.
-message GetVersionRequest {}
-
-message GetVersionResponse { string version = 1; }
-
 // Get root info.
 message GetRootInfoRequest {
-  multiscope.TreeID treeID = 1;
+  multiscope.TreeID tree_id = 1;
 }
 
 message GetRootInfoResponse { RootInfo info = 1; }
 
 service Root {
-  // Get the version of the proto API.
-  rpc GetVersion(GetVersionRequest) returns (GetVersionResponse) {}
   // Return info at the root node.
   rpc GetRootInfo(GetRootInfoRequest) returns (GetRootInfoResponse) {}
   // Set the key for the UI settings.

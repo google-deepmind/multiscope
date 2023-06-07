@@ -70,6 +70,7 @@ func (c *ClientNode) Path() Path {
 func (c *ClientNode) Close() error {
 	ctx := context.Background()
 	_, err := c.Client().TreeClient().Delete(ctx, &pb.DeleteRequest{
+		TreeId: c.client.TreeID(),
 		Path: &pb.NodePath{
 			Path: c.Path(),
 		},

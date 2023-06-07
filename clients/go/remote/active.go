@@ -37,9 +37,9 @@ type Active struct {
 	callbacks   map[core.Key][]ActiveCallback
 }
 
-func newActive(clt pbgrpc.TreeClient) (*Active, error) {
+func newActive(clt *Client) (*Active, error) {
 	ctx := context.Background()
-	activeClient, err := clt.ActivePaths(ctx, &pb.ActivePathsRequest{})
+	activeClient, err := clt.client.ActivePaths(ctx, &pb.ActivePathsRequest{TreeId: clt.TreeID()})
 	if err != nil {
 		return nil, err
 	}

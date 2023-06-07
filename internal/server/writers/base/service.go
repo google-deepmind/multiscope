@@ -42,7 +42,10 @@ func RegisterService(srv grpc.ServiceRegistrar, state treeservice.IDToState) {
 
 // NewGroup creates a new parent node in the tree.
 func (srv *Service) NewGroup(ctx context.Context, req *pb.NewGroupRequest) (*pb.NewGroupResponse, error) {
-	state := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	grp := NewGroup("")
 	writerPath, err := grp.AddToTree(state, req.GetPath())
 	if err != nil {
@@ -50,14 +53,18 @@ func (srv *Service) NewGroup(ctx context.Context, req *pb.NewGroupRequest) (*pb.
 	}
 	return &pb.NewGroupResponse{
 		Grp: &pb.Group{
-			Path: writerPath.PB(),
+			TreeId: req.TreeId,
+			Path:   writerPath.PB(),
 		},
 	}, nil
 }
 
 // NewProtoWriter creates a new writer for proto in the tree.
 func (srv *Service) NewProtoWriter(ctx context.Context, req *pb.NewProtoWriterRequest) (*pb.NewProtoWriterResponse, error) {
-	state := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	writer := NewProtoWriter(req.GetProto())
 	writerPath, err := writer.AddToTree(state, req.GetPath())
 	if err != nil {
@@ -65,14 +72,18 @@ func (srv *Service) NewProtoWriter(ctx context.Context, req *pb.NewProtoWriterRe
 	}
 	return &pb.NewProtoWriterResponse{
 		Writer: &pb.ProtoWriter{
-			Path: writerPath.PB(),
+			TreeId: req.TreeId,
+			Path:   writerPath.PB(),
 		},
 	}, nil
 }
 
 // WriteProto writes proto data to a given node in the tree.
 func (srv *Service) WriteProto(ctx context.Context, req *pb.WriteProtoRequest) (*pb.WriteProtoResponse, error) {
-	state := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	var writer *ProtoWriter
 	if err := core.Set(&writer, state.Root(), req.GetWriter()); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "cannot get the ProtoWriter from the tree: %v", err)
@@ -88,7 +99,10 @@ func (srv *Service) WriteProto(ctx context.Context, req *pb.WriteProtoRequest) (
 
 // NewRawWriter creates a new writer for raw data in the tree.
 func (srv *Service) NewRawWriter(ctx context.Context, req *pb.NewRawWriterRequest) (*pb.NewRawWriterResponse, error) {
-	state := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	writer := NewRawWriter(req.GetMime())
 	writerPath, err := writer.AddToTree(state, req.GetPath())
 	if err != nil {
@@ -96,20 +110,23 @@ func (srv *Service) NewRawWriter(ctx context.Context, req *pb.NewRawWriterReques
 	}
 	return &pb.NewRawWriterResponse{
 		Writer: &pb.RawWriter{
-			Path: writerPath.PB(),
+			TreeId: req.TreeId,
+			Path:   writerPath.PB(),
 		},
 	}, nil
 }
 
 // WriteRaw writes raw data to a given node in the tree.
 func (srv *Service) WriteRaw(ctx context.Context, req *pb.WriteRawRequest) (*pb.WriteRawResponse, error) {
-	state := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	state, err := srv.state.State(treeservice.TreeID(req.Writer)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
 	var writer *RawWriter
 	if err := core.Set(&writer, state.Root(), req.GetWriter()); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "cannot get the RawWriter from the tree: %v", err)
 	}
-	err := writer.Write(req.GetData())
-	if err != nil {
+	if err := writer.Write(req.GetData()); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "cannot write data: %v", err)
 	}
 	return &pb.WriteRawResponse{}, nil

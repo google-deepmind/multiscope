@@ -22,7 +22,6 @@ import (
 	"multiscope/internal/grpc/grpctesting"
 	"multiscope/internal/server/events"
 	"multiscope/internal/server/root"
-	"multiscope/internal/server/treeservice"
 
 	pb "multiscope/protos/tree_go_proto"
 )
@@ -30,9 +29,13 @@ import (
 func TestServerDispatchesEvents(t *testing.T) {
 	reg := events.NewRegistry()
 	state := grpctesting.NewState(root.NewRoot(), reg, nil)
-	client := treeservice.New(nil, state)
+	client, err := grpctesting.SetupTest(state)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	req := &pb.SendEventsRequest{
+		TreeId: client.TreeID(),
 		Events: []*pb.Event{
 			{
 				Path: &pb.NodePath{Path: []string{"node"}},
@@ -50,9 +53,8 @@ func TestServerDispatchesEvents(t *testing.T) {
 	defer queue.Delete()
 
 	ctx := context.Background()
-	_, err := client.SendEvents(ctx, req)
-	if err != nil {
-		t.Error(err)
+	if _, err := client.TreeClient().SendEvents(ctx, req); err != nil {
+		t.Fatal(err)
 	}
 
 	wg.Wait()

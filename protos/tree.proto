@@ -27,7 +27,7 @@ option go_package = "multiscope/protos/tree_go_proto";
 
 // Identifier of the tree on the server.
 message TreeID {
-  int64 treeID = 1;
+  int64 tree_id = 1;
 }
 
 // Path of a node in the tree.
@@ -96,7 +96,7 @@ message Event {
 
 // Request to parse the tree of available data.
 message NodeStructRequest {
-  TreeID treeID = 1;
+  TreeID tree_id = 1;
   repeated NodePath paths = 2;
 }
 
@@ -115,7 +115,7 @@ message DataRequest {
 
 // Request to query data from nodes in the tree.
 message NodeDataRequest {
-  TreeID treeID = 1;
+  TreeID tree_id = 1;
   repeated DataRequest reqs = 2;
 }
 
@@ -126,13 +126,13 @@ message NodeDataReply {
 
 // Request to send events to the backend.
 message SendEventsRequest {
-  TreeID treeID = 1;
+  TreeID tree_id = 1;
   repeated Event events = 2;
 }
 
 // Request for streaming events from the backend.
 message StreamEventsRequest {
-  TreeID treeID = 1;
+  TreeID tree_id = 1;
 }
 
 // Errors from processing the events.
@@ -141,7 +141,7 @@ message SendEventsReply {
 }
 
 message ActivePathsRequest {
-  TreeID treeID = 1;
+  TreeID tree_id = 1;
 }
 
 message ActivePathsReply {
@@ -149,19 +149,35 @@ message ActivePathsReply {
 }
 
 message ResetStateRequest {
-  TreeID treeID = 1;
+  TreeID tree_id = 1;
 }
 
 message ResetStateReply {}
 
 message DeleteRequest {
-  TreeID treeID = 1;
+  TreeID tree_id = 1;
   NodePath path = 2;
 }
 
 message DeleteReply {}
 
+message GetTreeIDRequest {
+  string url = 1;
+}
+
+message GetTreeIDReply {
+  // Version of the API to interact with the tree.
+  string version = 1;
+  TreeID tree_id = 2;
+}
+
 service Tree {
+  // Get a tree ID. It is up to the server to decide if this is a
+  // new tree or if the tree is shared amongst other clients.
+  //
+  // The returned TreeID needs to be used for all subsequent request.
+  rpc GetTreeID(GetTreeIDRequest) returns (GetTreeIDReply) {}
+
   // Browse the structure of the graph.
   rpc GetNodeStruct(NodeStructRequest) returns (NodeStructReply) {}
 

@@ -39,7 +39,7 @@ func TestHTMLWriter(t *testing.T) {
 			t.Error(err)
 			break
 		}
-		if err := texttesting.CheckHTML01(clt.TreeClient(), []string{texttesting.Text01Name}, i); err != nil {
+		if err := texttesting.CheckHTML01(clt, []string{texttesting.Text01Name}, i); err != nil {
 			t.Error(err)
 		}
 	}

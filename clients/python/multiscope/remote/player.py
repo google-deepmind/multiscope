@@ -12,16 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """A Multiscope player to play back data."""
-from typing import Any, Callable, List, Optional
-
 import datetime
+import threading
 import time
 import timeit
-import threading
+from typing import Any, Callable, List, Optional
 from absl import logging
-
 from google.protobuf import duration_pb2
-
 from multiscope.protos import ticker_pb2
 from multiscope.protos import ticker_pb2_grpc
 from multiscope.protos import tree_pb2 as pb
@@ -34,26 +31,31 @@ from multiscope.remote import stream_client
 class Player(group.ParentNode):
   """An object that can play back data.
 
-    A `Player` enables a panel in Multiscope with controls to play back the data.
-    The client needs to call `store` which will cause the server to save all the children
-    of the node into a frame.
+  A `Player` enables a panel in Multiscope with controls to play back the data.
+  The client needs to call `store` which will cause the server to save all the
+  children
+  of the node into a frame.
 
-    The UI will provide controls to display frames back in time.
-    """
+  The UI will provide controls to display frames back in time.
+  """
 
   @control.init
   def __init__(
       self,
+      py_client: stream_client.Client,
       name: str,
       parent: Optional[group.ParentNode] = None,
       stoppable: bool = True,
   ):
+    self._py_client = py_client
+
     self._tick_num: int = 0
 
     # Make the connection to the multiscope server.
-    self._client = ticker_pb2_grpc.TickersStub(stream_client.channel)
+    self._client = ticker_pb2_grpc.TickersStub(py_client.Channel())
     path = group.join_path_pb(parent, name)
-    req = ticker_pb2.NewPlayerRequest(path=path, ignorePause=not stoppable)
+    req = ticker_pb2.NewPlayerRequest(
+        tree_id=self._py_client.TreeID(), path=path, ignorePause=not stoppable)
     self._player = self._client.NewPlayer(req).player
     super().__init__(path=tuple(self._player.path.path))
 

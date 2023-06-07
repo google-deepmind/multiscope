@@ -20,6 +20,7 @@ import (
 	"log"
 	"math"
 	"multiscope/clients/go/scope"
+	"multiscope/internal/fmtx"
 )
 
 var (
@@ -30,16 +31,16 @@ var (
 func main() {
 	flag.Parse()
 	if err := scope.Start(*httpPort, *local); err != nil {
-		log.Fatal(err)
+		log.Fatal(fmtx.FormatError(err))
 	}
 	// Create a new writer and add some data to it.
 	ticker, err := scope.NewTicker("main", nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmtx.FormatError(err))
 	}
 	w, err := scope.NewScalarWriter("Sin Data", ticker.Path())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmtx.FormatError(err))
 	}
 	for {
 		if err = ticker.Tick(); err != nil {
@@ -55,5 +56,5 @@ func main() {
 			break
 		}
 	}
-	log.Fatal(err)
+	log.Fatal(fmtx.FormatError(err))
 }

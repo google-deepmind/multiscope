@@ -30,17 +30,17 @@ type Events struct {
 	reg *events.Registry
 }
 
-func newEvents(clt pbgrpc.TreeClient) (*Events, error) {
-	req := &pb.StreamEventsRequest{}
+func newEvents(clt *Client) (*Events, error) {
+	req := &pb.StreamEventsRequest{TreeId: clt.TreeID()}
 	ctx := context.Background()
-	strm, err := clt.StreamEvents(ctx, req)
+	strm, err := clt.client.StreamEvents(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("cannot stream events from the server: %v", err)
 	}
 	e := &Events{reg: events.NewRegistry()}
 	ackEvent, err := strm.Recv()
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("cannot receive acknowledgement event from the server: %v", err)
 	}
 	if ackEvent.Payload != nil {
 		return nil, errors.Errorf("incorrect fist event from the server")

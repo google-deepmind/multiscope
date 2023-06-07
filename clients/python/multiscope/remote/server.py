@@ -26,10 +26,8 @@ import termcolor
 from absl import flags
 
 from multiscope.protos import tree_pb2 as pb
-from multiscope.remote import active_paths
 from multiscope.remote import control
 from multiscope.remote import stream_client
-from multiscope.remote.events import events
 
 _HTTP_PORT = flags.DEFINE_integer("http_port", 5972, "http port.")
 # TODO: grpc_port=0 picks one that works. Good default, but right now we don't
@@ -142,18 +140,9 @@ def _start_server_unsafe(http_port: int, grpc_port: int,
   grpc_url = f"localhost:{grpc_port}"
 
   logging.info("Connecting grp_url: %s", grpc_url)
-  stream_client.InitializeStub(grpc_url)
-  # Make sure we can connect to the multiscope server.
-  stream_client.TryConnecting(timeout_secs=connection_timeout_secs)
-
-  # Listen to active paths.
-  threading.Thread(
-      target=active_paths.run_updates,
-      name="active_path_thread",
-      daemon=True,
-  ).start()
-  # Listen to events from the server.
-  events._event_processor.run()
+  stream_client.InitGlobalConnection(grpc_url)
+  client = stream_client.Client(timeout_secs=connection_timeout_secs)
+  stream_client.SetGlobalClient(client)
   return http_port, grpc_url
 
 

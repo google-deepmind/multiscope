@@ -19,6 +19,7 @@ import (
 
 	"multiscope/clients/go/clienttesting"
 	"multiscope/clients/go/remote"
+	"multiscope/internal/fmtx"
 	"multiscope/internal/server/writers/tensor"
 	tensortesting "multiscope/internal/server/writers/tensor/testing"
 )
@@ -39,20 +40,20 @@ func (t *tensorS) Value() []float32 {
 func TestTensorWriter(t *testing.T) {
 	clt, err := clienttesting.Start()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	writer, err := remote.NewTensorWriter[float32](clt, tensortesting.Tensor01Name, nil)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
-	if err := clienttesting.ForceActive(clt.TreeClient(), writer.Path()); err != nil {
-		t.Fatal(err)
+	if err := clienttesting.ForceActive(clt, writer.Path()); err != nil {
+		t.Fatal(fmtx.FormatError(err))
 	}
 	for _, test := range tensortesting.TensorTests {
 		if err := writer.Write(test.Tensor); err != nil {
-			t.Fatal(err)
+			t.Fatal(fmtx.FormatError(err))
 		}
-		if err := tensortesting.CheckTensorData(clt.TreeClient(), writer.Path(), &test); err != nil {
+		if err := tensortesting.CheckTensorData(clt, writer.Path(), &test); err != nil {
 			t.Errorf("incorrect tensor data for test %q: %v", test.Desc, err)
 		}
 	}
@@ -61,11 +62,11 @@ func TestTensorWriter(t *testing.T) {
 func TestTensorWriterForwardImageAndShouldWrite(t *testing.T) {
 	clt, err := clienttesting.Start()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	writer, err := remote.NewTensorWriter[float32](clt, tensortesting.Tensor01Name, nil)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	path := []string{tensortesting.Tensor01Name, tensor.NodeNameImage}
 	if err := clienttesting.CheckBecomeActive(clt, path, writer); err != nil {
@@ -76,11 +77,11 @@ func TestTensorWriterForwardImageAndShouldWrite(t *testing.T) {
 func TestTensorWriterForwardDistributionAndShouldWrite(t *testing.T) {
 	clt, err := clienttesting.Start()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	writer, err := remote.NewTensorWriter[float32](clt, tensortesting.Tensor01Name, nil)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	path := []string{tensortesting.Tensor01Name, tensor.NodeNameDistribution}
 	if err := clienttesting.CheckBecomeActive(clt, path, writer); err != nil {
@@ -91,11 +92,11 @@ func TestTensorWriterForwardDistributionAndShouldWrite(t *testing.T) {
 func TestTensorWriterForwardMinMaxAndShouldWrite(t *testing.T) {
 	clt, err := clienttesting.Start()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	writer, err := remote.NewTensorWriter[float32](clt, tensortesting.Tensor01Name, nil)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	path := []string{tensortesting.Tensor01Name, tensor.NodeNameMinMax}
 	if err := clienttesting.CheckBecomeActive(clt, path, writer); err != nil {
@@ -106,11 +107,11 @@ func TestTensorWriterForwardMinMaxAndShouldWrite(t *testing.T) {
 func TestTensorWriterForwardNormsAndShouldWrite(t *testing.T) {
 	clt, err := clienttesting.Start()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	writer, err := remote.NewTensorWriter[float32](clt, tensortesting.Tensor01Name, nil)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmtx.FormatError(err))
 	}
 	path := []string{tensortesting.Tensor01Name, tensor.NodeNameNorms}
 	if err := clienttesting.CheckBecomeActive(clt, path, writer); err != nil {

@@ -23,6 +23,9 @@ import (
 )
 
 type (
+	// TreeID is a tree ID.
+	TreeID int64
+
 	// Node represents a node (parent or leaf) in the graph.
 	Node interface {
 		MIME() string

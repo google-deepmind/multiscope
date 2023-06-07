@@ -21,7 +21,6 @@ import (
 	"multiscope/internal/grpc/client"
 	"multiscope/internal/mime"
 	tickerpb "multiscope/protos/ticker_go_proto"
-	pbgrpc "multiscope/protos/tree_go_proto"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -74,7 +73,7 @@ var (
 )
 
 // CheckTicker checks the data written to a fast ticker.
-func CheckTicker(clt pbgrpc.TreeClient, path []string, i int) error {
+func CheckTicker(clt client.Client, path []string, i int) error {
 	ctx := context.Background()
 	path = append([]string{}, path...)
 	nodes, err := client.PathToNodes(ctx, clt, path)
@@ -99,7 +98,7 @@ func CheckTicker(clt pbgrpc.TreeClient, path []string, i int) error {
 }
 
 // CheckRemoteTicker checks the data written to a fast ticker.
-func CheckRemoteTicker(clt pbgrpc.TreeClient, path []string, currentTick int64) error {
+func CheckRemoteTicker(clt client.Client, path []string, currentTick int64) error {
 	ctx := context.Background()
 	path = append([]string{}, path...)
 	nodes, err := client.PathToNodes(ctx, clt, path)

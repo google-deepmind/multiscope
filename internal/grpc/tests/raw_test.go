@@ -32,12 +32,12 @@ const rawWriterName = "test_raw_writer"
 func TestRawWriter(t *testing.T) {
 	rootNode := root.NewRoot()
 	state := grpctesting.NewState(rootNode, nil, nil)
-	conn, clt, err := grpctesting.SetupTest(state)
+	clt, err := grpctesting.SetupTest(state)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	defer conn.Close()
+	defer clt.Conn().Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

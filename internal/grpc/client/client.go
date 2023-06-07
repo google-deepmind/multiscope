@@ -17,12 +17,12 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	pb "multiscope/protos/tree_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
 
+	"github.com/pkg/errors"
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -30,18 +30,31 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
+// Client is a client to a tree service.
+type Client interface {
+	// TreeID returns the ID of the tree.
+	TreeID() *pb.TreeID
+	// TreeClient returns the gRPC client.
+	TreeClient() pbgrpc.TreeClient
+}
+
 // PathToNodes sends a request to convert a string path to a list of Nodes.
-func PathToNodes(ctx context.Context, clt pbgrpc.TreeClient, paths ...[]string) ([]*pb.Node, error) {
-	req := &pb.NodeStructRequest{}
+func PathToNodes(ctx context.Context, clt Client, paths ...[]string) (_ []*pb.Node, err error) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("cannot fetch nodes from path: %w", err)
+		}
+	}()
+	req := &pb.NodeStructRequest{TreeId: clt.TreeID()}
 	for _, path := range paths {
 		req.Paths = append(req.Paths, &pb.NodePath{Path: path})
 	}
-	reply, err := clt.GetNodeStruct(ctx, req)
+	reply, err := clt.TreeClient().GetNodeStruct(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("client.GetNodeStruct returned an error: %w", err)
+		return nil, errors.Errorf("client.GetNodeStruct returned an error: %v", err)
 	}
 	if len(paths) != len(reply.Nodes) {
-		return nil, fmt.Errorf("unexpected server reply, got %d nodes back, want %d nodes back", len(reply.Nodes), len(paths))
+		return nil, errors.Errorf("unexpected server reply, got %d nodes back, want %d nodes back", len(reply.Nodes), len(paths))
 	}
 	for i, node := range reply.Nodes {
 		if node.Error != "" {
@@ -49,14 +62,14 @@ func PathToNodes(ctx context.Context, clt pbgrpc.TreeClient, paths ...[]string) 
 		}
 	}
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("%v", err)
 	}
 	return reply.Nodes, nil
 }
 
 // NodesData sends a request to collect data from a list of nodes.
-func NodesData(ctx context.Context, clt pbgrpc.TreeClient, nodes []*pb.Node) ([]*pb.NodeData, error) {
-	req := &pb.NodeDataRequest{}
+func NodesData(ctx context.Context, clt Client, nodes []*pb.Node) ([]*pb.NodeData, error) {
+	req := &pb.NodeDataRequest{TreeId: clt.TreeID()}
 	for _, node := range nodes {
 		path := []string{}
 		if node.GetPath() != nil {
@@ -68,12 +81,12 @@ func NodesData(ctx context.Context, clt pbgrpc.TreeClient, nodes []*pb.Node) ([]
 			},
 		})
 	}
-	reply, err := clt.GetNodeData(ctx, req)
+	reply, err := clt.TreeClient().GetNodeData(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("cannot fetch data from nodes: %v", err)
 	}
 	if len(nodes) != len(reply.NodeData) {
-		return nil, fmt.Errorf("unexpected server reply, got %d nodes back, want %d nodes back", len(nodes), len(reply.NodeData))
+		return nil, errors.Errorf("unexpected server reply, got %d nodes back, want %d nodes back", len(nodes), len(reply.NodeData))
 	}
 	return reply.NodeData, nil
 }
@@ -93,27 +106,28 @@ func ToRaw(nodeData *pb.NodeData) ([]byte, error) {
 // ToProto converts data returned by the server into a protobuf.
 func ToProto(nodeData *pb.NodeData, msg proto.Message) error {
 	if nodeData.GetError() != "" {
-		return fmt.Errorf("node error: %s", nodeData.GetError())
+		return errors.Errorf("node error: %s", nodeData.GetError())
 	}
 	p := nodeData.GetPb()
 	if p == nil {
-		return errors.New("node data does not contain proto data")
+		return errors.Errorf("node data does not contain proto data")
 	}
 	const urlPrefix = "type.googleapis.com/"
 	destTypeURL := urlPrefix + string(proto.MessageName(msg))
 	if p.TypeUrl != destTypeURL {
-		return fmt.Errorf("cannot decode node data because protobuf type url does not match: got %q, want %q", p.TypeUrl, destTypeURL)
+		return errors.Errorf("cannot decode node data because protobuf type url does not match: got %q, want %q", p.TypeUrl, destTypeURL)
 	}
 	return proto.Unmarshal(p.Value, msg)
 }
 
 // SendEvent sends an event to the server given a path.
-func SendEvent(ctx context.Context, clt pbgrpc.TreeClient, tickerPath []string, event proto.Message) error {
+func SendEvent(ctx context.Context, clt Client, tickerPath []string, event proto.Message) error {
 	pl, err := anypb.New(event)
 	if err != nil {
 		return err
 	}
-	_, err = clt.SendEvents(ctx, &pb.SendEventsRequest{
+	_, err = clt.TreeClient().SendEvents(ctx, &pb.SendEventsRequest{
+		TreeId: clt.TreeID(),
 		Events: []*pb.Event{{
 			Path: &pb.NodePath{
 				Path: tickerPath,
@@ -128,7 +142,7 @@ func SendEvent(ctx context.Context, clt pbgrpc.TreeClient, tickerPath []string, 
 func Connect(addr string) (*grpc.ClientConn, error) {
 	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, fmt.Errorf("client cannot connect to testing server: %w", err)
+		return nil, errors.Errorf("client cannot connect to testing server: %v", err)
 	}
 	return conn, nil
 }

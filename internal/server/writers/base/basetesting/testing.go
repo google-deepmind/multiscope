@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"multiscope/internal/grpc/client"
-	pbgrpc "multiscope/protos/tree_go_proto"
 
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -52,7 +51,7 @@ func TimestampToAny(ts *timestamppb.Timestamp) (an *anypb.Any, err error) {
 }
 
 // CheckProto01 checks the data exported by a proto node.
-func CheckProto01(ctx context.Context, clt pbgrpc.TreeClient, path []string, i int) error {
+func CheckProto01(ctx context.Context, clt client.Client, path []string, i int) error {
 	nodes, err := client.PathToNodes(ctx, clt, path)
 	if err != nil {
 		return err
@@ -85,7 +84,7 @@ var Raw01Data = [][]byte{
 }
 
 // CheckRaw01 checks the data exported by a raw node.
-func CheckRaw01(ctx context.Context, clt pbgrpc.TreeClient, path []string, i int) error {
+func CheckRaw01(ctx context.Context, clt client.Client, path []string, i int) error {
 	nodes, err := client.PathToNodes(ctx, clt, path)
 	if err != nil {
 		return err

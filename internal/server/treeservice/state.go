@@ -23,8 +23,11 @@ import (
 )
 
 type (
-	// StateFactory returns a new state.
+	// StateFactory creates states associated to a given ID.
 	StateFactory interface {
+		// TreeID returns the ID to which the factory is associated to.
+		TreeID() core.TreeID
+		// State returns a new state.
 		NewState() *State
 	}
 
@@ -79,4 +82,9 @@ func (s *State) EventDispatcher() EventDispatcher {
 // Reset the state of Multiscope.
 func (s *State) Reset() *State {
 	return s.factory.NewState()
+}
+
+// TreeID returns the ID of the tree to which the state is associated to.
+func (s *State) TreeID() core.TreeID {
+	return s.factory.TreeID()
 }

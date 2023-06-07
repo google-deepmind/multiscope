@@ -31,6 +31,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -55,13 +56,14 @@ type Client struct {
 	prefix  Path
 	conn    grpc.ClientConnInterface
 	client  pbgrpc.TreeClient
+	treeID  *pb.TreeID
 	display *Display
 	events  *Events
 	active  *Active
 }
 
 // Connect to a Multiscope server and returns a Multiscope remote.
-func Connect(ctx context.Context, targetURL string) (*Client, error) {
+func Connect(ctx context.Context, targetURL string, treeID *pb.TreeID) (*Client, error) {
 	parsedURL, err := url.Parse(targetURL)
 	if err != nil {
 		return nil, err
@@ -75,7 +77,7 @@ func Connect(ctx context.Context, targetURL string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	clt, err := NewClient(conn)
+	clt, err := NewClient(conn, treeID)
 	if err != nil {
 		return nil, err
 	}
@@ -97,24 +99,38 @@ func connectUDS(ctx context.Context, parsedURL *url.URL) (*grpc.ClientConn, erro
 		credentialOpt, nameResolutionOpt, grpc.WithBlock())
 }
 
+func newTreeID(clt *Client) (*pb.TreeID, error) {
+	ctx := context.Background()
+	resp, err := clt.client.GetTreeID(ctx, &pb.GetTreeIDRequest{})
+	if err != nil {
+		return nil, errors.Errorf("cannot fetch a tree ID: %v", err)
+	}
+	return resp.TreeId, nil
+}
+
 // NewClient returns a new Multiscope client given a stream client connected to a Multiscope server.
-func NewClient(conn grpc.ClientConnInterface) (*Client, error) {
-	clt := pbgrpc.NewTreeClient(conn)
-	active, err := newActive(clt)
+func NewClient(conn grpc.ClientConnInterface, treeID *pb.TreeID) (*Client, error) {
+	clt := &Client{
+		conn:   conn,
+		client: pbgrpc.NewTreeClient(conn),
+	}
+	var err error
+	if treeID == nil {
+		clt.treeID, err = newTreeID(clt)
+	}
 	if err != nil {
 		return nil, err
 	}
-	events, err := newEvents(clt)
+	clt.active, err = newActive(clt)
 	if err != nil {
 		return nil, err
 	}
-	return &Client{
-		conn:    conn,
-		client:  clt,
-		events:  events,
-		display: newDisplay(conn),
-		active:  active,
-	}, nil
+	clt.events, err = newEvents(clt)
+	if err != nil {
+		return nil, err
+	}
+	clt.display = newDisplay(clt)
+	return clt, nil
 }
 
 // Connection returns the connection from the client to the server.
@@ -148,6 +164,11 @@ func (clt *Client) TreeClient() pbgrpc.TreeClient {
 	return clt.client
 }
 
+// TreeID returns a the ID of the tree to which this client is connected to.
+func (clt *Client) TreeID() *pb.TreeID {
+	return clt.treeID
+}
+
 // Active returns the registry to update the status of the node (active vs non-active).
 func (clt *Client) Active() *Active {
 	return clt.active
@@ -166,6 +187,7 @@ func (clt *Client) NewChildClient(name string) (*Client, error) {
 	}
 	return &Client{
 		conn:    clt.conn,
+		treeID:  clt.treeID,
 		client:  clt.client,
 		prefix:  grp.Path(),
 		events:  clt.events,
@@ -183,9 +205,10 @@ func (clt *Client) Display() *Display {
 func (clt *Client) SetGlobalName(name string) error {
 	rootClt := rootpbgrpc.NewRootClient(clt.Connection())
 	if _, err := rootClt.SetKeySettings(context.Background(), &rootpb.SetKeySettingsRequest{
+		TreeId:      clt.TreeID(),
 		KeySettings: name,
 	}); err != nil {
-		return err
+		return errors.Errorf("cannot set global name: %v", err)
 	}
 	return nil
 }

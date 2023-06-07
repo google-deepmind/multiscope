@@ -18,7 +18,6 @@ from absl.testing import absltest
 
 import multiscope
 from multiscope.protos import scalar_pb2
-from multiscope.remote.writers import scalar
 
 
 def setUpModule():
@@ -38,7 +37,7 @@ class TestScopeScalarWriter(absltest.TestCase):
 
   def test_writer_dict(self):
     """Can write to a ScalarWriter."""
-    w = scalar.ScalarWriter("sincos")
+    w = multiscope.ScalarWriter("sincos")
     for t in range(0, 10):
       w.write({
           "sin": math.sin(t * 0.01),
@@ -47,7 +46,7 @@ class TestScopeScalarWriter(absltest.TestCase):
 
   def test_writer_data_dict_vals(self):
     """Checks the outcome of the writing."""
-    w = scalar.ScalarWriter("sincos")
+    w = multiscope.ScalarWriter("sincos")
     w._client = MockClient()
     w.write({
         "sin": math.sin(0.0),
@@ -57,13 +56,13 @@ class TestScopeScalarWriter(absltest.TestCase):
 
   def test_writer_sequence_vals(self):
     """Writes a sequence of values inside a dictionary."""
-    w = scalar.ScalarWriter("sincos")
+    w = multiscope.ScalarWriter("sincos")
     for t in range(0, 10):
       w.write({"both": (math.sin(t * 0.01), math.cos(t * 0.05))})
 
   def test_writer_data_sequence_vals(self):
     """Checks the outcome of writing a sequence of values inside a dict."""
-    w = scalar.ScalarWriter("sincos")
+    w = multiscope.ScalarWriter("sincos")
     w._client = MockClient()
     w.write({"both": (math.sin(0.0), math.cos(0.0))})
     self.assertEqual(w._client.request.label_to_value, {
@@ -73,7 +72,7 @@ class TestScopeScalarWriter(absltest.TestCase):
 
   def test_writer_nan(self):
     """Writes NaN and Inf."""
-    w = scalar.ScalarWriter("nan")
+    w = multiscope.ScalarWriter("nan")
     for _ in range(0, 10):
       w.write({
           "nan": float("NaN"),

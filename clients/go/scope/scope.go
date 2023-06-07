@@ -75,7 +75,7 @@ func Start(httpPort int, local bool) error {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	clt, err := remote.Connect(ctx, grpcAddr)
+	clt, err := remote.Connect(ctx, grpcAddr, nil)
 	if err != nil {
 		return fmt.Errorf("connecting to multiscope: %v", err)
 	}

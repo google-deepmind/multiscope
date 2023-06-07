@@ -30,7 +30,7 @@ func TestTicker(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := clienttesting.ForceActive(clt.TreeClient(), ticker.Path()); err != nil {
+	if err := clienttesting.ForceActive(clt, ticker.Path()); err != nil {
 		t.Fatal(err)
 	}
 	for i := 0; i < 42; i++ {
@@ -38,7 +38,7 @@ func TestTicker(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if err := tickertesting.CheckRemoteTicker(clt.TreeClient(), ticker.Path().NodePath().GetPath(), ticker.CurrentTick()); err != nil {
+	if err := tickertesting.CheckRemoteTicker(clt, ticker.Path().NodePath().GetPath(), ticker.CurrentTick()); err != nil {
 		t.Errorf("wrong data on the server: %v", err)
 	}
 }

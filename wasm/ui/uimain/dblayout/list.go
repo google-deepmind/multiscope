@@ -68,8 +68,10 @@ func (lyt *list) Load(gLayout *rootpb.Layout) error {
 	lyt.pb.DefaultRowHeight = layout.DefaultRowHeight
 	lyt.fixProto()
 
-	nodes, err := lyt.dbd.UI().TreeClient().GetNodeStruct(context.Background(), &treepb.NodeStructRequest{
-		Paths: layout.Displayed,
+	treeClient, treeID := lyt.dbd.UI().TreeClient()
+	nodes, err := treeClient.GetNodeStruct(context.Background(), &treepb.NodeStructRequest{
+		TreeId: treeID,
+		Paths:  layout.Displayed,
 	})
 	if err != nil {
 		return fmt.Errorf("cannot query the tree structure: %v", err)

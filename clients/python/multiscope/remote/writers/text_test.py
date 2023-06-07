@@ -15,7 +15,6 @@
 from absl import flags
 
 import multiscope
-from multiscope.remote.writers import text
 from absl.testing import absltest
 
 FLAGS = flags.FLAGS
@@ -30,7 +29,7 @@ class TestTextWriter(absltest.TestCase):
 
   def testWriter(self):
     """Creates a TextWriter and then writes to it."""
-    w = text.TextWriter("writer")
+    w = multiscope.TextWriter("writer")
     w.write("Test! Hello World.")
 
 

@@ -36,7 +36,7 @@ func newToServer(ui ui.UI) *toServer {
 }
 
 func (to *toServer) processEvents() {
-	clt := to.ui.TreeClient()
+	clt, _ := to.ui.TreeClient()
 	for req := range to.toProcess {
 		ctx := context.Background()
 		if _, err := clt.SendEvents(ctx, req); err != nil {
@@ -51,7 +51,9 @@ func (to *toServer) sendEvent(path *treepb.NodePath, msg proto.Message) {
 		to.ui.DisplayErr(err)
 		return
 	}
+	_, treeID := to.ui.TreeClient()
 	to.toProcess <- &treepb.SendEventsRequest{
+		TreeId: treeID,
 		Events: []*treepb.Event{{
 			Path:    path,
 			Payload: &event,

@@ -17,14 +17,17 @@ package treeservice
 
 import (
 	"context"
-	"errors"
+	"fmt"
+	"net/url"
 	"sync"
 
 	"multiscope/internal/httpgrpc"
 	"multiscope/internal/server/core"
+	"multiscope/internal/version"
 	pb "multiscope/protos/tree_go_proto"
 	pbgrpc "multiscope/protos/tree_go_proto"
 
+	"github.com/pkg/errors"
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
@@ -32,12 +35,17 @@ import (
 )
 
 type (
-	// ID is a tree ID.
-	ID int64
+	// URLToState returns a possibly new server state given a URL.
+	URLToState interface {
+		ToState(url *url.URL) (*State, error)
 
-	// IDToState returns the state of a server and its tree given an ID.
+		Delete(core.TreeID)
+	}
+
+	// IDToState returns a state given an ID.
+	// An error is returned if no state can be found given the ID.
 	IDToState interface {
-		State(ID) *State
+		State(id core.TreeID) (*State, error)
 	}
 
 	// RegisterServiceCallback to register a grpc service provided by a node.
@@ -49,13 +57,13 @@ type (
 		// Services provided by the different node types
 		services []RegisterServiceCallback
 
-		idToState  IDToState
+		urlToState URLToState
 		idToServer sync.Map
 	}
 
 	// TreeIDGetter gives access to a tree ID (typically a proto).
 	TreeIDGetter interface {
-		GetTreeID() *pb.TreeID
+		GetTreeId() *pb.TreeID
 	}
 )
 
@@ -66,48 +74,87 @@ var (
 )
 
 // TreeID returns the ID of a tree given a proto.
-func TreeID(msg TreeIDGetter) ID {
+func TreeID(msg TreeIDGetter) core.TreeID {
 	if msg == nil {
 		return 0
 	}
-	treeID := msg.GetTreeID()
+	treeID := msg.GetTreeId()
 	if treeID == nil {
 		return 0
 	}
-	return ID(treeID.TreeID)
+	return core.TreeID(treeID.TreeId)
 }
 
 // New returns a service given a server state.
-func New(services []RegisterServiceCallback, idToState IDToState) *TreeServer {
+func New(services []RegisterServiceCallback, urlToState URLToState) *TreeServer {
 	return &TreeServer{
-		services:  services,
-		idToState: idToState,
+		services:   services,
+		urlToState: urlToState,
 	}
 }
 
-func (s *TreeServer) stateServer(id ID) *stateServer {
-	if server, ok := s.idToServer.Load(id); ok {
-		return server.(*stateServer)
+func (s *TreeServer) stateServer(id core.TreeID) (*stateServer, bool) {
+	serverWithState, ok := s.idToServer.Load(id)
+	if !ok {
+		return nil, false
 	}
-	state := s.idToState.State(id)
-	server := newStateServer(state)
-	s.idToServer.Store(id, server)
-	return server
+	return serverWithState.(*stateServer), true
+}
+
+func idErr(id core.TreeID) error {
+	return errors.Errorf("ID %v cannot be found", id)
 }
 
 // State returns the current state of the server.
-func (s *TreeServer) State(id ID) *State {
-	return s.stateServer(id).state.state()
+func (s *TreeServer) State(id core.TreeID) (*State, error) {
+	serverWithState, ok := s.stateServer(id)
+	if !ok {
+		return nil, idErr(id)
+	}
+	return serverWithState.state.state(), nil
+}
+
+// GetTreeID returns a tree ID from a URL.
+func (s *TreeServer) GetTreeID(ctx context.Context, req *pb.GetTreeIDRequest) (*pb.GetTreeIDReply, error) {
+	url, err := url.Parse(req.Url)
+	if err != nil {
+		return nil, errors.Errorf("cannot parse URL %q: %v", req.Url, err)
+	}
+	state, err := s.urlToState.ToState(url)
+	if err != nil {
+		return nil, fmt.Errorf("cannot get a tree ID for URL %q: %w", req.Url, err)
+	}
+	resp := &pb.GetTreeIDReply{
+		TreeId: &pb.TreeID{
+			TreeId: int64(state.TreeID()),
+		},
+		Version: version.Version,
+	}
+	serverWithState, ok := s.stateServer(state.TreeID())
+	if ok {
+		return resp, nil
+	}
+	serverWithState = newStateServer(state)
+	s.idToServer.Store(state.TreeID(), serverWithState)
+	return resp, nil
 }
 
 // GetNodeStruct browses the structure of the graph.
 func (s *TreeServer) GetNodeStruct(ctx context.Context, req *pb.NodeStructRequest) (*pb.NodeStructReply, error) {
-	return s.stateServer(TreeID(req)).getNodeStruct(ctx, req)
+	serverWithState, ok := s.stateServer(TreeID(req))
+	if !ok {
+		return nil, idErr(TreeID(req))
+	}
+	return serverWithState.getNodeStruct(ctx, req)
 }
 
 // GetNodeData requests data from nodes in the graph.
 func (s *TreeServer) GetNodeData(ctx context.Context, req *pb.NodeDataRequest) (*pb.NodeDataReply, error) {
-	return s.stateServer(TreeID(req)).getNodeData(ctx, req)
+	serverWithState, ok := s.stateServer(TreeID(req))
+	if !ok {
+		return nil, idErr(TreeID(req))
+	}
+	return serverWithState.getNodeData(ctx, req)
 }
 
 // Dispatch events using the SendEvents entry point.
@@ -139,27 +186,47 @@ func (s *TreeServer) Dispatch(path *core.Path, msg proto.Message) error {
 
 // SendEvents request data from nodes in the graph.
 func (s *TreeServer) SendEvents(ctx context.Context, req *pb.SendEventsRequest) (*pb.SendEventsReply, error) {
-	return s.stateServer(TreeID(req)).sendEvents(ctx, req)
+	serverWithState, ok := s.stateServer(TreeID(req))
+	if !ok {
+		return nil, idErr(TreeID(req))
+	}
+	return serverWithState.sendEvents(ctx, req)
 }
 
 // StreamEvents using a continuous gRPC stream for the given path.
 func (s *TreeServer) StreamEvents(req *pb.StreamEventsRequest, server pbgrpc.Tree_StreamEventsServer) error {
-	return s.stateServer(TreeID(req)).streamEvents(req, server)
+	serverWithState, ok := s.stateServer(TreeID(req))
+	if !ok {
+		return idErr(TreeID(req))
+	}
+	return serverWithState.streamEvents(req, server)
 }
 
 // ActivePaths streams active paths when the list is modified.
 func (s *TreeServer) ActivePaths(req *pb.ActivePathsRequest, srv pbgrpc.Tree_ActivePathsServer) error {
-	return s.stateServer(TreeID(req)).activePaths(req, srv)
+	serverWithState, ok := s.stateServer(TreeID(req))
+	if !ok {
+		return idErr(TreeID(req))
+	}
+	return serverWithState.activePaths(req, srv)
 }
 
 // ResetState resets the state of the server.
 func (s *TreeServer) ResetState(ctx context.Context, req *pb.ResetStateRequest) (*pb.ResetStateReply, error) {
-	return s.stateServer(TreeID(req)).resetState(ctx, req)
+	serverWithState, ok := s.stateServer(TreeID(req))
+	if !ok {
+		return nil, idErr(TreeID(req))
+	}
+	return serverWithState.resetState(ctx, req)
 }
 
 // Delete a node in the tree.
 func (s *TreeServer) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.DeleteReply, error) {
-	return s.stateServer(TreeID(req)).deletePath(ctx, req)
+	serverWithState, ok := s.stateServer(TreeID(req))
+	if !ok {
+		return nil, idErr(TreeID(req))
+	}
+	return serverWithState.deletePath(ctx, req)
 }
 
 // Desc returns a description of the service.

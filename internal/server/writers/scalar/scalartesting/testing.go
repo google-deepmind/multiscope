@@ -23,7 +23,6 @@ import (
 	"multiscope/internal/mime"
 	"multiscope/internal/server/writers/scalar"
 	plotpb "multiscope/protos/plot_go_proto"
-	pbgrpc "multiscope/protos/tree_go_proto"
 
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/encoding/prototext"
@@ -67,7 +66,7 @@ func buildWant() *plotpb.ScalarsPlot {
 }
 
 // CheckScalar01 checks the data that can be read from the scalar01 node.
-func CheckScalar01(clt pbgrpc.TreeClient, path []string) error {
+func CheckScalar01(clt client.Client, path []string) error {
 	ctx := context.Background()
 	// Get the nodes and check their types.
 	nodes, err := client.PathToNodes(ctx, clt, path)

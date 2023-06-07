@@ -39,17 +39,14 @@ func writeAndCheckScalarTextWriters(clt *remote.Client, prefix remote.Path, scal
 		if err := textWriter.Write(texttesting.Text01Data[i]); err != nil {
 			return err
 		}
-		if err := texttesting.CheckText01(clt.TreeClient(), textWriter.Path(), i); err != nil {
+		if err := texttesting.CheckText01(clt, textWriter.Path(), i); err != nil {
 			return err
 		}
 		if err := scalarWriter.WriteFloat64(data); err != nil {
 			return err
 		}
 	}
-	if err := scalartesting.CheckScalar01(clt.TreeClient(), scalarWriter.Path()); err != nil {
-		return err
-	}
-	return nil
+	return scalartesting.CheckScalar01(clt, scalarWriter.Path())
 }
 
 func TestScalarTextWritersWithGroup(t *testing.T) {

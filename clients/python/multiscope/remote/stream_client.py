@@ -22,24 +22,20 @@ import grpc
 
 from multiscope.protos import tree_pb2 as pb
 from multiscope.protos import tree_pb2_grpc as pb_grpc
+from multiscope.remote import active_paths
+from multiscope.remote import control
+from multiscope.remote.events import events
 
-_stub: Optional[pb_grpc.TreeStub] = None
-_reset_epoch: int = 0
-_mu = threading.Lock()
-
-channel: Optional[grpc.Channel] = None
+_channel: Optional[grpc.Channel] = None
 
 
-def InitializeStub(url: Text) -> None:
-  """Initializes the connection to the multiscope server."""
-  global _stub
-  if _stub is not None:
+def InitGlobalConnection(grpc_url: Text) -> grpc.Channel:
+  global _channel
+  if _channel is not None:
     raise AssertionError("GRPC stub already initialized")
-
-  global channel
   creds = grpc.local_channel_credentials(grpc.LocalConnectionType.LOCAL_TCP)
-  channel = grpc.secure_channel(
-      url,
+  _channel = grpc.secure_channel(
+      grpc_url,
       credentials=creds,
       # Remove all grpc limits on max message size to support writing very
       # large messages (eg the mujoco scene init message).
@@ -51,47 +47,66 @@ def InitializeStub(url: Text) -> None:
           ("grpc.max_receive_message_length", -1),
       ],
   )
-  _stub = pb_grpc.TreeStub(channel)
+  return _channel
 
 
-def TryConnecting(timeout_secs: int):
-  _stub.GetNodeData(
-      pb.NodeDataRequest(reqs=[]), wait_for_ready=True, timeout=timeout_secs)
+class Client:
+  """Client to the Multiscope server.
+  """
+
+  def __init__(self, timeout_secs):
+    self._tree_client = pb_grpc.TreeStub(_channel)
+    resp = self._tree_client.GetTreeID(
+        pb.GetTreeIDRequest(), wait_for_ready=True, timeout=timeout_secs)
+    self._tree_id = resp.tree_id
+    self._reset_epoch: int = 0
+    self._mu = threading.Lock()
+    # Listen to events from the server.
+    self._event_processor = events.EventProcessor(self)
+    self._event_processor.run()
+    self._active_paths = active_paths.ActivePath(self)
+    self._active_paths.run()
+
+  def Channel(self):
+    return _channel
+
+  def TreeID(self):
+    return self._tree_id
+
+  def TreeClient(self):
+    return self._tree_client
+
+  def ResetEpoch(self) -> int:
+    """Returns the number of times ResetState has been called."""
+    with self._mu:
+      return self._reset_epoch
+
+  def ActivePaths(self, *args, **kwargs):
+    return self._active_paths
+
+  def ResetState(self, *args, **kwargs):
+    self._reset_epoch
+    with self._mu:
+      res = self._tree_client.ResetState(*args, **kwargs)
+      self._reset_epoch += 1
+      return res
+
+  def Events(self):
+    return self._event_processor
+
+
+_client: Optional[Client] = None
 
 
 def Initialized() -> bool:
-  return _stub is not None
+  return _client is not None
 
 
-def ResetEpoch() -> int:
-  """Returns the number of times ResetState has been called."""
-  with _mu:
-    return _reset_epoch
+def SetGlobalClient(client: Client):
+  global _client
+  _client = client
 
 
-def GetNodeStruct(*args, **kwargs):
-  return _stub.GetNodeStruct(*args, **kwargs)
-
-
-def GetNodeData(*args, **kwargs):
-  return _stub.GetNodeData(*args, **kwargs)
-
-
-def StreamEvents(*args, **kwargs):
-  return _stub.StreamEvents(*args, **kwargs)
-
-
-def SendEvents(*args, **kwargs):
-  return _stub.SendEvents(*args, **kwargs)
-
-
-def ActivePaths(*args, **kwargs):
-  return _stub.ActivePaths(*args, **kwargs)
-
-
-def ResetState(*args, **kwargs):
-  global _reset_epoch
-  with _mu:
-    res = _stub.ResetState(*args, **kwargs)
-    _reset_epoch += 1
-    return res
+def GlobalClient():
+  """Return the global client."""
+  return _client
