@@ -14,6 +14,11 @@ class TreeStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.GetTreeID = channel.unary_unary(
+                '/multiscope.Tree/GetTreeID',
+                request_serializer=multiscope_dot_protos_dot_tree__pb2.GetTreeIDRequest.SerializeToString,
+                response_deserializer=multiscope_dot_protos_dot_tree__pb2.GetTreeIDReply.FromString,
+                )
         self.GetNodeStruct = channel.unary_unary(
                 '/multiscope.Tree/GetNodeStruct',
                 request_serializer=multiscope_dot_protos_dot_tree__pb2.NodeStructRequest.SerializeToString,
@@ -53,6 +58,16 @@ class TreeStub(object):
 
 class TreeServicer(object):
     """Missing associated documentation comment in .proto file."""
+
+    def GetTreeID(self, request, context):
+        """Get a tree ID. It is up to the server to decide if this is a
+        new tree or if the tree is shared amongst other clients.
+
+        The returned TreeID needs to be used for all subsequent request.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def GetNodeStruct(self, request, context):
         """Browse the structure of the graph.
@@ -108,6 +123,11 @@ class TreeServicer(object):
 
 def add_TreeServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'GetTreeID': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTreeID,
+                    request_deserializer=multiscope_dot_protos_dot_tree__pb2.GetTreeIDRequest.FromString,
+                    response_serializer=multiscope_dot_protos_dot_tree__pb2.GetTreeIDReply.SerializeToString,
+            ),
             'GetNodeStruct': grpc.unary_unary_rpc_method_handler(
                     servicer.GetNodeStruct,
                     request_deserializer=multiscope_dot_protos_dot_tree__pb2.NodeStructRequest.FromString,
@@ -152,6 +172,23 @@ def add_TreeServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class Tree(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def GetTreeID(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/multiscope.Tree/GetTreeID',
+            multiscope_dot_protos_dot_tree__pb2.GetTreeIDRequest.SerializeToString,
+            multiscope_dot_protos_dot_tree__pb2.GetTreeIDReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetNodeStruct(request,

@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 from multiscope.protos import tree_pb2 as multiscope_dot_protos_dot_tree__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1emultiscope/protos/tensor.proto\x12\x12multiscope.tensors\x1a\x1cmultiscope/protos/tree.proto\"P\n\x06Writer\x12\"\n\x06treeID\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"V\n\x05Shape\x12*\n\x03\x64im\x18\x02 \x03(\x0b\x32\x1d.multiscope.tensors.Shape.Dim\x1a!\n\x03\x44im\x12\x0c\n\x04size\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\"t\n\x06Tensor\x12+\n\x05\x64type\x18\x01 \x01(\x0e\x32\x1c.multiscope.tensors.DataType\x12(\n\x05shape\x18\x02 \x01(\x0b\x32\x19.multiscope.tensors.Shape\x12\x13\n\x07\x63ontent\x18\x04 \x01(\x0c\x42\x02\x08\x01\"Z\n\x10NewWriterRequest\x12\"\n\x06treeID\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"o\n\x11NewWriterResponse\x12*\n\x06writer\x18\x01 \x01(\x0b\x32\x1a.multiscope.tensors.Writer\x12.\n\x10\x64\x65\x66\x61ultPanelPath\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"f\n\x0cWriteRequest\x12*\n\x06writer\x18\x01 \x01(\x0b\x32\x1a.multiscope.tensors.Writer\x12*\n\x06tensor\x18\x02 \x01(\x0b\x32\x1a.multiscope.tensors.Tensor\"\x0f\n\rWriteResponse\"@\n\x12ResetWriterRequest\x12*\n\x06writer\x18\x01 \x01(\x0b\x32\x1a.multiscope.tensors.Writer\"\x15\n\x13ResetWriterResponse*\xac\x01\n\x08\x44\x61taType\x12\x0e\n\nDT_INVALID\x10\x00\x12\x0e\n\nDT_FLOAT32\x10\x01\x12\x0e\n\nDT_FLOAT64\x10\x02\x12\x0c\n\x08\x44T_UINT8\x10\x04\x12\r\n\tDT_UINT16\x10\x11\x12\r\n\tDT_UINT32\x10\x16\x12\r\n\tDT_UINT64\x10\x17\x12\x0b\n\x07\x44T_INT8\x10\x06\x12\x0c\n\x08\x44T_INT16\x10\x05\x12\x0c\n\x08\x44T_INT32\x10\x03\x12\x0c\n\x08\x44T_INT64\x10\t2\x97\x02\n\x07Tensors\x12Z\n\tNewWriter\x12$.multiscope.tensors.NewWriterRequest\x1a%.multiscope.tensors.NewWriterResponse\"\x00\x12`\n\x0bResetWriter\x12&.multiscope.tensors.ResetWriterRequest\x1a\'.multiscope.tensors.ResetWriterResponse\"\x00\x12N\n\x05Write\x12 .multiscope.tensors.WriteRequest\x1a!.multiscope.tensors.WriteResponse\"\x00\x42#Z!multiscope/protos/tensor_go_protob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1emultiscope/protos/tensor.proto\x12\x12multiscope.tensors\x1a\x1cmultiscope/protos/tree.proto\"Q\n\x06Writer\x12#\n\x07tree_id\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"V\n\x05Shape\x12*\n\x03\x64im\x18\x02 \x03(\x0b\x32\x1d.multiscope.tensors.Shape.Dim\x1a!\n\x03\x44im\x12\x0c\n\x04size\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\"t\n\x06Tensor\x12+\n\x05\x64type\x18\x01 \x01(\x0e\x32\x1c.multiscope.tensors.DataType\x12(\n\x05shape\x18\x02 \x01(\x0b\x32\x19.multiscope.tensors.Shape\x12\x13\n\x07\x63ontent\x18\x04 \x01(\x0c\x42\x02\x08\x01\"[\n\x10NewWriterRequest\x12#\n\x07tree_id\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"o\n\x11NewWriterResponse\x12*\n\x06writer\x18\x01 \x01(\x0b\x32\x1a.multiscope.tensors.Writer\x12.\n\x10\x64\x65\x66\x61ultPanelPath\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"f\n\x0cWriteRequest\x12*\n\x06writer\x18\x01 \x01(\x0b\x32\x1a.multiscope.tensors.Writer\x12*\n\x06tensor\x18\x02 \x01(\x0b\x32\x1a.multiscope.tensors.Tensor\"\x0f\n\rWriteResponse\"@\n\x12ResetWriterRequest\x12*\n\x06writer\x18\x01 \x01(\x0b\x32\x1a.multiscope.tensors.Writer\"\x15\n\x13ResetWriterResponse*\xac\x01\n\x08\x44\x61taType\x12\x0e\n\nDT_INVALID\x10\x00\x12\x0e\n\nDT_FLOAT32\x10\x01\x12\x0e\n\nDT_FLOAT64\x10\x02\x12\x0c\n\x08\x44T_UINT8\x10\x04\x12\r\n\tDT_UINT16\x10\x11\x12\r\n\tDT_UINT32\x10\x16\x12\r\n\tDT_UINT64\x10\x17\x12\x0b\n\x07\x44T_INT8\x10\x06\x12\x0c\n\x08\x44T_INT16\x10\x05\x12\x0c\n\x08\x44T_INT32\x10\x03\x12\x0c\n\x08\x44T_INT64\x10\t2\x97\x02\n\x07Tensors\x12Z\n\tNewWriter\x12$.multiscope.tensors.NewWriterRequest\x1a%.multiscope.tensors.NewWriterResponse\"\x00\x12`\n\x0bResetWriter\x12&.multiscope.tensors.ResetWriterRequest\x1a\'.multiscope.tensors.ResetWriterResponse\"\x00\x12N\n\x05Write\x12 .multiscope.tensors.WriteRequest\x1a!.multiscope.tensors.WriteResponse\"\x00\x42#Z!multiscope/protos/tensor_go_protob\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'multiscope.protos.tensor_pb2', globals())
@@ -24,28 +24,28 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._serialized_options = b'Z!multiscope/protos/tensor_go_proto'
   _TENSOR.fields_by_name['content']._options = None
   _TENSOR.fields_by_name['content']._serialized_options = b'\010\001'
-  _DATATYPE._serialized_start=788
-  _DATATYPE._serialized_end=960
+  _DATATYPE._serialized_start=790
+  _DATATYPE._serialized_end=962
   _WRITER._serialized_start=84
-  _WRITER._serialized_end=164
-  _SHAPE._serialized_start=166
-  _SHAPE._serialized_end=252
-  _SHAPE_DIM._serialized_start=219
-  _SHAPE_DIM._serialized_end=252
-  _TENSOR._serialized_start=254
-  _TENSOR._serialized_end=370
-  _NEWWRITERREQUEST._serialized_start=372
-  _NEWWRITERREQUEST._serialized_end=462
-  _NEWWRITERRESPONSE._serialized_start=464
-  _NEWWRITERRESPONSE._serialized_end=575
-  _WRITEREQUEST._serialized_start=577
-  _WRITEREQUEST._serialized_end=679
-  _WRITERESPONSE._serialized_start=681
-  _WRITERESPONSE._serialized_end=696
-  _RESETWRITERREQUEST._serialized_start=698
-  _RESETWRITERREQUEST._serialized_end=762
-  _RESETWRITERRESPONSE._serialized_start=764
-  _RESETWRITERRESPONSE._serialized_end=785
-  _TENSORS._serialized_start=963
-  _TENSORS._serialized_end=1242
+  _WRITER._serialized_end=165
+  _SHAPE._serialized_start=167
+  _SHAPE._serialized_end=253
+  _SHAPE_DIM._serialized_start=220
+  _SHAPE_DIM._serialized_end=253
+  _TENSOR._serialized_start=255
+  _TENSOR._serialized_end=371
+  _NEWWRITERREQUEST._serialized_start=373
+  _NEWWRITERREQUEST._serialized_end=464
+  _NEWWRITERRESPONSE._serialized_start=466
+  _NEWWRITERRESPONSE._serialized_end=577
+  _WRITEREQUEST._serialized_start=579
+  _WRITEREQUEST._serialized_end=681
+  _WRITERESPONSE._serialized_start=683
+  _WRITERESPONSE._serialized_end=698
+  _RESETWRITERREQUEST._serialized_start=700
+  _RESETWRITERREQUEST._serialized_end=764
+  _RESETWRITERRESPONSE._serialized_start=766
+  _RESETWRITERRESPONSE._serialized_end=787
+  _TENSORS._serialized_start=965
+  _TENSORS._serialized_end=1244
 # @@protoc_insertion_point(module_scope)

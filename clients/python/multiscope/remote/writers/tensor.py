@@ -14,30 +14,35 @@
 """Scope is a module that provides visualization of data in real-time."""
 from typing import Any, Optional, Tuple, Type
 
-import numpy as np
-
 from multiscope.protos import tensor_pb2
 from multiscope.protos import tensor_pb2_grpc
-
 from multiscope.remote import active_paths
 from multiscope.remote import control
 from multiscope.remote import group
 from multiscope.remote import stream_client
 from multiscope.remote.writers import base
+import numpy as np
 
 
 class TensorWriter(base.Writer):
   """TensorWriter displays a vega chart on the Multiscope page."""
 
   @control.init
-  def __init__(self, name: str, parent: Optional[group.ParentNode] = None):
-
-    self._client = tensor_pb2_grpc.TensorsStub(stream_client.channel)
+  def __init__(
+      self,
+      py_client: stream_client.Client,
+      name: str,
+      parent: Optional[group.ParentNode] = None,
+  ):
+    self._py_client = py_client
+    self._client = tensor_pb2_grpc.TensorsStub(self._py_client.Channel())
     path = group.join_path_pb(parent, name)
-    req = tensor_pb2.NewWriterRequest(path=path)
+    req = tensor_pb2.NewWriterRequest(
+        tree_id=self._py_client.TreeID(), path=path)
     self.writer = self._client.NewWriter(req).writer
     super().__init__(path=tuple(self.writer.path.path))
-    active_paths.register_callback(self.path, self._set_should_write)
+    self._py_client.ActivePaths().register_callback(self.path,
+                                                    self._set_should_write)
 
     # TODO(b/251324180): re-enable once fixed.
     # self._set_display()
@@ -45,8 +50,7 @@ class TensorWriter(base.Writer):
   @control.method
   def write(self, tensor: np.ndarray):
     """Write a tensor."""
-    req = tensor_pb2.WriteRequest()
-    req.writer.path.path.extend(self.path)
+    req = tensor_pb2.WriteRequest(writer=self.writer)
     tensor, dtype = _normalize_tensor_dtype(tensor)
     req.tensor.dtype = dtype
     _add_tensor_shape(req.tensor, tensor.shape)

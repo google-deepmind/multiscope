@@ -61,10 +61,9 @@ def init(init_func):
       "Failed to instantiate Multiscope writer, calls to this writer will be " +
       "ignored")
   @functools.wraps(init_func)
-  def wrapper(self, *args, **kwargs):
+  def wrapper(self, py_client, *args, **kwargs):
     """Mark writer as disabled if exception thrown."""
     self.enabled = False
-    self._reset_epoch = (stream_client.ResetEpoch())  # pylint: disable=protected-access
     # Early return if all multiscope calls are disabled.
     if control.disabled():
       return
@@ -73,8 +72,9 @@ def init(init_func):
       raise RuntimeError(
           "Tried to initialize multiscope writer before calling " +
           "multiscope.start_server.")
-    init_func(self, *args, **kwargs)
+    init_func(self, py_client, *args, **kwargs)
     self.enabled = True
+    self._reset_epoch = py_client.ResetEpoch()  # pylint: disable=protected-access
 
   return wrapper
 
@@ -92,7 +92,7 @@ def method(method_func):
     """Handle exceptions."""
     if not self.enabled:
       return None
-    if (self._reset_epoch != stream_client.ResetEpoch()):  # pylint: disable=protected-access
+    if (self._reset_epoch != self._py_client.ResetEpoch()):  # pylint: disable=protected-access
       raise RuntimeError(
           "Cannot use a writer that was instantiated before a call to " +
           "multiscope.reset()")

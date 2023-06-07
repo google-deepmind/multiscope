@@ -20,7 +20,6 @@ import multiscope
 
 from multiscope.protos import tree_pb2
 from multiscope.remote import stream_client
-from multiscope.remote.writers import tensor
 
 
 def setUpModule():
@@ -33,7 +32,7 @@ class TestTensorWriter(absltest.TestCase):
 
   def testWriter(self):
     """Creates a Tensor writer and then writes to it."""
-    w = tensor.TensorWriter("writer")
+    w = multiscope.TensorWriter("writer")
     tensor_data = np.arange(0, 5, 1, dtype=np.int16)
     pb_path = tree_pb2.NodePath(path=w.path + ("tensor",))
     data_req = tree_pb2.DataRequest(path=pb_path, lastTick=0)
@@ -49,7 +48,7 @@ class TestTensorWriter(absltest.TestCase):
 
   def testImgWriter(self):
     """Writes a tensor that is meant to be an image."""
-    w = tensor.TensorWriter("img_writer")
+    w = multiscope.TensorWriter("img_writer")
     shape = (12, 7, 3)
     total_size = np.prod(shape)
     assert total_size < np.iinfo(np.uint8).max

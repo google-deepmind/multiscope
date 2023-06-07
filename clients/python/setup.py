@@ -25,7 +25,7 @@ setup(
     version="0.1.0",
     description="A Python client to Multiscope.",
     author="DeepMind",
-    license="BSD-3-Clause License",
+    license="Apache License",
     keywords="analysis visualization python reinforcement-learning machine learning",
     packages=find_packages(exclude=["examples"]),
     python_requires=">=3.7, <4",

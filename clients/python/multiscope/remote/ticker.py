@@ -12,16 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """A Multiscope clock/ticker for synchronizing writes."""
-from typing import Any, Callable, List, Optional
-
 import datetime
+import threading
 import time
 import timeit
-import threading
+from typing import Any, Callable, List, Optional
 from absl import logging
-
 from google.protobuf import duration_pb2
-
 from multiscope.protos import ticker_pb2
 from multiscope.protos import ticker_pb2_grpc
 from multiscope.protos import tree_pb2 as pb
@@ -35,33 +32,39 @@ TIMER_AVERAGE_STEPSIZE = 0.01
 _TickerAction = ticker_pb2.TickerAction
 
 
-# TODO: this used to be called Clock. Rename everywhere.
 class Ticker(group.ParentNode):
   """An object that can perform synchronization.
 
-    A `Ticker` synchronizes the calls of all writers in its thread. It can
+  A `Ticker` synchronizes the calls of all writers in its thread. It can
 
-    * ensure that all writes happen with a given period, and
-    * pause the execution of the thread it is in.
+  * ensure that all writes happen with a given period, and
+  * pause the execution of the thread it is in.
 
-    The ticker can be controlled either through its methods or through its panel
-    on the multiscope web interface.
+  The ticker can be controlled either through its methods or through its panel
+  on the multiscope web interface.
 
-    ## Thread-safety
+  ## Thread-safety
 
-    Since we can control the ticker from the UI (or locally) some of the
-    methods and properties here are thread-safe:
+  Since we can control the ticker from the UI (or locally) some of the
+  methods and properties here are thread-safe:
 
-    * period (reading and writing),
-    * pause,
-    * run,
-    * step.
-    """
+  * period (reading and writing),
+  * pause,
+  * run,
+  * step.
+  """
 
   @control.init
-  def __init__(self, name: str, parent: Optional[group.ParentNode] = None):
+  def __init__(
+      self,
+      py_client: stream_client.Client,
+      name: str,
+      parent: Optional[group.ParentNode] = None,
+  ):
+    self._py_client = py_client
+
     self._tick_num: int = 0
-    # listeners are called on each tick.
+    # Listeners are called on each tick.
     self._listeners: List[Callable[[], None]] = []
 
     # Use timers to ensure the correct period and collect stats.
@@ -70,14 +73,16 @@ class Ticker(group.ParentNode):
     self._callback_timer = Timer(TIMER_AVERAGE_STEPSIZE)
 
     # Make the connection to the multiscope server.
-    self._client = ticker_pb2_grpc.TickersStub(stream_client.channel)
+    self._client = ticker_pb2_grpc.TickersStub(self._py_client.Channel())
     path = group.join_path_pb(parent, name)
-    req = ticker_pb2.NewTickerRequest(path=path)
+    req = ticker_pb2.NewTickerRequest(
+        tree_id=self._py_client.TreeID(), path=path)
     self._ticker = self._client.NewTicker(req).ticker
     super().__init__(path=tuple(self._ticker.path.path))
 
     # Set up event management.
-    events.register_ticker_callback(cb=self._process_event, path=self.path)
+    self._py_client.Events().register_ticker_callback(
+        cb=self._process_event, path=self.path)
     # Notify listeners when an event happens. Primarily used for testing.
     self._event_listeners: List[Callable[[_TickerAction], Any]] = []
 
@@ -94,7 +99,6 @@ class Ticker(group.ParentNode):
 
   def _call_listeners(self) -> None:
     """Calls all listeners."""
-    # TODO: collect and surface errors from these calls in a good way.
     self._callback_timer.start()
     for fn in self._listeners:
       fn()
@@ -214,11 +218,13 @@ class Ticker(group.ParentNode):
 
   @control.method
   def step(self):
-    """Uses the ticker into step-by-step mode. Thread-safe.
+    """Uses the ticker into step-by-step mode.
 
-        If the ticker is currently running, this will pause it. If it is
-        already paused, this will do exactly one stop then pause again.
-        """
+    Thread-safe.
+
+    If the ticker is currently running, this will pause it. If it is
+    already paused, this will do exactly one stop then pause again.
+    """
     logging.debug("CMD: step.")
     with self._pause_lock:
       self._pause_next_step = True

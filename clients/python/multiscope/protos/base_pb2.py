@@ -15,7 +15,7 @@ from google.protobuf import any_pb2 as google_dot_protobuf_dot_any__pb2
 from multiscope.protos import tree_pb2 as multiscope_dot_protos_dot_tree__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cmultiscope/protos/base.proto\x12\x0fmultiscope.base\x1a\x19google/protobuf/any.proto\x1a\x1cmultiscope/protos/tree.proto\"+\n\x05Group\x12\"\n\x04path\x18\x01 \x01(\x0b\x32\x14.multiscope.NodePath\"Y\n\x0fNewGroupRequest\x12\"\n\x06treeID\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"7\n\x10NewGroupResponse\x12#\n\x03grp\x18\x01 \x01(\x0b\x32\x16.multiscope.base.Group\"U\n\x0bProtoWriter\x12\"\n\x06treeID\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"\x84\x01\n\x15NewProtoWriterRequest\x12\"\n\x06treeID\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\x12#\n\x05proto\x18\x03 \x01(\x0b\x32\x14.google.protobuf.Any\"F\n\x16NewProtoWriterResponse\x12,\n\x06writer\x18\x01 \x01(\x0b\x32\x1c.multiscope.base.ProtoWriter\"f\n\x11WriteProtoRequest\x12,\n\x06writer\x18\x01 \x01(\x0b\x32\x1c.multiscope.base.ProtoWriter\x12#\n\x05proto\x18\x02 \x01(\x0b\x32\x14.google.protobuf.Any\"\x14\n\x12WriteProtoResponse\"S\n\tRawWriter\x12\"\n\x06treeID\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"k\n\x13NewRawWriterRequest\x12\"\n\x06treeID\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\x12\x0c\n\x04mime\x18\x03 \x01(\t\"B\n\x14NewRawWriterResponse\x12*\n\x06writer\x18\x01 \x01(\x0b\x32\x1a.multiscope.base.RawWriter\"K\n\x0fWriteRawRequest\x12*\n\x06writer\x18\x02 \x01(\x0b\x32\x1a.multiscope.base.RawWriter\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"\x12\n\x10WriteRawResponse2\xd0\x03\n\x0b\x42\x61seWriters\x12Q\n\x08NewGroup\x12 .multiscope.base.NewGroupRequest\x1a!.multiscope.base.NewGroupResponse\"\x00\x12\x63\n\x0eNewProtoWriter\x12&.multiscope.base.NewProtoWriterRequest\x1a\'.multiscope.base.NewProtoWriterResponse\"\x00\x12W\n\nWriteProto\x12\".multiscope.base.WriteProtoRequest\x1a#.multiscope.base.WriteProtoResponse\"\x00\x12]\n\x0cNewRawWriter\x12$.multiscope.base.NewRawWriterRequest\x1a%.multiscope.base.NewRawWriterResponse\"\x00\x12Q\n\x08WriteRaw\x12 .multiscope.base.WriteRawRequest\x1a!.multiscope.base.WriteRawResponse\"\x00\x42!Z\x1fmultiscope/protos/base_go_protob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cmultiscope/protos/base.proto\x12\x0fmultiscope.base\x1a\x19google/protobuf/any.proto\x1a\x1cmultiscope/protos/tree.proto\"P\n\x05Group\x12#\n\x07tree_id\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"Z\n\x0fNewGroupRequest\x12#\n\x07tree_id\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"7\n\x10NewGroupResponse\x12#\n\x03grp\x18\x01 \x01(\x0b\x32\x16.multiscope.base.Group\"V\n\x0bProtoWriter\x12#\n\x07tree_id\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"\x85\x01\n\x15NewProtoWriterRequest\x12#\n\x07tree_id\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\x12#\n\x05proto\x18\x03 \x01(\x0b\x32\x14.google.protobuf.Any\"F\n\x16NewProtoWriterResponse\x12,\n\x06writer\x18\x01 \x01(\x0b\x32\x1c.multiscope.base.ProtoWriter\"f\n\x11WriteProtoRequest\x12,\n\x06writer\x18\x01 \x01(\x0b\x32\x1c.multiscope.base.ProtoWriter\x12#\n\x05proto\x18\x02 \x01(\x0b\x32\x14.google.protobuf.Any\"\x14\n\x12WriteProtoResponse\"T\n\tRawWriter\x12#\n\x07tree_id\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\"l\n\x13NewRawWriterRequest\x12#\n\x07tree_id\x18\x01 \x01(\x0b\x32\x12.multiscope.TreeID\x12\"\n\x04path\x18\x02 \x01(\x0b\x32\x14.multiscope.NodePath\x12\x0c\n\x04mime\x18\x03 \x01(\t\"B\n\x14NewRawWriterResponse\x12*\n\x06writer\x18\x01 \x01(\x0b\x32\x1a.multiscope.base.RawWriter\"K\n\x0fWriteRawRequest\x12*\n\x06writer\x18\x02 \x01(\x0b\x32\x1a.multiscope.base.RawWriter\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"\x12\n\x10WriteRawResponse2\xd0\x03\n\x0b\x42\x61seWriters\x12Q\n\x08NewGroup\x12 .multiscope.base.NewGroupRequest\x1a!.multiscope.base.NewGroupResponse\"\x00\x12\x63\n\x0eNewProtoWriter\x12&.multiscope.base.NewProtoWriterRequest\x1a\'.multiscope.base.NewProtoWriterResponse\"\x00\x12W\n\nWriteProto\x12\".multiscope.base.WriteProtoRequest\x1a#.multiscope.base.WriteProtoResponse\"\x00\x12]\n\x0cNewRawWriter\x12$.multiscope.base.NewRawWriterRequest\x1a%.multiscope.base.NewRawWriterResponse\"\x00\x12Q\n\x08WriteRaw\x12 .multiscope.base.WriteRawRequest\x1a!.multiscope.base.WriteRawResponse\"\x00\x42!Z\x1fmultiscope/protos/base_go_protob\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'multiscope.protos.base_pb2', globals())
@@ -24,31 +24,31 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z\037multiscope/protos/base_go_proto'
   _GROUP._serialized_start=106
-  _GROUP._serialized_end=149
-  _NEWGROUPREQUEST._serialized_start=151
-  _NEWGROUPREQUEST._serialized_end=240
-  _NEWGROUPRESPONSE._serialized_start=242
-  _NEWGROUPRESPONSE._serialized_end=297
-  _PROTOWRITER._serialized_start=299
-  _PROTOWRITER._serialized_end=384
-  _NEWPROTOWRITERREQUEST._serialized_start=387
-  _NEWPROTOWRITERREQUEST._serialized_end=519
-  _NEWPROTOWRITERRESPONSE._serialized_start=521
-  _NEWPROTOWRITERRESPONSE._serialized_end=591
-  _WRITEPROTOREQUEST._serialized_start=593
-  _WRITEPROTOREQUEST._serialized_end=695
-  _WRITEPROTORESPONSE._serialized_start=697
-  _WRITEPROTORESPONSE._serialized_end=717
-  _RAWWRITER._serialized_start=719
-  _RAWWRITER._serialized_end=802
-  _NEWRAWWRITERREQUEST._serialized_start=804
-  _NEWRAWWRITERREQUEST._serialized_end=911
-  _NEWRAWWRITERRESPONSE._serialized_start=913
-  _NEWRAWWRITERRESPONSE._serialized_end=979
-  _WRITERAWREQUEST._serialized_start=981
-  _WRITERAWREQUEST._serialized_end=1056
-  _WRITERAWRESPONSE._serialized_start=1058
-  _WRITERAWRESPONSE._serialized_end=1076
-  _BASEWRITERS._serialized_start=1079
-  _BASEWRITERS._serialized_end=1543
+  _GROUP._serialized_end=186
+  _NEWGROUPREQUEST._serialized_start=188
+  _NEWGROUPREQUEST._serialized_end=278
+  _NEWGROUPRESPONSE._serialized_start=280
+  _NEWGROUPRESPONSE._serialized_end=335
+  _PROTOWRITER._serialized_start=337
+  _PROTOWRITER._serialized_end=423
+  _NEWPROTOWRITERREQUEST._serialized_start=426
+  _NEWPROTOWRITERREQUEST._serialized_end=559
+  _NEWPROTOWRITERRESPONSE._serialized_start=561
+  _NEWPROTOWRITERRESPONSE._serialized_end=631
+  _WRITEPROTOREQUEST._serialized_start=633
+  _WRITEPROTOREQUEST._serialized_end=735
+  _WRITEPROTORESPONSE._serialized_start=737
+  _WRITEPROTORESPONSE._serialized_end=757
+  _RAWWRITER._serialized_start=759
+  _RAWWRITER._serialized_end=843
+  _NEWRAWWRITERREQUEST._serialized_start=845
+  _NEWRAWWRITERREQUEST._serialized_end=953
+  _NEWRAWWRITERRESPONSE._serialized_start=955
+  _NEWRAWWRITERRESPONSE._serialized_end=1021
+  _WRITERAWREQUEST._serialized_start=1023
+  _WRITERAWREQUEST._serialized_end=1098
+  _WRITERAWRESPONSE._serialized_start=1100
+  _WRITERAWRESPONSE._serialized_end=1118
+  _BASEWRITERS._serialized_start=1121
+  _BASEWRITERS._serialized_end=1585
 # @@protoc_insertion_point(module_scope)
