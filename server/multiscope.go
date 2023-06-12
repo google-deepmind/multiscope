@@ -40,7 +40,7 @@ func toAddr(port int) string {
 
 func main() {
 	flag.Parse()
-	srv := scope.NewServer()
+	srv := scope.NewSingleton()
 	wg := sync.WaitGroup{}
 
 	httpAddr := toAddr(*httpPort)

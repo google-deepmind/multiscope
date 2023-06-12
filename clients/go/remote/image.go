@@ -57,8 +57,12 @@ func NewImageWriter(clt *Client, name string, parent Path) (*ImageWriter, error)
 	if err := clt.Display().DisplayIfDefault(writerPath); err != nil {
 		return nil, err
 	}
+	node, err := NewClientNode(clt, path)
+	if err != nil {
+		return nil, err
+	}
 	w := &ImageWriter{
-		ClientNode: NewClientNode(clt, path),
+		ClientNode: node,
 		clt:        clw,
 		buffer:     &bytes.Buffer{},
 		writer:     writer,

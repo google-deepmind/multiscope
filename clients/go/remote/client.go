@@ -21,6 +21,7 @@ import (
 	"multiscope/internal/grpc/client"
 	"multiscope/internal/server/events"
 	"multiscope/internal/server/scope"
+	"multiscope/internal/server/treeservice"
 	rootpb "multiscope/protos/root_go_proto"
 	rootpbgrpc "multiscope/protos/root_go_proto"
 	pb "multiscope/protos/tree_go_proto"
@@ -37,8 +38,7 @@ import (
 )
 
 // StartServer starts a Multiscope server and returns its URL to connect to it.
-func StartServer(httpAddr string) (string, error) {
-	srv := scope.NewServer()
+func StartServer(srv *treeservice.TreeServer, httpAddr string) (string, error) {
 	wg := sync.WaitGroup{}
 	if err := scope.RunHTTP(srv, &wg, httpAddr); err != nil {
 		return "", err
@@ -60,6 +60,7 @@ type Client struct {
 	display *Display
 	events  *Events
 	active  *Active
+	root    *Group
 }
 
 // Connect to a Multiscope server and returns a Multiscope remote.
@@ -130,6 +131,11 @@ func NewClient(conn grpc.ClientConnInterface, treeID *pb.TreeID) (*Client, error
 		return nil, err
 	}
 	clt.display = newDisplay(clt)
+	rootNode, err := NewClientNode(clt, nil)
+	if err != nil {
+		return nil, err
+	}
+	clt.root = &Group{ClientNode: rootNode}
 	return clt, nil
 }
 

@@ -72,8 +72,8 @@ func (s *singleton) ToState(url *url.URL) (*treeservice.State, error) {
 
 func (s *singleton) Delete(core.TreeID) {}
 
-// NewServer starts a new Multiscope server.
-func NewServer() *treeservice.TreeServer {
+// NewSingleton starts a new Multiscope server where the state is shared across all clients.
+func NewSingleton() *treeservice.TreeServer {
 	state := &singleton{treeID: 1}
 	srv := treeservice.New(writers.All(), state)
 	state.dispatcher = srv

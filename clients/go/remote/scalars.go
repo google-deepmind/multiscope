@@ -51,8 +51,12 @@ func NewScalarWriter(clt *Client, name string, parent Path) (*ScalarWriter, erro
 	if err := clt.Display().DisplayIfDefault(writerPath); err != nil {
 		return nil, err
 	}
+	node, err := NewClientNode(clt, writerPath)
+	if err != nil {
+		return nil, err
+	}
 	return &ScalarWriter{
-		ClientNode: NewClientNode(clt, writerPath),
+		ClientNode: node,
 		clt:        clw,
 		writer:     writer,
 	}, nil

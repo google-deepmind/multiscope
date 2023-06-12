@@ -16,19 +16,25 @@ package remote
 
 import (
 	"context"
+	"fmt"
 
 	pb "multiscope/protos/text_go_proto"
 	pbgrpc "multiscope/protos/text_go_proto"
+	treepb "multiscope/protos/tree_go_proto"
 
 	"github.com/pkg/errors"
 )
 
-// HTMLWriter writes raw text to Multiscope.
-type HTMLWriter struct {
-	*ClientNode
-	clt    pbgrpc.TextClient
-	writer *pb.HTMLWriter
-}
+type (
+	// HTMLWriter writes raw text to Multiscope.
+	HTMLWriter struct {
+		*ClientNode
+		clt    pbgrpc.TextClient
+		writer *pb.HTMLWriter
+
+		callback Callback
+	}
+)
 
 // NewHTMLWriter creates a new writer to write html and css to Multiscope.
 func NewHTMLWriter(clt *Client, name string, parent Path) (*HTMLWriter, error) {
@@ -50,11 +56,24 @@ func NewHTMLWriter(clt *Client, name string, parent Path) (*HTMLWriter, error) {
 	if err := clt.Display().DisplayIfDefault(writerPath); err != nil {
 		return nil, err
 	}
-	return &HTMLWriter{
-		ClientNode: NewClientNode(clt, writerPath),
+	node, err := NewClientNode(clt, writerPath)
+	if err != nil {
+		return nil, err
+	}
+	w := &HTMLWriter{
+		ClientNode: node,
 		clt:        clttw,
 		writer:     writer,
-	}, nil
+	}
+	clt.EventsManager().NewQueueForPath(w.Path(), w.processEvent)
+	return w, nil
+}
+
+func (w *HTMLWriter) processEvent(ev *treepb.Event) error {
+	if w.callback == nil {
+		return nil
+	}
+	return w.callback(ev)
 }
 
 // Write html to the Multiscope display.
@@ -67,6 +86,23 @@ func (w *HTMLWriter) Write(html string) error {
 		return errors.Errorf("cannot write HTML  data: %v", err)
 	}
 	return err
+}
+
+// WriteStringer writes html to the Multiscope display.
+// If the argument implements the Listener interface, then all events
+// coming to the writer are forward to the listener.
+// If a listener was registered before, it is unregistered.
+func (w *HTMLWriter) WriteStringer(html fmt.Stringer) error {
+	if err := w.Write(html.String()); err != nil {
+		return err
+	}
+	callbacker, ok := html.(Callbacker)
+	if ok {
+		w.callback = callbacker.Callback()
+	} else {
+		w.callback = nil
+	}
+	return nil
 }
 
 // WriteCSS css to the Multiscope display.
