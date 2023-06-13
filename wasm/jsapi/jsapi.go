@@ -38,12 +38,12 @@ func (api *api) sendEvent(this js.Value, args []js.Value) any {
 		return nil
 	}
 	if args[1].Type() != js.TypeNumber {
-		api.ui.DisplayErr(errors.Errorf("args[1] has type %q but want type 'string'", args[1].Type()))
+		api.ui.DisplayErr(errors.Errorf("args[1] has type %q but want type 'number'", args[1].Type()))
 		return nil
 	}
 	nodePath, err := pathlib.FromBase64(args[0].String())
 	if err != nil {
-		api.ui.DisplayErr(errors.Errorf("args[1] has type %q but want type 'string'", args[1].Type()))
+		api.ui.DisplayErr(errors.Errorf("cannot decode string %q to nodepath: %v", args[0].Type(), err))
 		return nil
 	}
 	widgetID := args[1].Int()

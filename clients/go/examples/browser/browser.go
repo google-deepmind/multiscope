@@ -76,8 +76,5 @@ func main() {
 	if err := writeDirContent(w, dirname); err != nil {
 		log.Fatal(fmtx.FormatError(err))
 	}
-	if err = w.WriteCSS("a { color: black; }"); err != nil {
-		log.Fatal(fmtx.FormatError(err))
-	}
 	<-make(chan bool)
 }
