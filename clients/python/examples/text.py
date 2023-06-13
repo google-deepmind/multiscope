@@ -16,15 +16,27 @@
 import time
 
 from absl import app
-import multiscope
 from examples import common
+import multiscope
 
 
 def main(argv):
   multiscope.start_server()
-  text = multiscope.TextWriter("Current time")
+  text = multiscope.TextWriter("Current time Raw text")
+  html = multiscope.HTMLWriter("Current time HTML")
+  html.write_css("""
+.fancy {color: red;}
+.superfancy {color: blue;}
+""")
   for _ in common.step():
     text.write(time.strftime("%H:%M:%S %Z on %b %d, %Y"))
+    html.write(
+        '<h1 class="fancy">{time}</h1> on <h1 class="superfancy">{date}</h1>'
+        .format(
+            time=time.strftime("%H:%M:%S %Z"),
+            date=time.strftime("%b %d, %Y"),
+        )
+    )
 
 
 if __name__ == "__main__":
