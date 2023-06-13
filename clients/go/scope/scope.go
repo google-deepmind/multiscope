@@ -22,6 +22,8 @@ import (
 	"multiscope/clients/go/reflect"
 	"multiscope/clients/go/remote"
 	"multiscope/internal/server/events"
+	"multiscope/internal/server/scope"
+	"multiscope/internal/server/treeservice"
 	"multiscope/lib/tensor"
 	treepb "multiscope/protos/tree_go_proto"
 	"time"
@@ -62,14 +64,20 @@ type (
 var scopeClient *remote.Client
 
 // Start starts the Multiscope server. Doesn't take a context for
-// convenience as this is a research-facing debugging library.
+// convenience.
 func Start(httpPort int, local bool) error {
+	srv := scope.NewSingleton()
+	return StartWithServer(srv, httpPort, local)
+}
+
+// StartWithServer starts the http and grpc server given a TreeService.
+func StartWithServer(srv *treeservice.TreeServer, httpPort int, local bool) error {
 	// Start the HTTP server on the specified port.
 	httpAddr := fmt.Sprintf(":%d", httpPort)
 	if local {
 		httpAddr = "localhost" + httpAddr
 	}
-	grpcAddr, err := remote.StartServer(httpAddr)
+	grpcAddr, err := remote.StartServer(srv, httpAddr)
 	if err != nil {
 		return err
 	}
@@ -182,7 +190,7 @@ func Reflect(root remote.Node, name string, obj any) (remote.Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		root = remote.Root(clt)
+		root = clt.Root()
 	}
 	return reflect.On(root, name, obj)
 }

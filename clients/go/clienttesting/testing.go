@@ -32,7 +32,7 @@ import (
 
 // Start a Multiscope gRPC server and returns a client connected to the server.
 func Start() (*remote.Client, error) {
-	srv := scope.NewServer()
+	srv := scope.NewSingleton()
 	wg := sync.WaitGroup{}
 	addr, err := scope.RunGRPC(srv, &wg, "localhost:0")
 	if err != nil {

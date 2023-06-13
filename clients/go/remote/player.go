@@ -50,7 +50,10 @@ func NewPlayer(clt *Client, name string, ignorePause bool, parent Path) (*Player
 	if p.player == nil {
 		return nil, errors.Errorf("server has returned a nil ticker")
 	}
-	p.ClientNode = NewClientNode(clt, toPath(p.player))
+	p.ClientNode, err = NewClientNode(clt, toPath(p.player))
+	if err != nil {
+		return nil, err
+	}
 	if err := clt.Display().DisplayIfDefault(p.Path()); err != nil {
 		return nil, err
 	}

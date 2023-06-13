@@ -16,8 +16,11 @@ package remote
 
 import (
 	"context"
+	pathlib "multiscope/lib/path"
 	pb "multiscope/protos/tree_go_proto"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 // Node is a node in the Multiscope tree.
@@ -34,13 +37,18 @@ type ClientNode struct {
 	client      *Client
 	path        Path
 	shouldWrite bool
+	id          string
 }
 
 // NewClientNode returns a new instance of ClientNode which can be used to implement the Node interface.
-func NewClientNode(client *Client, path Path) *ClientNode {
+func NewClientNode(client *Client, path Path) (*ClientNode, error) {
 	node := &ClientNode{client: client, path: path}
 	client.Active().Register(path, node.activeCallback)
-	return node
+	var err error
+	if node.id, err = pathlib.ToBase64(path.NodePath()); err != nil {
+		return nil, errors.Errorf("cannot encode node path to a proto: %v", err)
+	}
+	return node, nil
 }
 
 func (c *ClientNode) activeCallback(path Path, status bool) {
@@ -64,6 +72,11 @@ func (c *ClientNode) Client() *Client {
 // Path of the ticker in the tree.
 func (c *ClientNode) Path() Path {
 	return c.path
+}
+
+// NodeID returns an ID for the node that can be shared with the UI client.
+func (c *ClientNode) NodeID() string {
+	return c.id
 }
 
 // Close the node by removing it from the tree.

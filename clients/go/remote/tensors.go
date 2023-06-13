@@ -61,9 +61,12 @@ func NewTensorWriterPB(clt *Client, name string, parent Path) (*TensorWriterPB, 
 			return nil, err
 		}
 	}
-	writerPath := toPath(writer)
+	node, err := NewClientNode(clt, toPath(writer))
+	if err != nil {
+		return nil, err
+	}
 	return &TensorWriterPB{
-		ClientNode: NewClientNode(clt, writerPath),
+		ClientNode: node,
 		clt:        clttw,
 		writer:     writer,
 	}, nil

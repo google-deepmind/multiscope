@@ -26,6 +26,7 @@ import (
 	"multiscope/internal/version"
 	treepb "multiscope/protos/tree_go_proto"
 	uipb "multiscope/protos/ui_go_proto"
+	"multiscope/wasm/jsapi"
 	"multiscope/wasm/puller"
 	"multiscope/wasm/ui/fatal"
 	"multiscope/wasm/ui/uimain"
@@ -77,6 +78,7 @@ func pullDataMain(wkr *worker.Worker) {
 func main() {
 	worker.Register(pullDataMain)
 	if worker.IsWorker() {
+		// Worker thread.
 		worker.Run()
 		return
 	}
@@ -96,5 +98,6 @@ func main() {
 		ui.DisplayErr(err)
 		return
 	}
+	jsapi.BuildAPI(ui)
 	ui.MainLoop()
 }

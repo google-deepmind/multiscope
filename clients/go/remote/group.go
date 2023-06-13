@@ -43,13 +43,17 @@ func NewGroup(clt *Client, name string, parent Path) (*Group, error) {
 	if grp == nil {
 		return nil, errors.New("server has returned a nil group")
 	}
+	node, err := NewClientNode(clt, toPath(grp))
+	if err != nil {
+		return nil, err
+	}
 	return &Group{
-		ClientNode: NewClientNode(clt, toPath(grp)),
+		ClientNode: node,
 		clt:        clw,
 	}, nil
 }
 
 // Root returns a root node.
-func Root(clt *Client) *Group {
-	return &Group{ClientNode: NewClientNode(clt, nil)}
+func (clt *Client) Root() *Group {
+	return clt.root
 }

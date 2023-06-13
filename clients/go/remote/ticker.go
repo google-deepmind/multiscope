@@ -86,7 +86,10 @@ func NewTicker(clt *Client, name string, parent Path) (*Ticker, error) {
 	if t.ticker == nil {
 		return nil, errors.New("server has returned a nil ticker")
 	}
-	t.ClientNode = NewClientNode(clt, toPath(t.ticker))
+	t.ClientNode, err = NewClientNode(clt, toPath(t.ticker))
+	if err != nil {
+		return nil, err
+	}
 	if err := clt.Display().DisplayIfDefault(t.Path()); err != nil {
 		return nil, err
 	}

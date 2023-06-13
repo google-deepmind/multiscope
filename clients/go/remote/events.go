@@ -25,10 +25,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Events manages client events by receiving events from the backend and dispatching them locally.
-type Events struct {
-	reg *events.Registry
-}
+type (
+	// Callback function.
+	Callback = events.Callback
+
+	// Callbacker is able to return a callback.
+	Callbacker interface {
+		Callback() Callback
+	}
+
+	// Events manages client events by receiving events from the backend and dispatching them locally.
+	Events struct {
+		reg *events.Registry
+	}
+)
 
 func newEvents(clt *Client) (*Events, error) {
 	req := &pb.StreamEventsRequest{TreeId: clt.TreeID()}

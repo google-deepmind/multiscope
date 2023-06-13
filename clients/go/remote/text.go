@@ -50,8 +50,12 @@ func NewTextWriter(clt *Client, name string, parent Path) (*TextWriter, error) {
 	if err := clt.Display().DisplayIfDefault(writerPath); err != nil {
 		return nil, err
 	}
+	node, err := NewClientNode(clt, writerPath)
+	if err != nil {
+		return nil, err
+	}
 	return &TextWriter{
-		ClientNode: NewClientNode(clt, writerPath),
+		ClientNode: node,
 		clt:        clttw,
 		writer:     writer,
 	}, nil
