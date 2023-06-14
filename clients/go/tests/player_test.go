@@ -32,21 +32,21 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 )
 
-func writeThenCheckPlayerData(player *remote.Player, writer *remote.HTMLWriter) error {
+func writeThenCheckPlayerData(prefix string, player *remote.Player, writer *remote.HTMLWriter) error {
 	const nTicks = 10
 	// Write some data.
 	for i := 0; i < nTicks; i++ {
-		if err := writer.WriteCSS("css:" + fmt.Sprint(i)); err != nil {
+		if err := writer.WriteCSS(prefix + "css:" + fmt.Sprint(i)); err != nil {
 			return err
 		}
-		if err := writer.Write("html:" + fmt.Sprint(i)); err != nil {
+		if err := writer.Write(prefix + "html:" + fmt.Sprint(i)); err != nil {
 			return err
 		}
 		if err := player.StoreFrame(); err != nil {
 			return err
 		}
 	}
-	return tickertesting.CheckPlayerTimeline01(player.Client(), player.Path(), writer.Path())
+	return tickertesting.CheckPlayerTimeline01(player.Client(), prefix, player.Path(), writer.Path())
 }
 
 func testPlayerTimeline(withReset bool) error {
@@ -54,8 +54,6 @@ func testPlayerTimeline(withReset bool) error {
 	if err != nil {
 		return err
 	}
-
-	// Create the tree.
 	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, nil)
 	if err != nil {
 		return err
@@ -64,7 +62,7 @@ func testPlayerTimeline(withReset bool) error {
 	if err != nil {
 		return err
 	}
-	if err := writeThenCheckPlayerData(player, writer); err != nil {
+	if err := writeThenCheckPlayerData("", player, writer); err != nil {
 		return err
 	}
 	if !withReset {
@@ -73,10 +71,10 @@ func testPlayerTimeline(withReset bool) error {
 	if err := player.Reset(); err != nil {
 		return err
 	}
-	if err := tickertesting.CheckPlayerTimelineAfterReset(player.Client(), player.Path(), writer.Path()); err != nil {
+	if err := tickertesting.CheckPlayerTimelineAfterReset(clt, player.Path(), writer.Path()); err != nil {
 		return err
 	}
-	if err := writeThenCheckPlayerData(player, writer); err != nil {
+	if err := writeThenCheckPlayerData("", player, writer); err != nil {
 		return err
 	}
 	return player.Close()
@@ -90,6 +88,27 @@ func TestPlayerTimeline(t *testing.T) {
 
 func TestPlayerTimelineWithReset(t *testing.T) {
 	if err := testPlayerTimeline(true); err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+}
+
+func TestPlayerTimelineWithEmbeddedTimeline(t *testing.T) {
+	clt, err := clienttesting.Start()
+	if err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, nil)
+	if err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+	writer, err := remote.NewHTMLWriter(clt, tickertesting.Ticker01HTMLWriterName, player.Path())
+	if err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+	if err := writeThenCheckPlayerData("", player, writer); err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+	if err := player.Close(); err != nil {
 		t.Error(fmtx.FormatError(err))
 	}
 }

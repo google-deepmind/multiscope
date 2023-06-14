@@ -108,7 +108,7 @@ func sendOffsetDisplayTick(clt client.Client, tickerPath []string, delta int64) 
 	})
 }
 
-func checkDisplayedValues(clt client.Client, nodes []*treepb.Node, tick int) error {
+func checkDisplayedValues(clt client.Client, prefix string, nodes []*treepb.Node, tick int) error {
 	ctx := context.Background()
 	data, err := client.NodesData(ctx, clt, nodes)
 	if err != nil {
@@ -118,7 +118,7 @@ func checkDisplayedValues(clt client.Client, nodes []*treepb.Node, tick int) err
 	if err != nil {
 		return err
 	}
-	htmlWant := fmt.Sprintf("html:%d", tick)
+	htmlWant := fmt.Sprintf(prefix+"html:%d", tick)
 	if string(htmlText) != htmlWant {
 		return fmt.Errorf("got %s, want %s", string(htmlText), htmlWant)
 	}
@@ -126,7 +126,7 @@ func checkDisplayedValues(clt client.Client, nodes []*treepb.Node, tick int) err
 	if err != nil {
 		return err
 	}
-	cssWant := fmt.Sprintf("css:%d", tick)
+	cssWant := fmt.Sprintf(prefix+"css:%d", tick)
 	if string(cssText) != cssWant {
 		return fmt.Errorf("got %s, want %s", string(cssText), cssWant)
 	}
@@ -134,7 +134,7 @@ func checkDisplayedValues(clt client.Client, nodes []*treepb.Node, tick int) err
 }
 
 // CheckPlayerTimeline01 checks the timeline by sending events to the player.
-func CheckPlayerTimeline01(clt client.Client, tickerPath, writerPath []string) error {
+func CheckPlayerTimeline01(clt client.Client, prefix string, tickerPath, writerPath []string) error {
 	// Get the nodes given the path.
 	nodes, err := client.PathToNodes(context.Background(), clt,
 		append(append([]string{}, writerPath...), "html"),
@@ -148,7 +148,7 @@ func CheckPlayerTimeline01(clt client.Client, tickerPath, writerPath []string) e
 		if err := SendSetDisplayTick(clt, tickerPath, displayTick); err != nil {
 			return fmt.Errorf("cannot set the clock display to %d: %w", displayTick, err)
 		}
-		if err := checkDisplayedValues(clt, nodes, i); err != nil {
+		if err := checkDisplayedValues(clt, prefix, nodes, i); err != nil {
 			return fmt.Errorf("the wrong data is being displayed: %w", err)
 		}
 	}
@@ -158,7 +158,7 @@ func CheckPlayerTimeline01(clt client.Client, tickerPath, writerPath []string) e
 		return fmt.Errorf("cannot set display tick: %w", err)
 	}
 	for i := 0; i < Ticker01NumTicks; i++ {
-		if err := checkDisplayedValues(clt, nodes, i); err != nil {
+		if err := checkDisplayedValues(clt, prefix, nodes, i); err != nil {
 			return fmt.Errorf("OffsetDisplayTick error: %w", err)
 		}
 		err := sendOffsetDisplayTick(clt, tickerPath, 1)
@@ -169,24 +169,24 @@ func CheckPlayerTimeline01(clt client.Client, tickerPath, writerPath []string) e
 			return fmt.Errorf("this is the last tick: got error %v, want error %T", err, &displayNotModifiedError{})
 		}
 	}
-	if err := checkDisplayedValues(clt, nodes, Ticker01NumTicks-1); err != nil {
+	if err := checkDisplayedValues(clt, prefix, nodes, Ticker01NumTicks-1); err != nil {
 		return fmt.Errorf("OffsetDisplayTick error: %w", err)
 	}
 	if err := SendSetDisplayTick(clt, tickerPath, 0); err != nil {
 		return fmt.Errorf("SetDisplayTick error: %w", err)
 	}
 	// Check what we get when offsetting outside the range.
-	if err := sendOffsetDisplayTick(clt, tickerPath, 100); err != nil {
+	if err := sendOffsetDisplayTick(clt, tickerPath, Ticker01NumTicks*2); err != nil {
 		return fmt.Errorf("OffsetDisplayTick error: %w", err)
 	}
-	if err := checkDisplayedValues(clt, nodes, 9); err != nil {
+	if err := checkDisplayedValues(clt, prefix, nodes, Ticker01NumTicks-1); err != nil {
 		return fmt.Errorf("outside range positive displayTick: %w", err)
 	}
 	// We always use the last step if displayTick is lower than 0.
-	if err := sendOffsetDisplayTick(clt, tickerPath, -100); err != nil {
+	if err := sendOffsetDisplayTick(clt, tickerPath, -Ticker01NumTicks*2); err != nil {
 		return fmt.Errorf("cannot send an offset of -100: %w", err)
 	}
-	if err := checkDisplayedValues(clt, nodes, 0); err != nil {
+	if err := checkDisplayedValues(clt, prefix, nodes, 0); err != nil {
 		return fmt.Errorf("outside range negative displayTick: %w", err)
 	}
 	// Put back the player in running mode for further testing.
