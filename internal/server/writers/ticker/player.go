@@ -113,6 +113,7 @@ func (p *Player) processEvents(ev *treepb.Event) error {
 
 // ResetNode resets the node.
 func (p *Player) ResetNode() error {
+	p.control.mainNextStep()
 	return p.tline.Reset()
 }
 

@@ -16,15 +16,29 @@ package tickertesting
 
 import (
 	"context"
-	"errors"
+	stderr "errors"
 	"fmt"
 	"multiscope/internal/grpc/client"
 	pb "multiscope/protos/ticker_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
-var errTickerDisplayNotModified = errors.New("the ticker action did not modify the display")
+type displayNotModifiedError struct {
+	err error
+}
+
+func (e displayNotModifiedError) Unwrap() error { return e.err }
+
+func (e displayNotModifiedError) Error() string { return e.err.Error() }
+
+func errTickerDisplayNotModified() error {
+	return displayNotModifiedError{
+		err: errors.New("the ticker action did not modify the display"),
+	}
+}
 
 func queryDisplayTick(clt client.Client, tickerPath []string) (int64, error) {
 	ctx := context.Background()
@@ -40,7 +54,7 @@ func queryDisplayTick(clt client.Client, tickerPath []string) (int64, error) {
 		return 0, err
 	}
 	if display.Timeline == nil {
-		return 0, fmt.Errorf("the ticker did not return a timeline")
+		return 0, errors.Errorf("the ticker did not return a timeline")
 	}
 	return display.Timeline.DisplayTick, nil
 }
@@ -63,7 +77,7 @@ func sendEventWaitForUpdate(clt client.Client, tickerPath []string, action *pb.P
 			return err
 		}
 		if time.Now().After(deadline) {
-			return errTickerDisplayNotModified
+			return errTickerDisplayNotModified()
 		}
 	}
 	return nil
@@ -126,54 +140,81 @@ func CheckPlayerTimeline01(clt client.Client, tickerPath, writerPath []string) e
 		append(append([]string{}, writerPath...), "html"),
 		append(append([]string{}, writerPath...), "css"))
 	if err != nil {
-		return fmt.Errorf("cannot get paths to nodes: %v", err)
+		return fmt.Errorf("cannot get paths to nodes: %w", err)
 	}
 	// Check the data using SetDisplayTick
 	for i := 0; i < Ticker01NumTicks; i++ {
 		displayTick := int64(i)
 		if err := SendSetDisplayTick(clt, tickerPath, displayTick); err != nil {
-			return fmt.Errorf("cannot set the clock display to %d: %v", displayTick, err)
+			return fmt.Errorf("cannot set the clock display to %d: %w", displayTick, err)
 		}
 		if err := checkDisplayedValues(clt, nodes, i); err != nil {
-			return fmt.Errorf("the wrong data is being displayed: %v", err)
+			return fmt.Errorf("the wrong data is being displayed: %w", err)
 		}
 	}
 
 	// Check the data using OffsetDisplayTick.
 	if err := SendSetDisplayTick(clt, tickerPath, 0); err != nil {
-		return fmt.Errorf("cannot set display tick: %v", err)
+		return fmt.Errorf("cannot set display tick: %w", err)
 	}
 	for i := 0; i < Ticker01NumTicks; i++ {
 		if err := checkDisplayedValues(clt, nodes, i); err != nil {
-			return fmt.Errorf("OffsetDisplayTick error: %v", err)
+			return fmt.Errorf("OffsetDisplayTick error: %w", err)
 		}
 		err := sendOffsetDisplayTick(clt, tickerPath, 1)
 		if i < Ticker01NumTicks-1 && err != nil {
-			return fmt.Errorf("cannot send offset at iteration %d: %v", i, err)
+			return fmt.Errorf("cannot send offset at iteration %d: %w", i, err)
 		}
-		if i == Ticker01NumTicks && err != errTickerDisplayNotModified {
-			return fmt.Errorf("this is the last tick: got error %v, want error %v", err, errTickerDisplayNotModified)
+		if i == Ticker01NumTicks && !stderr.As(err, &displayNotModifiedError{}) {
+			return fmt.Errorf("this is the last tick: got error %v, want error %T", err, &displayNotModifiedError{})
 		}
 	}
 	if err := checkDisplayedValues(clt, nodes, Ticker01NumTicks-1); err != nil {
-		return fmt.Errorf("OffsetDisplayTick error: %v", err)
+		return fmt.Errorf("OffsetDisplayTick error: %w", err)
 	}
 	if err := SendSetDisplayTick(clt, tickerPath, 0); err != nil {
-		return fmt.Errorf("SetDisplayTick error: %v", err)
+		return fmt.Errorf("SetDisplayTick error: %w", err)
 	}
 	// Check what we get when offsetting outside the range.
 	if err := sendOffsetDisplayTick(clt, tickerPath, 100); err != nil {
-		return fmt.Errorf("OffsetDisplayTick error: %v", err)
+		return fmt.Errorf("OffsetDisplayTick error: %w", err)
 	}
 	if err := checkDisplayedValues(clt, nodes, 9); err != nil {
-		return fmt.Errorf("outside range positive displayTick: %v", err)
+		return fmt.Errorf("outside range positive displayTick: %w", err)
 	}
 	// We always use the last step if displayTick is lower than 0.
 	if err := sendOffsetDisplayTick(clt, tickerPath, -100); err != nil {
-		return fmt.Errorf("cannot send an offset of -100: %v", err)
+		return fmt.Errorf("cannot send an offset of -100: %w", err)
 	}
 	if err := checkDisplayedValues(clt, nodes, 0); err != nil {
-		return fmt.Errorf("outside range negative displayTick: %v", err)
+		return fmt.Errorf("outside range negative displayTick: %w", err)
+	}
+	// Put back the player in running mode for further testing.
+	if err := client.SendEvent(context.Background(), clt, tickerPath, &pb.PlayerAction{
+		Action: &pb.PlayerAction_Command{Command: pb.Command_CMD_RUN},
+	}); err != nil {
+		return errors.Errorf("cannot send a run event to the player: %v", err)
+	}
+	return nil
+}
+
+// CheckPlayerTimelineAfterReset checks the timeline it has been reset.
+func CheckPlayerTimelineAfterReset(clt client.Client, tickerPath, writerPath []string) error {
+	// Get the nodes given the path.
+	nodes, err := client.PathToNodes(context.Background(), clt,
+		writerPath,
+		append(append([]string{}, writerPath...), "html"),
+		append(append([]string{}, writerPath...), "css"))
+	if err != nil {
+		return fmt.Errorf("cannot get paths to nodes: %v", err)
+	}
+	ctx := context.Background()
+	data, err := client.NodesData(ctx, clt, nodes)
+	if err != nil {
+		return err
+	}
+	if _, err := client.ToRaw(data[1]); err == nil {
+		return errors.Errorf("want a node error but got nil")
 	}
 	return nil
 }

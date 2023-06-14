@@ -32,41 +32,65 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 )
 
-func TestPlayerTimeline(t *testing.T) {
+func writeThenCheckPlayerData(player *remote.Player, writer *remote.HTMLWriter) error {
+	const nTicks = 10
+	// Write some data.
+	for i := 0; i < nTicks; i++ {
+		if err := writer.WriteCSS("css:" + fmt.Sprint(i)); err != nil {
+			return err
+		}
+		if err := writer.Write("html:" + fmt.Sprint(i)); err != nil {
+			return err
+		}
+		if err := player.StoreFrame(); err != nil {
+			return err
+		}
+	}
+	return tickertesting.CheckPlayerTimeline01(player.Client(), player.Path(), writer.Path())
+}
+
+func testPlayerTimeline(withReset bool) error {
 	clt, err := clienttesting.Start()
 	if err != nil {
-		t.Fatal(fmtx.FormatError(err))
+		return err
 	}
 
 	// Create the tree.
 	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, nil)
 	if err != nil {
-		t.Fatal(fmtx.FormatError(err))
+		return err
 	}
 	writer, err := remote.NewHTMLWriter(clt, tickertesting.Ticker01HTMLWriterName, player.Path())
 	if err != nil {
-		t.Fatal(fmtx.FormatError(err))
+		return err
 	}
-
-	const nTicks = 10
-	// Write some data.
-	for i := 0; i < nTicks; i++ {
-		if err := writer.WriteCSS("css:" + fmt.Sprint(i)); err != nil {
-			t.Fatal(fmtx.FormatError(err))
-		}
-		if err := writer.Write("html:" + fmt.Sprint(i)); err != nil {
-			t.Fatal(fmtx.FormatError(err))
-		}
-		if err := player.StoreFrame(); err != nil {
-			t.Fatal(fmtx.FormatError(err))
-		}
+	if err := writeThenCheckPlayerData(player, writer); err != nil {
+		return err
 	}
+	if !withReset {
+		return player.Close()
+	}
+	if err := player.Reset(); err != nil {
+		return err
+	}
+	if err := tickertesting.CheckPlayerTimelineAfterReset(player.Client(), player.Path(), writer.Path()); err != nil {
+		return err
+	}
+	if err := writeThenCheckPlayerData(player, writer); err != nil {
+		return err
+	}
+	return player.Close()
+}
 
-	if err := tickertesting.CheckPlayerTimeline01(clt, player.Path(), writer.Path()); err != nil {
+func TestPlayerTimeline(t *testing.T) {
+	if err := testPlayerTimeline(false); err != nil {
 		t.Error(fmtx.FormatError(err))
 	}
-	if err := player.Close(); err != nil {
-		t.Fatal(fmtx.FormatErrorf("cannot close player: %v", err))
+}
+
+func TestPlayerTimelineWithReset(t *testing.T) {
+	if err := testPlayerTimeline(true); err != nil {
+		t.Error(fmtx.FormatError(err))
 	}
 }
 

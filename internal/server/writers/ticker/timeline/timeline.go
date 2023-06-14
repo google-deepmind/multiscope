@@ -105,6 +105,7 @@ func (tl *Timeline) Reset() error {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 	tl.currentTick = 0
+	tl.displayTick = math.MaxInt64
 
 	return nil
 }
