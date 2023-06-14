@@ -98,6 +98,17 @@ func (tl *Timeline) SetTickView(view *pb.SetTickView) error {
 	return nil
 }
 
+// Reset the timeline by removing all data.
+func (tl *Timeline) Reset() error {
+	tl.db.Reset()
+
+	tl.mux.Lock()
+	defer tl.mux.Unlock()
+	tl.currentTick = 0
+
+	return nil
+}
+
 // Store the data for all children.
 func (tl *Timeline) Store() error {
 	tl.db.Store(tl.currentTick)

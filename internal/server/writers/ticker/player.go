@@ -49,9 +49,10 @@ type (
 )
 
 var (
-	_ core.Node       = (*Player)(nil)
-	_ core.Parent     = (*Player)(nil)
-	_ core.ChildAdder = (*Player)(nil)
+	_ core.Node        = (*Player)(nil)
+	_ core.Parent      = (*Player)(nil)
+	_ core.ChildAdder  = (*Player)(nil)
+	_ core.NodeReseter = (*Player)(nil)
 )
 
 // NewPlayer returns a new writer to stream data tables.
@@ -108,6 +109,11 @@ func (p *Player) processEvents(ev *treepb.Event) error {
 		err = errors.Errorf("player action %T not implemented", act)
 	}
 	return err
+}
+
+// ResetNode resets the node.
+func (p *Player) ResetNode() error {
+	return p.tline.Reset()
 }
 
 // StoreFrame goes through the tree to store the current state of the nodes into a storage.

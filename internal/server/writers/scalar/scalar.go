@@ -37,7 +37,10 @@ type Writer struct {
 	plotters        map[string]*plotpb.Plotter
 }
 
-var _ core.Node = (*Writer)(nil)
+var (
+	_ core.Node        = (*Writer)(nil)
+	_ core.NodeReseter = (*Writer)(nil)
+)
 
 // TimeLabel is a label to use to override the default time counter of the vega writer.
 const TimeLabel = "__time__"
@@ -47,17 +50,23 @@ var historyLength = 200
 // NewWriter returns a writer collecting data to be plotted.
 func NewWriter() *Writer {
 	w := &Writer{}
-	w.Reset()
+	w.reset()
 	w.ProtoWriter = base.NewProtoWriter(w.plot)
 	return w
 }
 
-// Reset resets the writer data.
-func (w *Writer) Reset() {
+func (w *Writer) reset() {
 	w.mut.Lock()
 	defer w.mut.Unlock()
 	w.plot = &plotpb.ScalarsPlot{Plot: &plotpb.Plot{}}
 	w.plotters = make(map[string]*plotpb.Plotter)
+	w.defaultTimeStep = 0
+}
+
+// ResetNode resets the writer data.
+func (w *Writer) ResetNode() error {
+	w.reset()
+	return nil
 }
 
 // AddToTree adds the writer to a stream tree.

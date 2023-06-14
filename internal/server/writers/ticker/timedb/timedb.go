@@ -68,6 +68,17 @@ func (db *TimeDB) Fetch(tick int64) *Record {
 	return db.tickToRecord[tick].rec
 }
 
+// Reset the time database.
+func (db *TimeDB) Reset() {
+	db.mut.Lock()
+	defer db.mut.Unlock()
+
+	for tick := range db.tickToRecord {
+		delete(db.tickToRecord, tick)
+	}
+	db.storage = 0
+}
+
 // Store a record given a tick index.
 func (db *TimeDB) Store(tick int64) {
 	rec := db.newContext().buildRecord()
