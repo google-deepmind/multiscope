@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/encoding/prototext"
 )
 
 type displayNotModifiedError struct {
@@ -59,7 +60,12 @@ func queryDisplayTick(clt client.Client, tickerPath []string) (int64, error) {
 	return display.Timeline.DisplayTick, nil
 }
 
-func sendEventWaitForUpdate(clt client.Client, tickerPath []string, action *pb.PlayerAction) error {
+func sendEventWaitForUpdate(clt client.Client, tickerPath []string, action *pb.PlayerAction) (err error) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("event %q to %v returned error: %w", prototext.Format(action), tickerPath, err)
+		}
+	}()
 	old, err := queryDisplayTick(clt, tickerPath)
 	if err != nil {
 		return err
@@ -108,27 +114,32 @@ func sendOffsetDisplayTick(clt client.Client, tickerPath []string, delta int64) 
 	})
 }
 
+// CheckText compares some texts to the data of a node.
+// Returns an error if the text does not match or if the node data has an error.
+func CheckText(data *treepb.NodeData, want string) error {
+	text, err := client.ToRaw(data)
+	if err != nil {
+		return err
+	}
+	if string(text) != want {
+		return errors.Errorf("got %s, want %s", string(text), want)
+	}
+	return nil
+}
+
 func checkDisplayedValues(clt client.Client, prefix string, nodes []*treepb.Node, tick int) error {
 	ctx := context.Background()
 	data, err := client.NodesData(ctx, clt, nodes)
 	if err != nil {
 		return err
 	}
-	htmlText, err := client.ToRaw(data[0])
-	if err != nil {
-		return err
-	}
 	htmlWant := fmt.Sprintf(prefix+"html:%d", tick)
-	if string(htmlText) != htmlWant {
-		return fmt.Errorf("got %s, want %s", string(htmlText), htmlWant)
-	}
-	cssText, err := client.ToRaw(data[1])
-	if err != nil {
-		return err
+	if err := CheckText(data[0], htmlWant); err != nil {
+		return fmt.Errorf("incorrect HTML data: %w", err)
 	}
 	cssWant := fmt.Sprintf(prefix+"css:%d", tick)
-	if string(cssText) != cssWant {
-		return fmt.Errorf("got %s, want %s", string(cssText), cssWant)
+	if err := CheckText(data[1], cssWant); err != nil {
+		return fmt.Errorf("incorrect CSS data: %w", err)
 	}
 	return nil
 }
@@ -213,8 +224,11 @@ func CheckPlayerTimelineAfterReset(clt client.Client, tickerPath, writerPath []s
 	if err != nil {
 		return err
 	}
-	if _, err := client.ToRaw(data[1]); err == nil {
-		return errors.Errorf("want a node error but got nil")
+	if err := CheckText(data[1], ""); err != nil {
+		return fmt.Errorf("incorrect HTML data: %w", err)
+	}
+	if err := CheckText(data[2], ""); err != nil {
+		return fmt.Errorf("incorrect CSS data: %w", err)
 	}
 	return nil
 }

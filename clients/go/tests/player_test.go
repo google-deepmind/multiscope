@@ -97,7 +97,11 @@ func TestPlayerTimelineWithEmbeddedTimeline(t *testing.T) {
 	if err != nil {
 		t.Error(fmtx.FormatError(err))
 	}
-	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, nil)
+	meta, err := remote.NewPlayer(clt, "Meta", false, nil)
+	if err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, meta.Path())
 	if err != nil {
 		t.Error(fmtx.FormatError(err))
 	}
@@ -109,6 +113,9 @@ func TestPlayerTimelineWithEmbeddedTimeline(t *testing.T) {
 		t.Error(fmtx.FormatError(err))
 	}
 	if err := player.Close(); err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+	if err := meta.Close(); err != nil {
 		t.Error(fmtx.FormatError(err))
 	}
 }
@@ -223,21 +230,17 @@ func TestPlayerEmptyTimeline(t *testing.T) {
 	if err != nil {
 		t.Fatal(fmtx.FormatError(err))
 	}
-	const errWant = "data for tick 0 does not exist"
-	errGot := data[0].GetError()
-	if errGot != errWant {
-		t.Errorf("unexpected error for absent data: got %q want %q", errGot, errWant)
+	if err := tickertesting.CheckText(data[0], ""); err != nil {
+		t.Error(fmtx.FormatError(err))
 	}
-	// Requesting data when a tick has occurred, but no data has been written.
 	if err := player.StoreFrame(); err != nil {
 		t.Fatal(fmtx.FormatError(err))
 	}
 	if data, err = client.NodesData(ctx, clt, nodes); err != nil {
 		t.Fatal(fmtx.FormatError(err))
 	}
-	errGot = data[0].GetError()
-	if errGot != "" {
-		t.Errorf("unexpected error: got %q want \"\"", errGot)
+	if err := tickertesting.CheckText(data[0], ""); err != nil {
+		t.Error(fmtx.FormatError(err))
 	}
 	if err := player.Close(); err != nil {
 		t.Fatalf("cannot close player: %v", err)

@@ -128,10 +128,18 @@ func (p *Player) MIME() string {
 	return mime.ProtoToMIME(&tickerpb.PlayerInfo{})
 }
 
+func (p *Player) marshalChildData(data *treepb.NodeData, path []string, lastTick uint32) {
+	if p.tline.IsLastTickDisplayed() {
+		p.Group.MarshalData(data, path, lastTick)
+		return
+	}
+	p.tline.MarshalData(data, path)
+}
+
 // MarshalData retrieves the NodeData of a child based on path.
 func (p *Player) MarshalData(d *treepb.NodeData, path []string, lastTick uint32) {
 	if len(path) > 0 {
-		p.tline.MarshalData(d, path)
+		p.marshalChildData(d, path, lastTick)
 		return
 	}
 	data := &tickerpb.PlayerInfo{
