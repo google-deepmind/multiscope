@@ -33,9 +33,7 @@ import (
 )
 
 func writeThenCheckPlayerData(prefix string, player *remote.Player, writer *remote.HTMLWriter) error {
-	const nTicks = 10
-	// Write some data.
-	for i := 0; i < nTicks; i++ {
+	for i := 0; i < tickertesting.Ticker01NumTicks; i++ {
 		if err := writer.WriteCSS(prefix + "css:" + fmt.Sprint(i)); err != nil {
 			return err
 		}
@@ -109,8 +107,29 @@ func TestPlayerTimelineWithEmbeddedTimeline(t *testing.T) {
 	if err != nil {
 		t.Error(fmtx.FormatError(err))
 	}
-	if err := writeThenCheckPlayerData("", player, writer); err != nil {
-		t.Error(fmtx.FormatError(err))
+	const metaFrame = 3
+	for i := 0; i < metaFrame; i++ {
+		if err := player.Reset(); err != nil {
+			t.Error(fmtx.FormatError(err))
+		}
+		prefix := fmt.Sprintf("metaframe=%d ", i)
+		if err := writeThenCheckPlayerData(prefix, player, writer); err != nil {
+			t.Error(fmtx.FormatError(err))
+		}
+		if err := meta.StoreFrame(); err != nil {
+			t.Error(fmtx.FormatError(err))
+		}
+	}
+	for i := 0; i < metaFrame; i++ {
+		if err := tickertesting.SendSetDisplayTick(clt, meta.Path(), i); err != nil {
+			t.Fatalf("SetDisplayTick error: %v", err)
+		}
+		/*
+			prefix := fmt.Sprintf("metaframe=%d ", i)
+			if err := tickertesting.CheckPlayerTimeline01(clt, prefix, player.Path(), writer.Path()); err != nil {
+				t.Error(fmtx.FormatError(err))
+			}
+		*/
 	}
 	if err := player.Close(); err != nil {
 		t.Error(fmtx.FormatError(err))

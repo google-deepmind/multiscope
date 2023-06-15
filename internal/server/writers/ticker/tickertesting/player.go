@@ -41,7 +41,7 @@ func errTickerDisplayNotModified() error {
 	}
 }
 
-func queryDisplayTick(clt client.Client, tickerPath []string) (int64, error) {
+func queryDisplayTick(clt client.Client, tickerPath []string) (int, error) {
 	ctx := context.Background()
 	data, err := client.NodesData(ctx, clt, []*treepb.Node{{
 		Path: &treepb.NodePath{
@@ -57,8 +57,10 @@ func queryDisplayTick(clt client.Client, tickerPath []string) (int64, error) {
 	if display.Timeline == nil {
 		return 0, errors.Errorf("the ticker did not return a timeline")
 	}
-	return display.Timeline.DisplayTick, nil
+	return int(display.Timeline.DisplayTick), nil
 }
+
+var lastQuery time.Duration = 1 * time.Second
 
 func sendEventWaitForUpdate(clt client.Client, tickerPath []string, action *pb.PlayerAction) (err error) {
 	defer func() {
@@ -66,6 +68,7 @@ func sendEventWaitForUpdate(clt client.Client, tickerPath []string, action *pb.P
 			err = fmt.Errorf("event %q to %v returned error: %w", prototext.Format(action), tickerPath, err)
 		}
 	}()
+	startQuery := time.Now()
 	old, err := queryDisplayTick(clt, tickerPath)
 	if err != nil {
 		return err
@@ -75,9 +78,9 @@ func sendEventWaitForUpdate(clt client.Client, tickerPath []string, action *pb.P
 		return err
 	}
 	current := old
-	deadline := time.Now().Add(10 * time.Second)
+	deadline := time.Now().Add(100 * lastQuery)
 	for old == current {
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(1 * time.Millisecond)
 		current, err = queryDisplayTick(clt, tickerPath)
 		if err != nil {
 			return err
@@ -86,28 +89,29 @@ func sendEventWaitForUpdate(clt client.Client, tickerPath []string, action *pb.P
 			return errTickerDisplayNotModified()
 		}
 	}
+	lastQuery = time.Since(startQuery)
 	return nil
 }
 
 // SendSetDisplayTick sends an event to a ticker to set the tick being displayed.
-func SendSetDisplayTick(clt client.Client, tickerPath []string, tick int64) error {
+func SendSetDisplayTick(clt client.Client, tickerPath []string, tick int) error {
 	return sendEventWaitForUpdate(clt, tickerPath, &pb.PlayerAction{
 		Action: &pb.PlayerAction_TickView{
 			TickView: &pb.SetTickView{
 				TickCommand: &pb.SetTickView_ToDisplay{
-					ToDisplay: tick,
+					ToDisplay: int64(tick),
 				},
 			},
 		},
 	})
 }
 
-func sendOffsetDisplayTick(clt client.Client, tickerPath []string, delta int64) error {
+func sendOffsetDisplayTick(clt client.Client, tickerPath []string, delta int) error {
 	return sendEventWaitForUpdate(clt, tickerPath, &pb.PlayerAction{
 		Action: &pb.PlayerAction_TickView{
 			TickView: &pb.SetTickView{
 				TickCommand: &pb.SetTickView_Offset{
-					Offset: delta,
+					Offset: int64(delta),
 				},
 			},
 		},
@@ -153,11 +157,18 @@ func CheckPlayerTimeline01(clt client.Client, prefix string, tickerPath, writerP
 	if err != nil {
 		return fmt.Errorf("cannot get paths to nodes: %w", err)
 	}
+	// Check the current tick being displayed to skip the first check if required.
+	currentDisplayed, err := queryDisplayTick(clt, tickerPath)
+	if err != nil {
+		return fmt.Errorf("cannot query the current tick being displayed: %w", err)
+	}
 	// Check the data using SetDisplayTick
 	for i := 0; i < Ticker01NumTicks; i++ {
-		displayTick := int64(i)
-		if err := SendSetDisplayTick(clt, tickerPath, displayTick); err != nil {
-			return fmt.Errorf("cannot set the clock display to %d: %w", displayTick, err)
+		if i == currentDisplayed {
+			continue
+		}
+		if err := SendSetDisplayTick(clt, tickerPath, i); err != nil {
+			return fmt.Errorf("cannot set the clock display to %d: %w", i, err)
 		}
 		if err := checkDisplayedValues(clt, prefix, nodes, i); err != nil {
 			return fmt.Errorf("the wrong data is being displayed: %w", err)
