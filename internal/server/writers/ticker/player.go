@@ -21,6 +21,7 @@ import (
 	"multiscope/internal/server/events"
 	"multiscope/internal/server/treeservice"
 	"multiscope/internal/server/writers/base"
+	"multiscope/internal/server/writers/ticker/timedb"
 	"multiscope/internal/server/writers/ticker/timeline"
 	tickerpb "multiscope/protos/ticker_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
@@ -42,6 +43,7 @@ type (
 	// Player is a group node that displays timing data.
 	Player struct {
 		*base.Group
+		db      *timedb.TimeDB
 		tline   *timeline.Timeline
 		control playerControl
 		queue   *events.Queue
@@ -59,8 +61,9 @@ var (
 func NewPlayer(ignorePause bool) *Player {
 	p := &Player{
 		Group: base.NewGroup(mime.MultiscopePlayer),
+		tline: timeline.New(),
 	}
-	p.tline = timeline.New(p.Group)
+	p.db = timedb.New(p.Group)
 	if ignorePause {
 		p.control = newNoPauseControl(p)
 	} else {
@@ -86,17 +89,17 @@ func (p *Player) processEvents(ev *treepb.Event) error {
 	var err error
 	switch act := action.Action.(type) {
 	case *tickerpb.PlayerAction_TickView:
-		err = p.tline.SetTickView(act.TickView)
+		err = p.tline.SetTickView(p.db, act.TickView)
 		p.control.pause()
 	case *tickerpb.PlayerAction_Command:
 		switch act.Command {
 		case tickerpb.Command_CMD_STEP:
-			err = p.tline.SetTickView(&tickerpb.SetTickView{
+			err = p.tline.SetTickView(p.db, &tickerpb.SetTickView{
 				TickCommand: &tickerpb.SetTickView_Offset{Offset: 1},
 			})
 			p.control.pause()
 		case tickerpb.Command_CMD_STEPBACK:
-			err = p.tline.SetTickView(&tickerpb.SetTickView{
+			err = p.tline.SetTickView(p.db, &tickerpb.SetTickView{
 				TickCommand: &tickerpb.SetTickView_Offset{Offset: -1},
 			})
 			p.control.pause()
@@ -114,13 +117,14 @@ func (p *Player) processEvents(ev *treepb.Event) error {
 // ResetNode resets the node.
 func (p *Player) ResetNode() error {
 	p.control.mainNextStep()
+	p.db.Reset()
 	return p.tline.Reset()
 }
 
 // StoreFrame goes through the tree to store the current state of the nodes into a storage.
 func (p *Player) StoreFrame(data *tickerpb.PlayerData) error {
 	p.control.mainNextStep()
-	return p.tline.Store()
+	return p.tline.Store(p.db)
 }
 
 // MIME returns the mime type of this node.
@@ -133,7 +137,7 @@ func (p *Player) marshalChildData(data *treepb.NodeData, path []string, lastTick
 		p.Group.MarshalData(data, path, lastTick)
 		return
 	}
-	p.tline.MarshalData(data, path)
+	p.tline.MarshalData(p.db, data, path)
 }
 
 // MarshalData retrieves the NodeData of a child based on path.
@@ -143,7 +147,7 @@ func (p *Player) MarshalData(d *treepb.NodeData, path []string, lastTick uint32)
 		return
 	}
 	data := &tickerpb.PlayerInfo{
-		Timeline: p.tline.MarshalDisplay(),
+		Timeline: p.tline.MarshalDisplay(p.db),
 	}
 	anyPB, err := anypb.New(data)
 	if err != nil {
@@ -157,5 +161,6 @@ func (p *Player) MarshalData(d *treepb.NodeData, path []string, lastTick uint32)
 func (p *Player) Close() error {
 	p.queue.Delete()
 	p.control.close()
-	return p.tline.Close()
+	p.db.Close()
+	return nil
 }

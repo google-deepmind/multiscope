@@ -56,7 +56,7 @@ func (c *playerNoPauseControl) playerLoop() {
 			case <-time.After(500 * time.Millisecond):
 			}
 		} else {
-			if err := c.player.tline.SetTickView(&pb.SetTickView{TickCommand: &pb.SetTickView_Offset{
+			if err := c.player.tline.SetTickView(c.player.db, &pb.SetTickView{TickCommand: &pb.SetTickView_Offset{
 				Offset: 1,
 			}}); err != nil {
 				log.Printf("timeline Go routine cannot set the ticker view: %v", err)
@@ -72,7 +72,7 @@ func (c *playerNoPauseControl) setPeriod(period *pb.SetPeriod) error {
 
 func (c *playerNoPauseControl) processCommand(cmd pb.Command) error {
 	if cmd != pb.Command_CMD_RUN {
-		c.player.tline.SetTickView(&pb.SetTickView{
+		c.player.tline.SetTickView(c.player.db, &pb.SetTickView{
 			TickCommand: &pb.SetTickView_ToDisplay{
 				ToDisplay: c.player.tline.CurrentTick() - 1,
 			},
