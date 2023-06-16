@@ -38,7 +38,7 @@ func recursiveReset(node Node) error {
 }
 
 // RecursiveReset resets all children nodes implementing the NodeReseter interface.
-func RecursiveReset(parent Parent, withPath WithPBPath) error {
+func RecursiveReset(parent ParentNode, withPath WithPBPath) error {
 	_, node, err := pathToNode(parent, withPath)
 	if err != nil {
 		return err

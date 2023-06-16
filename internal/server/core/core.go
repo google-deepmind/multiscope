@@ -37,11 +37,16 @@ type (
 
 	// Parent is node in the graph with children.
 	Parent interface {
-		Node
 		// Child returns a child node given its ID.
 		Child(name string) (Node, error)
 		// Children returns the (sorted) list of names of all children of this node.
 		Children() ([]string, error)
+	}
+
+	// ParentNode is a node and a parent.
+	ParentNode interface {
+		Node
+		Parent
 	}
 
 	// ChildAdder adds children nodes to a parent.
@@ -54,8 +59,8 @@ type (
 
 	// Root is the root of a stream tree node.
 	Root interface {
+		Node
 		Parent
-
 		ChildAdder
 
 		Path() *Path
@@ -71,7 +76,7 @@ type WithPBPath interface {
 	GetPath() *pb.NodePath
 }
 
-func pathToNode(parent Parent, withPath WithPBPath) (*pb.NodePath, Node, error) {
+func pathToNode(parent ParentNode, withPath WithPBPath) (*pb.NodePath, Node, error) {
 	if withPath == nil {
 		return nil, nil, errors.Errorf("cannot get a path in the tree from nil")
 	}
@@ -85,7 +90,7 @@ func pathToNode(parent Parent, withPath WithPBPath) (*pb.NodePath, Node, error) 
 
 // Set finds a path starting from parent and set dst to the node found in the tree.
 // The code returns an error if the node in the tree cannot be cast to dst.
-func Set(dst any, parent Parent, withPath WithPBPath) error {
+func Set(dst any, parent ParentNode, withPath WithPBPath) error {
 	path, node, err := pathToNode(parent, withPath)
 	if err != nil {
 		return err
