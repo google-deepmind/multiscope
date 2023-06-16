@@ -26,7 +26,6 @@ import (
 	treepb "multiscope/protos/tree_go_proto"
 
 	"github.com/pkg/errors"
-	"google.golang.org/protobuf/proto"
 )
 
 // Timeline stores data for a sub-tree for all ticks.
@@ -151,15 +150,7 @@ func (tl *Timeline) MarshalData(db *timedb.TimeDB, data *treepb.NodeData, path [
 		data.Error = fmt.Sprintf("data for tick %d does not exist", displayTick)
 		return
 	}
-	for _, p := range path {
-		child := rec.Child(p)
-		if child == nil {
-			data.Error = fmt.Sprintf("child %q in path %v cannot be found in the timeline. Available children are: %v", p, path, rec.Children())
-			return
-		}
-		rec = child
-	}
-	proto.Merge(data, rec.Data())
+	rec.MarshalData(data, path, 0)
 }
 
 // CurrentTick returns the next frame to store.

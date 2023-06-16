@@ -17,7 +17,6 @@ package timedb
 import (
 	"multiscope/internal/server/core"
 	"multiscope/internal/server/core/timeline"
-	treepb "multiscope/protos/tree_go_proto"
 )
 
 type context struct {
@@ -33,7 +32,7 @@ func (db *TimeDB) newContext() *context {
 func (ctx *context) buildChildRecord(parent core.Parent, childName string) *Record {
 	child, childErr := parent.Child(childName)
 	if childErr != nil {
-		return newErrorRecord(childErr)
+		return newErrorRecord(ctx.path.PB(), childErr)
 	}
 	childCtx := &context{
 		current: child,
@@ -43,17 +42,11 @@ func (ctx *context) buildChildRecord(parent core.Parent, childName string) *Reco
 }
 
 func (ctx *context) buildRecord() *Record {
-	if current, ok := ctx.current.(timeline.Adapter); ok {
-		ctx.current = current.Timeline()
-	}
-
-	// Serialize the data for the current node.
-	data := &treepb.NodeData{Path: ctx.path.PB()}
-	ctx.current.MarshalData(data, nil, 0)
-	rec := newRecord(data)
+	marshaler := timeline.ToMarshaler(ctx.path.PB(), ctx.current)
+	rec := newRecord(marshaler)
 
 	// Check if the node has children.
-	parent, ok := ctx.current.(core.Parent)
+	parent, ok := marshaler.(core.Parent)
 	if !ok {
 		return rec
 	}

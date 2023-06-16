@@ -15,10 +15,11 @@
 package timedb
 
 import (
+	"fmt"
+	"multiscope/internal/server/core/timeline"
 	treepb "multiscope/protos/tree_go_proto"
 
 	"golang.org/x/exp/maps"
-	"google.golang.org/protobuf/proto"
 )
 
 // Record saved in the database.
@@ -29,36 +30,37 @@ import (
 // Storing a recursive data structure, as opposed to a flat structure, makes
 // it easy to retrieve the error at level /a if the path /a/b/c is requested.
 type Record struct {
-	data *treepb.NodeData
+	data timeline.Marshaler
 
 	fetchChildrenError error
 	children           map[string]*Record
 }
 
-func newErrorRecord(err error) *Record {
-	return newRecord(&treepb.NodeData{Error: err.Error()})
+func newErrorRecord(path *treepb.NodePath, err error) *Record {
+	return newRecord(timeline.ToErrorMarshaler(path, err))
 }
 
-func newRecord(data *treepb.NodeData) *Record {
+func newRecord(data timeline.Marshaler) *Record {
 	return &Record{data: data}
 }
 
-// Data returns the serialized data for the record.
-func (rec *Record) Data() *treepb.NodeData {
-	return rec.data
-}
-
-// Child returns a child record given a name.
-func (rec *Record) Child(name string) *Record {
-	if rec.fetchChildrenError != nil {
-		return newErrorRecord(rec.fetchChildrenError)
+// MarshalData from the record.
+func (rec *Record) MarshalData(data *treepb.NodeData, path []string, lastTick uint32) {
+	if len(path) == 0 {
+		rec.data.MarshalData(data, path, lastTick)
+		return
 	}
-	return rec.children[name]
-}
-
-// Children returns the list of children.
-func (rec *Record) Children() []string {
-	return maps.Keys(rec.children)
+	if rec.fetchChildrenError != nil {
+		data.Error = rec.fetchChildrenError.Error()
+		return
+	}
+	childName := path[0]
+	child := rec.children[childName]
+	if child == nil {
+		data.Error = fmt.Sprintf("child %q in path %v cannot be found in the timeline. Available children are: %v", childName, path, maps.Keys(rec.children))
+		return
+	}
+	child.MarshalData(data, path[1:], lastTick)
 }
 
 func (rec *Record) addChild(name string, child *Record) {
@@ -73,7 +75,7 @@ func (rec *Record) setFetchChildrenError(err error) {
 }
 
 func (rec *Record) computeSize() uint64 {
-	size := uint64(proto.Size(rec.data))
+	size := rec.data.StorageSize()
 	for _, child := range rec.children {
 		size += child.computeSize()
 	}
