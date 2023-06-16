@@ -25,6 +25,7 @@ import (
 	"multiscope/internal/server/writers/ticker/timeline"
 	tickerpb "multiscope/protos/ticker_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
+	"sync/atomic"
 
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
@@ -43,10 +44,12 @@ type (
 	// Player is a group node that displays timing data.
 	Player struct {
 		*base.Group
-		db      *timedb.TimeDB
-		tline   *timeline.Timeline
-		control playerControl
-		queue   *events.Queue
+		db *timedb.TimeDB
+
+		displayDB atomic.Pointer[timedb.TimeDB]
+		tline     *timeline.Timeline
+		control   playerControl
+		queue     *events.Queue
 	}
 )
 
@@ -64,6 +67,7 @@ func NewPlayer(ignorePause bool) *Player {
 		tline: timeline.New(),
 	}
 	p.db = timedb.New(p.Group)
+	p.displayDB.Store(p.db)
 	if ignorePause {
 		p.control = newNoPauseControl(p)
 	} else {
@@ -86,20 +90,21 @@ func (p *Player) processEvents(ev *treepb.Event) error {
 	if err := anypb.UnmarshalTo(ev.Payload, action, proto.UnmarshalOptions{}); err != nil {
 		return err
 	}
+	db := p.displayDB.Load()
 	var err error
 	switch act := action.Action.(type) {
 	case *tickerpb.PlayerAction_TickView:
-		err = p.tline.SetTickView(p.db, act.TickView)
+		err = p.tline.SetTickView(db, act.TickView)
 		p.control.pause()
 	case *tickerpb.PlayerAction_Command:
 		switch act.Command {
 		case tickerpb.Command_CMD_STEP:
-			err = p.tline.SetTickView(p.db, &tickerpb.SetTickView{
+			err = p.tline.SetTickView(db, &tickerpb.SetTickView{
 				TickCommand: &tickerpb.SetTickView_Offset{Offset: 1},
 			})
 			p.control.pause()
 		case tickerpb.Command_CMD_STEPBACK:
-			err = p.tline.SetTickView(p.db, &tickerpb.SetTickView{
+			err = p.tline.SetTickView(db, &tickerpb.SetTickView{
 				TickCommand: &tickerpb.SetTickView_Offset{Offset: -1},
 			})
 			p.control.pause()
@@ -132,22 +137,22 @@ func (p *Player) MIME() string {
 	return mime.ProtoToMIME(&tickerpb.PlayerInfo{})
 }
 
-func (p *Player) marshalChildData(data *treepb.NodeData, path []string, lastTick uint32) {
+func (p *Player) marshalChildData(db *timedb.TimeDB, data *treepb.NodeData, path []string, lastTick uint32) {
 	if p.tline.IsLastTickDisplayed() {
 		p.Group.MarshalData(data, path, lastTick)
 		return
 	}
-	p.tline.MarshalData(p.db, data, path)
+	p.tline.MarshalData(db, data, path)
 }
 
-// MarshalData retrieves the NodeData of a child based on path.
-func (p *Player) MarshalData(d *treepb.NodeData, path []string, lastTick uint32) {
+func (p *Player) marshalData(d *treepb.NodeData, path []string, lastTick uint32) {
+	db := p.displayDB.Load()
 	if len(path) > 0 {
-		p.marshalChildData(d, path, lastTick)
+		p.marshalChildData(db, d, path, lastTick)
 		return
 	}
 	data := &tickerpb.PlayerInfo{
-		Timeline: p.tline.MarshalDisplay(p.db),
+		Timeline: p.tline.MarshalDisplay(db),
 	}
 	anyPB, err := anypb.New(data)
 	if err != nil {
@@ -157,10 +162,17 @@ func (p *Player) MarshalData(d *treepb.NodeData, path []string, lastTick uint32)
 	d.Data = &treepb.NodeData_Pb{Pb: anyPB}
 }
 
+// MarshalData retrieves the NodeData of a child based on path.
+func (p *Player) MarshalData(d *treepb.NodeData, path []string, lastTick uint32) {
+	p.displayDB.Store(p.db)
+	p.marshalData(d, path, lastTick)
+}
+
 // Close the player and release the storage memory.
 func (p *Player) Close() error {
 	p.queue.Delete()
 	p.control.close()
+	p.displayDB.Store(p.db)
 	p.db.Close()
 	return nil
 }
