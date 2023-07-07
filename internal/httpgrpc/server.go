@@ -98,7 +98,7 @@ func (s *Server) post(w http.ResponseWriter, r *http.Request) error {
 	}
 	methodName := call[2]
 	method := reflect.ValueOf(service).MethodByName(methodName)
-	if method.IsZero() {
+	if !method.IsValid() {
 		return fmt.Errorf("method %q cannot be found for service %T", methodName, service)
 	}
 	msg, err := protoFromMethod(service, method)
