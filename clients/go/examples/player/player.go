@@ -21,7 +21,6 @@ import (
 	"log"
 	"math"
 	"math/rand"
-	"multiscope/clients/go/examples/tensors/tensor"
 	"multiscope/clients/go/remote"
 	"multiscope/clients/go/scope"
 )
@@ -30,17 +29,9 @@ var (
 	httpPort = flag.Int("http_port", scope.DefaultPort, "http port")
 	local    = flag.Bool("local", true, "open the port to local connection only")
 
-	maxNumStepsPerEpisode = flag.Int("max_num_steps_per_episode", 10, "maximum number of steps in an episode")
+	maxNumStepsPerEpisode = flag.Int("max_num_steps_per_episode", 10000, "maximum number of steps in an episode")
 	metaNumSteps          = flag.Int("meta_num_steps", math.MaxInt, "number of meta steps to run")
 )
-
-func writeTensorData(w *scope.TensorWriter, rnd *rand.Rand, t *tensor.Tensor, offset float32) error {
-	vals := t.Values()
-	for i := range vals {
-		vals[i] = rnd.Float32() + offset
-	}
-	return w.Write(t)
-}
 
 func writeScalarData(w *scope.ScalarWriter, tick int) error {
 	const factor = 0.01
@@ -57,14 +48,11 @@ type writers struct {
 	text   *remote.TextWriter
 	html   *remote.HTMLWriter
 	scalar *remote.ScalarWriter
-	rgb    *remote.TensorWriter[float32]
 }
 
 func runEpisode(ws *writers, numSteps int) error {
 	const text = "Ticker\nsays\n<%d>"
 	const html = `<h1 class="fancy">Ticker</h1> says <h1 class="superfancy">%d</h1>`
-	rnd := rand.New(rand.NewSource(0))
-	rgb := tensor.NewTensor(20, 20, 3)
 	if err := ws.player.Reset(); err != nil {
 		return err
 	}
@@ -79,9 +67,6 @@ func runEpisode(ws *writers, numSteps int) error {
 			return err
 		}
 		if err := writeScalarData(ws.scalar, ws.player.CurrentTick()); err != nil {
-			return err
-		}
-		if err := writeTensorData(ws.rgb, rnd, rgb, 0); err != nil {
 			return err
 		}
 	}
@@ -105,7 +90,7 @@ func main() {
 
 	ws := &writers{}
 	// Create a new player to store frames in it.
-	if ws.player, err = scope.NewPlayer("steps", true, nil); err != nil {
+	if ws.player, err = scope.NewPlayer("steps", true, meta.Path()); err != nil {
 		log.Fatal(err)
 	}
 	// Create writers under the player because StoreFrame stores data
@@ -125,9 +110,6 @@ func main() {
 	if ws.scalar, err = scope.NewScalarWriter("Sin Data", ws.player.Path()); err != nil {
 		log.Fatal(err)
 	}
-	if ws.rgb, err = scope.NewTensorWriter[float32]("Scaled RGB", ws.player.Path()); err != nil {
-		log.Fatal(err)
-	}
 	rnd := rand.New(rand.NewSource(0))
 	for episode := 0; episode < *metaNumSteps; episode++ {
 		numSteps := rnd.Intn(*maxNumStepsPerEpisode-2) + 2
@@ -140,7 +122,6 @@ func main() {
 		if err := meta.StoreFrame(); err != nil {
 			log.Fatal(err)
 		}
-
 	}
 	<-make(chan bool)
 }

@@ -20,10 +20,10 @@ import (
 	"math"
 	"sync"
 
+	"multiscope/internal/server/core/timeline"
 	"multiscope/internal/server/writers/ticker/storage"
 	"multiscope/internal/server/writers/ticker/timedb"
 	pb "multiscope/protos/ticker_go_proto"
-	treepb "multiscope/protos/tree_go_proto"
 
 	"github.com/pkg/errors"
 )
@@ -105,8 +105,8 @@ func (tl *Timeline) Reset() error {
 }
 
 // Store the data for all children.
-func (tl *Timeline) Store(db *timedb.TimeDB) error {
-	db.Store(tl.currentTick)
+func (tl *Timeline) Store(db *timedb.TimeDB, root timeline.Marshaler) error {
+	db.Store(tl.currentTick, root)
 
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
@@ -139,18 +139,12 @@ func (tl *Timeline) adjustDisplayTick(db *timedb.TimeDB, tick int64) (out int64)
 	return tl.currentTick - 1
 }
 
-// MarshalData serializes the data given the current tick being displayed.
-func (tl *Timeline) MarshalData(db *timedb.TimeDB, data *treepb.NodeData, path []string) {
+// DisplayTick a record at the current tick being displayed.
+func (tl *Timeline) DisplayTick(db *timedb.TimeDB) int64 {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 
-	displayTick := tl.adjustDisplayTick(db, tl.displayTick)
-	rec := db.Fetch(displayTick)
-	if rec == nil {
-		data.Error = fmt.Sprintf("data for tick %d does not exist", displayTick)
-		return
-	}
-	rec.MarshalData(data, path, 0)
+	return tl.adjustDisplayTick(db, tl.displayTick)
 }
 
 // CurrentTick returns the next frame to store.

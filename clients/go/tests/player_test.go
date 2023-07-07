@@ -124,12 +124,10 @@ func TestPlayerTimelineWithEmbeddedTimeline(t *testing.T) {
 		if err := tickertesting.SendSetDisplayTick(clt, meta.Path(), i); err != nil {
 			t.Fatalf("SetDisplayTick error: %v", err)
 		}
-		/*
-			prefix := fmt.Sprintf("metaframe=%d ", i)
-			if err := tickertesting.CheckPlayerTimeline01(clt, prefix, player.Path(), writer.Path()); err != nil {
-				t.Error(fmtx.FormatError(err))
-			}
-		*/
+		prefix := fmt.Sprintf("metaframe=%d ", i)
+		if err := tickertesting.CheckPlayerTimeline01(clt, prefix, player.Path(), writer.Path()); err != nil {
+			t.Error(fmtx.FormatError(err))
+		}
 	}
 	if err := player.Close(); err != nil {
 		t.Error(fmtx.FormatError(err))
@@ -193,7 +191,7 @@ func TestPlayerTimelineCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(fmtx.FormatError(err))
 	}
-	textWant := fmt.Sprintf("%s  %02d", padding, 60)
+	textWant := fmt.Sprintf("%s  %02d", padding, 55)
 	if string(textGot) != textWant {
 		t.Errorf("got %s, want %s", string(textGot), textWant)
 	}
@@ -210,10 +208,10 @@ func TestPlayerTimelineCleanup(t *testing.T) {
 	}
 	tlGot := display.Timeline
 	tlWant := &pb.TimeLine{
-		DisplayTick:     60,
-		HistoryLength:   40,
-		OldestTick:      60,
-		StorageCapacity: "5e+03/5e+03 (92%)"}
+		DisplayTick:     55,
+		HistoryLength:   45,
+		OldestTick:      55,
+		StorageCapacity: "4e+03/5e+03 (90%)"}
 	if diff := cmp.Diff(tlWant, tlGot, protocmp.Transform()); diff != "" {
 		t.Errorf("got the following timeline:\n%v\nbut want the following:\n%v\ndiff:\n%s",
 			tlGot, tlWant, diff)

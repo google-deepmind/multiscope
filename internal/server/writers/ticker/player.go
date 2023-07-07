@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"multiscope/internal/mime"
 	"multiscope/internal/server/core"
+	coretimeline "multiscope/internal/server/core/timeline"
 	"multiscope/internal/server/events"
 	"multiscope/internal/server/treeservice"
 	"multiscope/internal/server/writers/base"
@@ -46,18 +47,19 @@ type (
 		*base.Group
 		db *timedb.TimeDB
 
-		displayDB atomic.Pointer[timedb.TimeDB]
-		tline     *timeline.Timeline
-		control   playerControl
-		queue     *events.Queue
+		displayedDB atomic.Pointer[timedb.TimeDB]
+		tline       *timeline.Timeline
+		control     playerControl
+		queue       *events.Queue
 	}
 )
 
 var (
-	_ core.Node        = (*Player)(nil)
-	_ core.Parent      = (*Player)(nil)
-	_ core.ChildAdder  = (*Player)(nil)
-	_ core.NodeReseter = (*Player)(nil)
+	_ core.Node                  = (*Player)(nil)
+	_ core.Parent                = (*Player)(nil)
+	_ core.ChildAdder            = (*Player)(nil)
+	_ core.NodeReseter           = (*Player)(nil)
+	_ coretimeline.WithMarshaler = (*Player)(nil)
 )
 
 // NewPlayer returns a new writer to stream data tables.
@@ -66,8 +68,7 @@ func NewPlayer(ignorePause bool) *Player {
 		Group: base.NewGroup(mime.MultiscopePlayer),
 		tline: timeline.New(),
 	}
-	p.db = timedb.New(p.Group)
-	p.displayDB.Store(p.db)
+	p.db = timedb.New(p)
 	if ignorePause {
 		p.control = newNoPauseControl(p)
 	} else {
@@ -90,8 +91,8 @@ func (p *Player) processEvents(ev *treepb.Event) error {
 	if err := anypb.UnmarshalTo(ev.Payload, action, proto.UnmarshalOptions{}); err != nil {
 		return err
 	}
-	db := p.displayDB.Load()
 	var err error
+	db := p.displayedDB.Load()
 	switch act := action.Action.(type) {
 	case *tickerpb.PlayerAction_TickView:
 		err = p.tline.SetTickView(db, act.TickView)
@@ -129,7 +130,7 @@ func (p *Player) ResetNode() error {
 // StoreFrame goes through the tree to store the current state of the nodes into a storage.
 func (p *Player) StoreFrame(data *tickerpb.PlayerData) error {
 	p.control.mainNextStep()
-	return p.tline.Store(p.db)
+	return p.tline.Store(p.db, coretimeline.NewParent(false, p))
 }
 
 // MIME returns the mime type of this node.
@@ -137,20 +138,13 @@ func (p *Player) MIME() string {
 	return mime.ProtoToMIME(&tickerpb.PlayerInfo{})
 }
 
-func (p *Player) marshalChildData(db *timedb.TimeDB, data *treepb.NodeData, path []string, lastTick uint32) {
-	if p.tline.IsLastTickDisplayed() {
-		p.Group.MarshalData(data, path, lastTick)
-		return
-	}
-	p.tline.MarshalData(db, data, path)
+// Timeline returns a marshaler to store the player as a timeline.
+func (p *Player) Timeline() coretimeline.Marshaler {
+	return newTLPlayer(p)
 }
 
-func (p *Player) marshalData(d *treepb.NodeData, path []string, lastTick uint32) {
-	db := p.displayDB.Load()
-	if len(path) > 0 {
-		p.marshalChildData(db, d, path, lastTick)
-		return
-	}
+func (p *Player) marshalDisplay(d *treepb.NodeData, lastTick uint32, db *timedb.TimeDB) {
+	p.displayedDB.Store(db)
 	data := &tickerpb.PlayerInfo{
 		Timeline: p.tline.MarshalDisplay(db),
 	}
@@ -162,17 +156,28 @@ func (p *Player) marshalData(d *treepb.NodeData, path []string, lastTick uint32)
 	d.Data = &treepb.NodeData_Pb{Pb: anyPB}
 }
 
+func (p *Player) marshalPastData(d *treepb.NodeData, path []string, lastTick uint32, db *timedb.TimeDB) {
+	toDisplay := p.tline.DisplayTick(db)
+	db.MarshalData(toDisplay, d, path, lastTick)
+}
+
 // MarshalData retrieves the NodeData of a child based on path.
 func (p *Player) MarshalData(d *treepb.NodeData, path []string, lastTick uint32) {
-	p.displayDB.Store(p.db)
-	p.marshalData(d, path, lastTick)
+	if len(path) == 0 {
+		p.marshalDisplay(d, lastTick, p.db)
+		return
+	}
+	if p.tline.IsLastTickDisplayed() {
+		p.Group.MarshalData(d, path, lastTick)
+		return
+	}
+	p.marshalPastData(d, path, lastTick, p.db)
 }
 
 // Close the player and release the storage memory.
 func (p *Player) Close() error {
 	p.queue.Delete()
 	p.control.close()
-	p.displayDB.Store(p.db)
 	p.db.Close()
 	return nil
 }
