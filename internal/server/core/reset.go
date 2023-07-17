@@ -4,13 +4,13 @@ import (
 	"go.uber.org/multierr"
 )
 
-// NodeReseter resets the node.
-type NodeReseter interface {
+// NodeResetter resets the node.
+type NodeResetter interface {
 	ResetNode() error
 }
 
 func recursiveReset(node Node) error {
-	reseter, ok := node.(NodeReseter)
+	reseter, ok := node.(NodeResetter)
 	if ok {
 		if err := reseter.ResetNode(); err != nil {
 			return err
@@ -37,7 +37,7 @@ func recursiveReset(node Node) error {
 	return gErr
 }
 
-// RecursiveReset resets all children nodes implementing the NodeReseter interface.
+// RecursiveReset resets all children nodes implementing the NodeResetter interface.
 func RecursiveReset(parent ParentNode, withPath WithPBPath) error {
 	_, node, err := pathToNode(parent, withPath)
 	if err != nil {

@@ -58,7 +58,7 @@ var (
 	_ core.Node                  = (*Player)(nil)
 	_ core.Parent                = (*Player)(nil)
 	_ core.ChildAdder            = (*Player)(nil)
-	_ core.NodeReseter           = (*Player)(nil)
+	_ core.NodeResetter          = (*Player)(nil)
 	_ coretimeline.WithMarshaler = (*Player)(nil)
 )
 

@@ -38,8 +38,8 @@ type Writer struct {
 }
 
 var (
-	_ core.Node        = (*Writer)(nil)
-	_ core.NodeReseter = (*Writer)(nil)
+	_ core.Node         = (*Writer)(nil)
+	_ core.NodeResetter = (*Writer)(nil)
 )
 
 // TimeLabel is a label to use to override the default time counter of the vega writer.

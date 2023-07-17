@@ -37,7 +37,7 @@ type (
 	}
 )
 
-// ToMarshaler converts a node to a marchaler for a timeline.
+// ToMarshaler converts a node to a marshaler for a timeline.
 func ToMarshaler(node core.Node) Marshaler {
 	if node == nil {
 		return nil
