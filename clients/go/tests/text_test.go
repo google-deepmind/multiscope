@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package text_test
+package scope_test
 
 import (
 	"testing"
+	"text/template"
 
 	"multiscope/clients/go/clienttesting"
 	"multiscope/clients/go/remote"
@@ -32,6 +33,33 @@ func TestWriter(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i, want := range texttesting.Text01Data {
+		if err := writer.Write(want); err != nil {
+			t.Error(err)
+			break
+		}
+		if err := texttesting.CheckText01(clt, []string{texttesting.Text01Name}, i); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestWriterIO(t *testing.T) {
+	clt, err := clienttesting.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	writer, err := remote.NewTextWriter(clt, texttesting.Text01Name, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tmpl := template.Must(template.New("").Parse("{{.content}}"))
+	for i, want := range texttesting.Text01Data {
+		if err := tmpl.Execute(writer.IO(), map[string]string{
+			"content": want,
+		}); err != nil {
+			t.Error(err)
+			break
+		}
 		if err := writer.Write(want); err != nil {
 			t.Error(err)
 			break
