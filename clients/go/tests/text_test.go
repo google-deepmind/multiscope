@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package text_test
+package scope_test
 
 import (
 	"testing"
@@ -22,24 +22,21 @@ import (
 	"multiscope/internal/server/writers/text/texttesting"
 )
 
-func TestHTMLWriter(t *testing.T) {
+func TestWriter(t *testing.T) {
 	clt, err := clienttesting.Start()
 	if err != nil {
 		t.Fatal(err)
 	}
-	writer, err := remote.NewHTMLWriter(clt, texttesting.HTML01Name, nil)
+	writer, err := remote.NewTextWriter(clt, texttesting.Text01Name, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.WriteCSS(texttesting.CSS01Data); err != nil {
-		t.Fatal(err)
-	}
-	for i, want := range texttesting.HTML01Data {
+	for i, want := range texttesting.Text01Data {
 		if err := writer.Write(want); err != nil {
 			t.Error(err)
 			break
 		}
-		if err := texttesting.CheckHTML01(clt, []string{texttesting.Text01Name}, i); err != nil {
+		if err := texttesting.CheckText01(clt, []string{texttesting.Text01Name}, i); err != nil {
 			t.Error(err)
 		}
 	}

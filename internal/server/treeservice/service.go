@@ -130,11 +130,11 @@ func (s *TreeServer) GetTreeID(ctx context.Context, req *pb.GetTreeIDRequest) (*
 		},
 		Version: version.Version,
 	}
-	serverWithState, ok := s.stateServer(state.TreeID())
+	_, ok := s.stateServer(state.TreeID())
 	if ok {
 		return resp, nil
 	}
-	serverWithState = newStateServer(state)
+	serverWithState := newStateServer(state)
 	s.idToServer.Store(state.TreeID(), serverWithState)
 	return resp, nil
 }
