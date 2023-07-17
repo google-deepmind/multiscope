@@ -149,11 +149,6 @@ func (w *Writer) forceUpdate() (err error) {
 	return
 }
 
-// Timeline returns a node to serialize in the timeline.
-func (w *Writer) Timeline() core.Node {
-	return w.timeline
-}
-
 // MarshalData writes the tensor protobuf into a data node.
 func (w *Writer) MarshalData(data *treepb.NodeData, path []string, lastTick uint32) {
 	if w.tensor == nil {

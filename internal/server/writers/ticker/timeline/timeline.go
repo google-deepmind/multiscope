@@ -20,14 +20,12 @@ import (
 	"math"
 	"sync"
 
-	"multiscope/internal/server/core"
+	"multiscope/internal/server/core/timeline"
 	"multiscope/internal/server/writers/ticker/storage"
 	"multiscope/internal/server/writers/ticker/timedb"
 	pb "multiscope/protos/ticker_go_proto"
-	treepb "multiscope/protos/tree_go_proto"
 
 	"github.com/pkg/errors"
-	"google.golang.org/protobuf/proto"
 )
 
 // Timeline stores data for a sub-tree for all ticks.
@@ -36,71 +34,79 @@ type Timeline struct {
 
 	currentTick int64
 	displayTick int64
-	db          *timedb.TimeDB
 }
 
 // New returns a new time given a node in the tree.
-func New(node core.Node) *Timeline {
+func New() *Timeline {
 	return &Timeline{
-		db:          timedb.New(node),
 		currentTick: 0,
 		displayTick: math.MaxInt64,
 	}
 }
 
 // MarshalDisplay sets the timeline information.
-func (tl *Timeline) MarshalDisplay() *pb.TimeLine {
+func (tl *Timeline) MarshalDisplay(db *timedb.TimeDB) *pb.TimeLine {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 
-	if tl.db.NumRecords() == 0 {
+	if db.NumRecords() == 0 {
 		return nil
 	}
-	currentStorage := tl.db.StorageSize()
+	currentStorage := db.StorageSize()
 	maxStorage := storage.Global().Available()
 	storageCapacity := fmt.Sprintf("%.e/%.e (%d%%)",
 		float64(currentStorage),
 		float64(maxStorage),
 		int(float64(currentStorage)/float64(maxStorage)*100))
 	return &pb.TimeLine{
-		DisplayTick:     tl.adjustDisplayTick(tl.displayTick),
-		OldestTick:      tl.db.Oldest(),
-		HistoryLength:   int64(tl.db.NumRecords()),
+		DisplayTick:     tl.adjustDisplayTick(db, tl.displayTick),
+		OldestTick:      db.Oldest(),
+		HistoryLength:   int64(db.NumRecords()),
 		StorageCapacity: storageCapacity,
 	}
 }
 
-func (tl *Timeline) setDisplayTick(displayTick int64) {
+func (tl *Timeline) setDisplayTick(db *timedb.TimeDB, displayTick int64) {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 
 	tl.displayTick = displayTick
 }
 
-func (tl *Timeline) offsetDisplayTick(offset int64) {
+func (tl *Timeline) offsetDisplayTick(db *timedb.TimeDB, offset int64) {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 
-	tl.displayTick = tl.adjustDisplayTick(tl.displayTick)
+	tl.displayTick = tl.adjustDisplayTick(db, tl.displayTick)
 	tl.displayTick += offset
 }
 
 // SetTickView set the view to display.
-func (tl *Timeline) SetTickView(view *pb.SetTickView) error {
+func (tl *Timeline) SetTickView(db *timedb.TimeDB, view *pb.SetTickView) error {
 	switch cmd := view.TickCommand.(type) {
 	case *pb.SetTickView_ToDisplay:
-		tl.setDisplayTick(cmd.ToDisplay)
+		tl.setDisplayTick(db, cmd.ToDisplay)
 	case *pb.SetTickView_Offset:
-		tl.offsetDisplayTick(cmd.Offset)
+		tl.offsetDisplayTick(db, cmd.Offset)
 	default:
 		return errors.Errorf("tick command not supported: %T", cmd)
 	}
 	return nil
 }
 
+// Reset the timeline by removing all data.
+func (tl *Timeline) Reset() error {
+	tl.mux.Lock()
+	defer tl.mux.Unlock()
+	tl.currentTick = 0
+	tl.displayTick = math.MaxInt64
+
+	return nil
+}
+
 // Store the data for all children.
-func (tl *Timeline) Store() error {
-	tl.db.Store(tl.currentTick)
+func (tl *Timeline) Store(db *timedb.TimeDB, root timeline.Marshaler) error {
+	db.Store(tl.currentTick, root)
 
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
@@ -109,15 +115,15 @@ func (tl *Timeline) Store() error {
 	return nil
 }
 
-func (tl *Timeline) adjustDisplayTick(tick int64) (out int64) {
+func (tl *Timeline) adjustDisplayTick(db *timedb.TimeDB, tick int64) (out int64) {
 	defer func() {
 		if out < 0 {
 			out = 0
 		}
 	}()
 
-	oldest := tl.db.Oldest()
-	if tick < tl.db.Oldest() {
+	oldest := db.Oldest()
+	if tick < db.Oldest() {
 		// Adjust to the oldest tick.
 		return oldest
 	}
@@ -133,26 +139,12 @@ func (tl *Timeline) adjustDisplayTick(tick int64) (out int64) {
 	return tl.currentTick - 1
 }
 
-// MarshalData serializes the data given the current tick being displayed.
-func (tl *Timeline) MarshalData(data *treepb.NodeData, path []string) {
+// DisplayTick a record at the current tick being displayed.
+func (tl *Timeline) DisplayTick(db *timedb.TimeDB) int64 {
 	tl.mux.Lock()
 	defer tl.mux.Unlock()
 
-	displayTick := tl.adjustDisplayTick(tl.displayTick)
-	rec := tl.db.Fetch(displayTick)
-	if rec == nil {
-		data.Error = fmt.Sprintf("data for tick %d does not exist", displayTick)
-		return
-	}
-	for _, p := range path {
-		child := rec.Child(p)
-		if child == nil {
-			data.Error = fmt.Sprintf("child %q in path %v cannot be found in the timeline. Available children are: %v", p, path, rec.Children())
-			return
-		}
-		rec = child
-	}
-	proto.Merge(data, rec.Data())
+	return tl.adjustDisplayTick(db, tl.displayTick)
 }
 
 // CurrentTick returns the next frame to store.
@@ -169,10 +161,4 @@ func (tl *Timeline) IsLastTickDisplayed() bool {
 	defer tl.mux.Unlock()
 
 	return tl.displayTick >= tl.currentTick
-}
-
-// Close the timeline and release all the memory.
-func (tl *Timeline) Close() error {
-	tl.db.Close()
-	return nil
 }

@@ -28,7 +28,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func addChildTo(nameToPath map[string][]string, root core.Parent, parentPath []string, nodeName string, node core.Node) []string {
+func addChildTo(nameToPath map[string][]string, root core.ParentNode, parentPath []string, nodeName string, node core.Node) []string {
 	parent, err := core.PathToNode(root, parentPath)
 	if err != nil {
 		log.Fatal(err)

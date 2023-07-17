@@ -61,6 +61,23 @@ func (srv *Service) NewPlayer(ctx context.Context, req *pb.NewPlayerRequest) (*p
 	}, nil
 }
 
+// ResetPlayer clears all frames stored in a player.
+func (srv *Service) ResetPlayer(ctx context.Context, req *pb.ResetPlayerRequest) (*pb.ResetPlayerResponse, error) {
+	state, err := srv.state.State(treeservice.TreeID(req.Player)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
+	var player *Player
+	if err := core.Set(&player, state.Root(), req.GetPlayer()); err != nil {
+		desc := fmt.Sprintf("cannot get the player from the tree: %v", err)
+		return nil, status.New(codes.InvalidArgument, desc).Err()
+	}
+	if err := core.RecursiveReset(state.Root(), req.GetPlayer()); err != nil {
+		return nil, err
+	}
+	return &pb.ResetPlayerResponse{}, nil
+}
+
 // StoreFrame goes through all the children of a tree to store their state into some kind of storage.
 func (srv *Service) StoreFrame(ctx context.Context, req *pb.StoreFrameRequest) (*pb.StoreFrameResponse, error) {
 	state, err := srv.state.State(treeservice.TreeID(req.Player)) // use state throughout this RPC lifetime.

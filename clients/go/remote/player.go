@@ -60,6 +60,19 @@ func NewPlayer(clt *Client, name string, ignorePause bool, parent Path) (*Player
 	return p, nil
 }
 
+// Reset the player by erasing all stored frames.
+func (p *Player) Reset() error {
+	p.tick = 0
+	ctx := context.Background()
+	_, err := p.clt.ResetPlayer(ctx, &pb.ResetPlayerRequest{
+		Player: p.player,
+	})
+	if err != nil {
+		return errors.Errorf("cannot reset player: %v", err)
+	}
+	return nil
+}
+
 // StoreFrame stores all the data from nodes under a player.
 func (p *Player) StoreFrame() error {
 	p.tick++
@@ -73,7 +86,7 @@ func (p *Player) StoreFrame() error {
 	if err != nil {
 		return errors.Errorf("cannot store frame: %v", err)
 	}
-	return err
+	return nil
 }
 
 // CurrentTick returns the current frame number.

@@ -32,41 +32,108 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 )
 
-func TestPlayerTimeline(t *testing.T) {
+func writeThenCheckPlayerData(prefix string, player *remote.Player, writer *remote.HTMLWriter) error {
+	for i := 0; i < tickertesting.Ticker01NumTicks; i++ {
+		if err := writer.WriteCSS(prefix + "css:" + fmt.Sprint(i)); err != nil {
+			return err
+		}
+		if err := writer.Write(prefix + "html:" + fmt.Sprint(i)); err != nil {
+			return err
+		}
+		if err := player.StoreFrame(); err != nil {
+			return err
+		}
+	}
+	return tickertesting.CheckPlayerTimeline01(player.Client(), prefix, player.Path(), writer.Path())
+}
+
+func testPlayerTimeline(withReset bool) error {
 	clt, err := clienttesting.Start()
 	if err != nil {
-		t.Fatal(fmtx.FormatError(err))
+		return err
 	}
-
-	// Create the tree.
 	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, nil)
 	if err != nil {
-		t.Fatal(fmtx.FormatError(err))
+		return err
 	}
 	writer, err := remote.NewHTMLWriter(clt, tickertesting.Ticker01HTMLWriterName, player.Path())
 	if err != nil {
-		t.Fatal(fmtx.FormatError(err))
+		return err
 	}
-
-	const nTicks = 10
-	// Write some data.
-	for i := 0; i < nTicks; i++ {
-		if err := writer.WriteCSS("css:" + fmt.Sprint(i)); err != nil {
-			t.Fatal(fmtx.FormatError(err))
-		}
-		if err := writer.Write("html:" + fmt.Sprint(i)); err != nil {
-			t.Fatal(fmtx.FormatError(err))
-		}
-		if err := player.StoreFrame(); err != nil {
-			t.Fatal(fmtx.FormatError(err))
-		}
+	if err := writeThenCheckPlayerData("", player, writer); err != nil {
+		return err
 	}
+	if !withReset {
+		return player.Close()
+	}
+	if err := player.Reset(); err != nil {
+		return err
+	}
+	if err := tickertesting.CheckPlayerTimelineAfterReset(clt, player.Path(), writer.Path()); err != nil {
+		return err
+	}
+	if err := writeThenCheckPlayerData("", player, writer); err != nil {
+		return err
+	}
+	return player.Close()
+}
 
-	if err := tickertesting.CheckPlayerTimeline01(clt, player.Path(), writer.Path()); err != nil {
+func TestPlayerTimeline(t *testing.T) {
+	if err := testPlayerTimeline(false); err != nil {
 		t.Error(fmtx.FormatError(err))
 	}
+}
+
+func TestPlayerTimelineWithReset(t *testing.T) {
+	if err := testPlayerTimeline(true); err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+}
+
+func TestPlayerTimelineWithEmbeddedTimeline(t *testing.T) {
+	clt, err := clienttesting.Start()
+	if err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+	meta, err := remote.NewPlayer(clt, "Meta", false, nil)
+	if err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+	player, err := remote.NewPlayer(clt, tickertesting.Ticker01Name, false, meta.Path())
+	if err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+	writer, err := remote.NewHTMLWriter(clt, tickertesting.Ticker01HTMLWriterName, player.Path())
+	if err != nil {
+		t.Error(fmtx.FormatError(err))
+	}
+	const metaFrame = 3
+	for i := 0; i < metaFrame; i++ {
+		if err := player.Reset(); err != nil {
+			t.Error(fmtx.FormatError(err))
+		}
+		prefix := fmt.Sprintf("metaframe=%d ", i)
+		if err := writeThenCheckPlayerData(prefix, player, writer); err != nil {
+			t.Error(fmtx.FormatError(err))
+		}
+		if err := meta.StoreFrame(); err != nil {
+			t.Error(fmtx.FormatError(err))
+		}
+	}
+	for i := 0; i < metaFrame; i++ {
+		if err := tickertesting.SendSetDisplayTick(clt, meta.Path(), i); err != nil {
+			t.Fatalf("SetDisplayTick error: %v", err)
+		}
+		prefix := fmt.Sprintf("metaframe=%d ", i)
+		if err := tickertesting.CheckPlayerTimeline01(clt, prefix, player.Path(), writer.Path()); err != nil {
+			t.Error(fmtx.FormatError(err))
+		}
+	}
 	if err := player.Close(); err != nil {
-		t.Fatal(fmtx.FormatErrorf("cannot close player: %v", err))
+		t.Error(fmtx.FormatError(err))
+	}
+	if err := meta.Close(); err != nil {
+		t.Error(fmtx.FormatError(err))
 	}
 }
 
@@ -124,7 +191,7 @@ func TestPlayerTimelineCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(fmtx.FormatError(err))
 	}
-	textWant := fmt.Sprintf("%s  %02d", padding, 60)
+	textWant := fmt.Sprintf("%s  %02d", padding, 55)
 	if string(textGot) != textWant {
 		t.Errorf("got %s, want %s", string(textGot), textWant)
 	}
@@ -141,10 +208,10 @@ func TestPlayerTimelineCleanup(t *testing.T) {
 	}
 	tlGot := display.Timeline
 	tlWant := &pb.TimeLine{
-		DisplayTick:     60,
-		HistoryLength:   40,
-		OldestTick:      60,
-		StorageCapacity: "5e+03/5e+03 (92%)"}
+		DisplayTick:     55,
+		HistoryLength:   45,
+		OldestTick:      55,
+		StorageCapacity: "4e+03/5e+03 (90%)"}
 	if diff := cmp.Diff(tlWant, tlGot, protocmp.Transform()); diff != "" {
 		t.Errorf("got the following timeline:\n%v\nbut want the following:\n%v\ndiff:\n%s",
 			tlGot, tlWant, diff)
@@ -180,21 +247,17 @@ func TestPlayerEmptyTimeline(t *testing.T) {
 	if err != nil {
 		t.Fatal(fmtx.FormatError(err))
 	}
-	const errWant = "data for tick 0 does not exist"
-	errGot := data[0].GetError()
-	if errGot != errWant {
-		t.Errorf("unexpected error for absent data: got %q want %q", errGot, errWant)
+	if err := tickertesting.CheckText(data[0], ""); err != nil {
+		t.Error(fmtx.FormatError(err))
 	}
-	// Requesting data when a tick has occurred, but no data has been written.
 	if err := player.StoreFrame(); err != nil {
 		t.Fatal(fmtx.FormatError(err))
 	}
 	if data, err = client.NodesData(ctx, clt, nodes); err != nil {
 		t.Fatal(fmtx.FormatError(err))
 	}
-	errGot = data[0].GetError()
-	if errGot != "" {
-		t.Errorf("unexpected error: got %q want \"\"", errGot)
+	if err := tickertesting.CheckText(data[0], ""); err != nil {
+		t.Error(fmtx.FormatError(err))
 	}
 	if err := player.Close(); err != nil {
 		t.Fatalf("cannot close player: %v", err)

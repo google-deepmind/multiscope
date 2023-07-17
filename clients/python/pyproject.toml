@@ -79,6 +79,7 @@ disable = [
     'pyi-error',
     'module-attr',
     'import-error',
+    'attribute-error',
 ]
 # Don't report errors.
 report_errors = true

@@ -35,8 +35,7 @@ def main(argv):
         .format(
             time=time.strftime("%H:%M:%S %Z"),
             date=time.strftime("%b %d, %Y"),
-        )
-    )
+        ))
 
 
 if __name__ == "__main__":

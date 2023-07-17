@@ -94,11 +94,11 @@ func NodesData(ctx context.Context, clt Client, nodes []*pb.Node) ([]*pb.NodeDat
 // ToRaw converts data returned by the server into a byte array.
 func ToRaw(nodeData *pb.NodeData) ([]byte, error) {
 	if nodeData.GetError() != "" {
-		return nil, fmt.Errorf("node error: %s", nodeData.GetError())
+		return nil, errors.Errorf("node error: %s", nodeData.GetError())
 	}
 	raw := nodeData.GetRaw()
 	if raw == nil {
-		return nil, errors.New("node data does not contain raw data")
+		return nil, errors.Errorf("node data does not contain raw data")
 	}
 	return raw, nil
 }
