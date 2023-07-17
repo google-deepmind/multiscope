@@ -16,6 +16,7 @@ package scope_test
 
 import (
 	"testing"
+	"text/template"
 
 	"multiscope/clients/go/clienttesting"
 	"multiscope/clients/go/remote"
@@ -36,6 +37,34 @@ func TestHTMLWriter(t *testing.T) {
 	}
 	for i, want := range texttesting.HTML01Data {
 		if err := writer.Write(want); err != nil {
+			t.Error(err)
+			break
+		}
+		if err := texttesting.CheckHTML01(clt, []string{texttesting.Text01Name}, i); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestHTMLWriterIO(t *testing.T) {
+	clt, err := clienttesting.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	writer, err := remote.NewHTMLWriter(clt, texttesting.HTML01Name, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tmpl := template.Must(template.New("").Parse("{{.content}}"))
+	if err := tmpl.Execute(writer.CSSIO(), map[string]string{
+		"content": texttesting.CSS01Data,
+	}); err != nil {
+		t.Error(err)
+	}
+	for i, want := range texttesting.HTML01Data {
+		if err := tmpl.Execute(writer.HTMLIO(), map[string]string{
+			"content": want,
+		}); err != nil {
 			t.Error(err)
 			break
 		}
