@@ -20,13 +20,14 @@ from typing import Callable, Tuple
 # from multiscope import root_pb2 as root_pb
 # from multiscope.protos import tree_pb2 as stream_pb2
 from multiscope.remote import active_paths
-from multiscope.remote import control
 from multiscope.remote import stream_client
+from multiscope.remote.control import control
 
 
 class Node(abc.ABC):
 
-  def __init__(self, path: Tuple[str, ...]):
+  def __init__(self, py_client: stream_client.Client, path: Tuple[str, ...]):
+    self._py_client = py_client
     self.path = path
     self.name = self.path[-1]
 
@@ -34,8 +35,8 @@ class Node(abc.ABC):
 class Writer(Node):
   """A writer has a write method.."""
 
-  def __init__(self, path: Tuple[str, ...]):
-    Node.__init__(self, path=path)
+  def __init__(self, py_client: stream_client.Client, path: Tuple[str, ...]):
+    Node.__init__(self, py_client=py_client, path=path)
     self._should_write = False
     self._should_write_lock = threading.Lock()
     # This property is controlled by the decorators in
@@ -70,7 +71,7 @@ class Writer(Node):
   #   return stream_client.PutNodeData(request=request)
 
   def register_activity_callback(self, cb: Callable[[bool], None]):
-    active_paths.register_callback(self.path, cb)
+    self._py_client.ActivePaths().register_callback(self.path, cb)
 
   def reset(self):
     """Clears the data of the writer in the backend, if any.

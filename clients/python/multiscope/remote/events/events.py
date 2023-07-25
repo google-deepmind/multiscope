@@ -40,7 +40,6 @@ from typing import (
 from absl import logging
 from multiscope.protos import ticker_pb2
 from multiscope.protos import tree_pb2 as pb
-from multiscope.remote import stream_client
 
 _ticker_filter = ticker_pb2.TickerAction.DESCRIPTOR.full_name
 

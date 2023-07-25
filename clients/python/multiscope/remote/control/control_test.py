@@ -25,9 +25,10 @@ from multiscope.remote.control import control
 
 def _list_all_nodes():
   """Lists all nodes (including the root) in the tree. Not optimized."""
-  req = pb.NodeStructRequest()
+  tree_id = stream_client.GlobalClient().TreeID()
+  req = pb.NodeStructRequest(tree_id=tree_id)
   req.paths.append(pb.NodePath())
-  nodes = stream_client.GetNodeStruct(req).nodes
+  nodes = stream_client.GlobalClient().TreeClient().GetNodeStruct(req).nodes
   if nodes:
     # This needs to be the root node, that's what we requested.
     if len(nodes) != 1 or len(nodes[0].path.path) != 0:
@@ -50,9 +51,10 @@ def _list_subtree(root):
 
   if len(root.children) == 0:
     # Request them.
-    req = pb.NodeStructRequest()
+    tree_id = stream_client.GlobalClient().TreeID()
+    req = pb.NodeStructRequest(tree_id=tree_id)
     req.paths.append(root.path)
-    nodes = stream_client.GetNodeStruct(req).nodes
+    nodes = stream_client.GlobalClient().TreeClient().GetNodeStruct(req).nodes
     assert nodes[0].path == root.path
     root = nodes[0]
 
@@ -70,7 +72,7 @@ class TestControl(absltest.TestCase):
 
   def testDisable(self):
     multiscope.disable()
-    self.assertIsNone(multiscope.start_server())
+    self.assertIsNone(multiscope.start_server(port=0))
     # Strict mode is enabled in BUILD rule for all tests.
     s = multiscope.ScalarWriter("scalar")
     t = multiscope.TextWriter("text")
@@ -82,7 +84,7 @@ class TestControl(absltest.TestCase):
 
   def testReset(self):
     text_data = "foo"
-    multiscope.start_server()
+    multiscope.start_server(port=0)
     t = multiscope.Ticker("ticker")
     w = multiscope.TextWriter("text", t)
 
@@ -119,13 +121,14 @@ class TestControl(absltest.TestCase):
     self.assertLen(all_nodes, len(["root", t, w]))
 
     # We can read the data written.
-    node_data_request = pb.NodeDataRequest()
+    tree_id = stream_client.GlobalClient().TreeID()
+    node_data_request = pb.NodeDataRequest(tree_id=tree_id)
     data_req = pb.DataRequest(lastTick=0)
     data_req.path.path.extend(w.path)
     node_data_request.reqs.append(data_req)
     got_text = (
-        stream_client.GetNodeData(node_data_request).node_data[0].raw.decode(
-            "utf-8"))
+        stream_client.GlobalClient().TreeClient().GetNodeData(
+            node_data_request).node_data[0].raw.decode("utf-8"))
     self.assertEqual(got_text, text_data)
 
 

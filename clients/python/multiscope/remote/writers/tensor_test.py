@@ -23,9 +23,7 @@ from multiscope.remote import stream_client
 
 
 def setUpModule():
-  # TODO: in some tests `start_server()` is imported from `remote.__init__`,
-  #   here it's from multiscope. Make consistent.
-  multiscope.start_server()
+  multiscope.start_server(port=0)
 
 
 class TestTensorWriter(absltest.TestCase):
@@ -36,12 +34,14 @@ class TestTensorWriter(absltest.TestCase):
     tensor_data = np.arange(0, 5, 1, dtype=np.int16)
     pb_path = tree_pb2.NodePath(path=w.path + ("tensor",))
     data_req = tree_pb2.DataRequest(path=pb_path, lastTick=0)
-    node_data_req = tree_pb2.NodeDataRequest()
+    tree_id = stream_client.GlobalClient().TreeID()
+    node_data_req = tree_pb2.NodeDataRequest(tree_id=tree_id)
     node_data_req.reqs.append(data_req)
     empty_data = True
     while empty_data:
       w.write(tensor_data)
-      pb_data = stream_client.GetNodeData(node_data_req)
+      pb_data = stream_client.GlobalClient().TreeClient().GetNodeData(
+          node_data_req)
       self.assertEmpty(pb_data.node_data[0].error)
       empty_data = not bool(pb_data.node_data[0].raw)
     self.assertNotEmpty(pb_data.node_data[0].raw)

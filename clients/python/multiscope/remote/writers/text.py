@@ -17,7 +17,8 @@ from typing import Optional
 from multiscope.protos import text_pb2
 from multiscope.protos import text_pb2_grpc
 from multiscope.remote import active_paths
-from multiscope.remote import control
+from multiscope.remote.control import control
+from multiscope.remote.control import decorators
 from multiscope.remote import group
 from multiscope.remote import stream_client
 from multiscope.remote.writers import base
@@ -26,23 +27,22 @@ from multiscope.remote.writers import base
 class TextWriter(base.Writer):
   """Writes text on the Multiscope page."""
 
-  @control.init
+  @decorators.init
   def __init__(
       self,
       py_client: stream_client.Client,
       name: str,
       parent: Optional[group.ParentNode] = None,
   ):
-    self._py_client = py_client
     self._client = text_pb2_grpc.TextStub(self._py_client.Channel())
     path = group.join_path_pb(parent, name)
     req = text_pb2.NewWriterRequest(tree_id=self._py_client.TreeID(), path=path)
     self.writer = self._client.NewWriter(req).writer
-    super().__init__(path=tuple(self.writer.path.path))
+    super().__init__(py_client=py_client, path=tuple(self.writer.path.path))
     self._py_client.ActivePaths().register_callback(self.path,
                                                     self._set_should_write)
 
-  @control.method
+  @decorators.method
   def write(self, data: str):
     request = text_pb2.WriteRequest(
         writer=self.writer,
@@ -61,17 +61,16 @@ class HTMLWriter(base.Writer):
       name: str,
       parent: Optional[group.ParentNode] = None,
   ):
-    self._py_client = py_client
-    self._client = text_pb2_grpc.TextStub(self._py_client.Channel())
+    self._client = text_pb2_grpc.TextStub(py_client.Channel())
     path = group.join_path_pb(parent, name)
     req = text_pb2.NewHTMLWriterRequest(
         tree_id=self._py_client.TreeID(), path=path)
     self.writer = self._client.NewHTMLWriter(req).writer
-    super().__init__(path=tuple(self.writer.path.path))
+    super().__init__(py_client=py_client, path=tuple(self.writer.path.path))
     self._py_client.ActivePaths().register_callback(self.path,
                                                     self._set_should_write)
 
-  @control.method
+  @decorators.method
   def write_css(self, data: str):
     request = text_pb2.WriteCSSRequest(
         writer=self.writer,
@@ -79,7 +78,7 @@ class HTMLWriter(base.Writer):
     )
     self._client.WriteCSS(request)
 
-  @control.method
+  @decorators.method
   def write(self, data: str):
     request = text_pb2.WriteHTMLRequest(
         writer=self.writer,

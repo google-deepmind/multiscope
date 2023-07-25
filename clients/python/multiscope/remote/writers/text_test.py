@@ -13,16 +13,16 @@
 # limitations under the License.
 
 from absl import flags
+from absl.testing import absltest
 
 import multiscope
-from absl.testing import absltest
 
 FLAGS = flags.FLAGS
 FLAGS.multiscope_strict_mode = True
 
 
 def setUpModule():
-  multiscope.start_server()
+  multiscope.start_server(port=0)
 
 
 class TestTextWriter(absltest.TestCase):

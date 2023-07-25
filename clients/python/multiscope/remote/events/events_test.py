@@ -17,12 +17,12 @@ import time
 
 from absl.testing import absltest
 
-from multiscope.protos import ticker_pb2
-from multiscope.protos import tree_pb2 as pb
-
 from multiscope.remote import server as multiscope
 from multiscope.remote import stream_client
 from multiscope.remote.events import events
+
+from multiscope.protos import ticker_pb2
+from multiscope.protos import tree_pb2 as pb
 
 
 def _to_event_pb(path, msg):
@@ -36,7 +36,7 @@ class EventsTest(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
-    multiscope.start_server()
+    multiscope.start_server(port=0)
 
   def testSubscribe(self):
     """Tests if we can subscribe to events."""
@@ -53,14 +53,16 @@ class EventsTest(absltest.TestCase):
 
     # Register the callback
     path = ["this", "is", "a", "path"]
-    events.register_ticker_callback(path, collect_event)
+    stream_client.GlobalClient().Events().register_ticker_callback(
+        path, collect_event)
     # Create an event
     data = ticker_pb2.TickerAction(command=ticker_pb2.Command.CMD_RUN)
     event = _to_event_pb(path, data)
-    req = pb.SendEventsRequest()
+    tree_id = stream_client.GlobalClient().TreeID()
+    req = pb.SendEventsRequest(tree_id=tree_id)
     req.events.append(event)
 
-    stream_client.SendEvents(req)
+    stream_client.GlobalClient().TreeClient().SendEvents(req)
 
     wait.acquire()
     self.assertIsNotNone(collected_action)

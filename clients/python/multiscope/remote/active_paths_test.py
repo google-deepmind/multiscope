@@ -26,7 +26,7 @@ class ActivePathTest(absltest.TestCase):
 
   def testActivePath(self):
     """Tests if active_paths calls callbacks."""
-    multiscope.start_server()
+    multiscope.start_server(port=0)
 
     path_ab = ["a", "b"]
     is_active_ab = threading.Event()
@@ -34,7 +34,8 @@ class ActivePathTest(absltest.TestCase):
     def active_ab(_: bool):
       is_active_ab.set()
 
-    active_paths.register_callback(tuple(path_ab), active_ab)
+    stream_client.GlobalClient().ActivePaths().register_callback(
+        tuple(path_ab), active_ab)
 
     path_a = ["a"]
     is_active_a = threading.Event()
@@ -42,21 +43,26 @@ class ActivePathTest(absltest.TestCase):
     def active_a(_: bool):
       is_active_a.set()
 
-    active_paths.register_callback(tuple(path_a), active_a)
-
+    stream_client.GlobalClient().ActivePaths().register_callback(
+        tuple(path_a), active_a)
+    tree_id = stream_client.GlobalClient().TreeID()
     stream_client.GetNodeData(
-        pb.NodeDataRequest(reqs=[
-            pb.DataRequest(path=pb.NodePath(path=path_ab), lastTick=0),
-        ]))
+        pb.NodeDataRequest(
+            tree_id=tree_id,
+            reqs=[
+                pb.DataRequest(path=pb.NodePath(path=path_ab), lastTick=0),
+            ]))
     is_active_ab.wait()
     self.assertFalse(is_active_a.is_set())
 
     is_active_a.clear()
     is_active_ab.clear()
     stream_client.GetNodeData(
-        pb.NodeDataRequest(reqs=[
-            pb.DataRequest(path=pb.NodePath(path=path_a), lastTick=0),
-        ]))
+        pb.NodeDataRequest(
+            tree_id=tree_id,
+            reqs=[
+                pb.DataRequest(path=pb.NodePath(path=path_a), lastTick=0),
+            ]))
     is_active_a.wait()
     is_active_ab.wait()
 
