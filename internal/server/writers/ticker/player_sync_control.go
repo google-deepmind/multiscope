@@ -57,7 +57,7 @@ func (c *playerSyncControl) playerLoop() {
 				c.mainStepDone.Wait()
 			}
 		} else {
-			if err := c.player.tline.SetTickView(&pb.SetTickView{TickCommand: &pb.SetTickView_Offset{
+			if err := c.player.tline.SetTickView(c.player.db, &pb.SetTickView{TickCommand: &pb.SetTickView_Offset{
 				Offset: 1,
 			}}); err != nil {
 				log.Printf("timeline Go routine cannot set the ticker view: %v", err)

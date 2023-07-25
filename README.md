@@ -12,7 +12,18 @@ multiscope directory should be created. Clone the git repository:
 git clone https://github.com/deepmind/multiscope.git && (cd multiscope && hookdir=`git rev-parse --git-dir`/hooks ;  mkdir -p  $hookdir ; ln -s ../../.pre-commit.git $hookdir/pre-commit && chmod +x $hookdir/pre-commit)
 ```
 
+
 ### Getting the Tools for Building and Running
+
+Ensure you have a Go compiler whose version is >= 1.19.
+```
+go version
+```
+
+If you need to install a new version, it might not be consistent with your default operating system install.  It may be installed in a separate location.  Modify your environment variables to point to this toolchain as necessary in your shell startup configurations.
+e.g.
+
+
 
 Install the protobuf compiler.
 

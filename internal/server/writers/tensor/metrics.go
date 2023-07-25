@@ -39,8 +39,8 @@ func newMetrics(parent *Writer) *metricsUpdater {
 }
 
 func (u *metricsUpdater) reset() error {
-	u.minmax.Reset()
-	u.norms.Reset()
+	u.minmax.ResetNode()
+	u.norms.ResetNode()
 	return nil
 }
 

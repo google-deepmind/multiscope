@@ -447,6 +447,94 @@ func (x *PlayerData) GetTick() int64 {
 	return 0
 }
 
+// Reset data for a given player.
+type ResetPlayerRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Path to the player.
+	Player *Player `protobuf:"bytes,1,opt,name=player,proto3" json:"player,omitempty"`
+}
+
+func (x *ResetPlayerRequest) Reset() {
+	*x = ResetPlayerRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ticker_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ResetPlayerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResetPlayerRequest) ProtoMessage() {}
+
+func (x *ResetPlayerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ticker_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResetPlayerRequest.ProtoReflect.Descriptor instead.
+func (*ResetPlayerRequest) Descriptor() ([]byte, []int) {
+	return file_ticker_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ResetPlayerRequest) GetPlayer() *Player {
+	if x != nil {
+		return x.Player
+	}
+	return nil
+}
+
+// Response after storing a frame.
+type ResetPlayerResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ResetPlayerResponse) Reset() {
+	*x = ResetPlayerResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ticker_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ResetPlayerResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResetPlayerResponse) ProtoMessage() {}
+
+func (x *ResetPlayerResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ticker_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResetPlayerResponse.ProtoReflect.Descriptor instead.
+func (*ResetPlayerResponse) Descriptor() ([]byte, []int) {
+	return file_ticker_proto_rawDescGZIP(), []int{7}
+}
+
 // Request to store a frame in the player.
 // All the children of the player (supporting the functionality)
 // will store their data associated with the current frame number.
@@ -464,7 +552,7 @@ type StoreFrameRequest struct {
 func (x *StoreFrameRequest) Reset() {
 	*x = StoreFrameRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[6]
+		mi := &file_ticker_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -477,7 +565,7 @@ func (x *StoreFrameRequest) String() string {
 func (*StoreFrameRequest) ProtoMessage() {}
 
 func (x *StoreFrameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[6]
+	mi := &file_ticker_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -490,7 +578,7 @@ func (x *StoreFrameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StoreFrameRequest.ProtoReflect.Descriptor instead.
 func (*StoreFrameRequest) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{6}
+	return file_ticker_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *StoreFrameRequest) GetPlayer() *Player {
@@ -517,7 +605,7 @@ type StoreFrameResponse struct {
 func (x *StoreFrameResponse) Reset() {
 	*x = StoreFrameResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[7]
+		mi := &file_ticker_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -530,7 +618,7 @@ func (x *StoreFrameResponse) String() string {
 func (*StoreFrameResponse) ProtoMessage() {}
 
 func (x *StoreFrameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[7]
+	mi := &file_ticker_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -543,7 +631,7 @@ func (x *StoreFrameResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StoreFrameResponse.ProtoReflect.Descriptor instead.
 func (*StoreFrameResponse) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{7}
+	return file_ticker_proto_rawDescGZIP(), []int{9}
 }
 
 // Time line information.
@@ -561,7 +649,7 @@ type TimeLine struct {
 func (x *TimeLine) Reset() {
 	*x = TimeLine{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[8]
+		mi := &file_ticker_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -574,7 +662,7 @@ func (x *TimeLine) String() string {
 func (*TimeLine) ProtoMessage() {}
 
 func (x *TimeLine) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[8]
+	mi := &file_ticker_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -587,7 +675,7 @@ func (x *TimeLine) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TimeLine.ProtoReflect.Descriptor instead.
 func (*TimeLine) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{8}
+	return file_ticker_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *TimeLine) GetDisplayTick() int64 {
@@ -630,7 +718,7 @@ type PlayerInfo struct {
 func (x *PlayerInfo) Reset() {
 	*x = PlayerInfo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[9]
+		mi := &file_ticker_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -643,7 +731,7 @@ func (x *PlayerInfo) String() string {
 func (*PlayerInfo) ProtoMessage() {}
 
 func (x *PlayerInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[9]
+	mi := &file_ticker_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -656,7 +744,7 @@ func (x *PlayerInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlayerInfo.ProtoReflect.Descriptor instead.
 func (*PlayerInfo) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{9}
+	return file_ticker_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *PlayerInfo) GetTimeline() *TimeLine {
@@ -683,7 +771,7 @@ type PlayerAction struct {
 func (x *PlayerAction) Reset() {
 	*x = PlayerAction{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[10]
+		mi := &file_ticker_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -696,7 +784,7 @@ func (x *PlayerAction) String() string {
 func (*PlayerAction) ProtoMessage() {}
 
 func (x *PlayerAction) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[10]
+	mi := &file_ticker_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -709,7 +797,7 @@ func (x *PlayerAction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlayerAction.ProtoReflect.Descriptor instead.
 func (*PlayerAction) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{10}
+	return file_ticker_proto_rawDescGZIP(), []int{12}
 }
 
 func (m *PlayerAction) GetAction() isPlayerAction_Action {
@@ -776,7 +864,7 @@ type Ticker struct {
 func (x *Ticker) Reset() {
 	*x = Ticker{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[11]
+		mi := &file_ticker_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -789,7 +877,7 @@ func (x *Ticker) String() string {
 func (*Ticker) ProtoMessage() {}
 
 func (x *Ticker) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[11]
+	mi := &file_ticker_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -802,7 +890,7 @@ func (x *Ticker) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Ticker.ProtoReflect.Descriptor instead.
 func (*Ticker) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{11}
+	return file_ticker_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *Ticker) GetTreeId() *tree_go_proto.TreeID {
@@ -832,7 +920,7 @@ type NewTickerRequest struct {
 func (x *NewTickerRequest) Reset() {
 	*x = NewTickerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[12]
+		mi := &file_ticker_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -845,7 +933,7 @@ func (x *NewTickerRequest) String() string {
 func (*NewTickerRequest) ProtoMessage() {}
 
 func (x *NewTickerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[12]
+	mi := &file_ticker_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -858,7 +946,7 @@ func (x *NewTickerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NewTickerRequest.ProtoReflect.Descriptor instead.
 func (*NewTickerRequest) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{12}
+	return file_ticker_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *NewTickerRequest) GetTreeId() *tree_go_proto.TreeID {
@@ -887,7 +975,7 @@ type NewTickerResponse struct {
 func (x *NewTickerResponse) Reset() {
 	*x = NewTickerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[13]
+		mi := &file_ticker_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -900,7 +988,7 @@ func (x *NewTickerResponse) String() string {
 func (*NewTickerResponse) ProtoMessage() {}
 
 func (x *NewTickerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[13]
+	mi := &file_ticker_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -913,7 +1001,7 @@ func (x *NewTickerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NewTickerResponse.ProtoReflect.Descriptor instead.
 func (*NewTickerResponse) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{13}
+	return file_ticker_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *NewTickerResponse) GetTicker() *Ticker {
@@ -938,7 +1026,7 @@ type TickerData struct {
 func (x *TickerData) Reset() {
 	*x = TickerData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[14]
+		mi := &file_ticker_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -951,7 +1039,7 @@ func (x *TickerData) String() string {
 func (*TickerData) ProtoMessage() {}
 
 func (x *TickerData) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[14]
+	mi := &file_ticker_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -964,7 +1052,7 @@ func (x *TickerData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TickerData.ProtoReflect.Descriptor instead.
 func (*TickerData) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{14}
+	return file_ticker_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *TickerData) GetTick() int64 {
@@ -997,7 +1085,7 @@ type TickerAction struct {
 func (x *TickerAction) Reset() {
 	*x = TickerAction{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[15]
+		mi := &file_ticker_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1010,7 +1098,7 @@ func (x *TickerAction) String() string {
 func (*TickerAction) ProtoMessage() {}
 
 func (x *TickerAction) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[15]
+	mi := &file_ticker_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1023,7 +1111,7 @@ func (x *TickerAction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TickerAction.ProtoReflect.Descriptor instead.
 func (*TickerAction) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{15}
+	return file_ticker_proto_rawDescGZIP(), []int{17}
 }
 
 func (m *TickerAction) GetAction() isTickerAction_Action {
@@ -1078,7 +1166,7 @@ type WriteTickerRequest struct {
 func (x *WriteTickerRequest) Reset() {
 	*x = WriteTickerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[16]
+		mi := &file_ticker_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1091,7 +1179,7 @@ func (x *WriteTickerRequest) String() string {
 func (*WriteTickerRequest) ProtoMessage() {}
 
 func (x *WriteTickerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[16]
+	mi := &file_ticker_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1104,7 +1192,7 @@ func (x *WriteTickerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WriteTickerRequest.ProtoReflect.Descriptor instead.
 func (*WriteTickerRequest) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{16}
+	return file_ticker_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *WriteTickerRequest) GetTicker() *Ticker {
@@ -1131,7 +1219,7 @@ type WriteTickerResponse struct {
 func (x *WriteTickerResponse) Reset() {
 	*x = WriteTickerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[17]
+		mi := &file_ticker_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1144,7 +1232,7 @@ func (x *WriteTickerResponse) String() string {
 func (*WriteTickerResponse) ProtoMessage() {}
 
 func (x *WriteTickerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[17]
+	mi := &file_ticker_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1157,7 +1245,7 @@ func (x *WriteTickerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WriteTickerResponse.ProtoReflect.Descriptor instead.
 func (*WriteTickerResponse) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{17}
+	return file_ticker_proto_rawDescGZIP(), []int{19}
 }
 
 type TickerData_Periods struct {
@@ -1178,7 +1266,7 @@ type TickerData_Periods struct {
 func (x *TickerData_Periods) Reset() {
 	*x = TickerData_Periods{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticker_proto_msgTypes[18]
+		mi := &file_ticker_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1191,7 +1279,7 @@ func (x *TickerData_Periods) String() string {
 func (*TickerData_Periods) ProtoMessage() {}
 
 func (x *TickerData_Periods) ProtoReflect() protoreflect.Message {
-	mi := &file_ticker_proto_msgTypes[18]
+	mi := &file_ticker_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1204,7 +1292,7 @@ func (x *TickerData_Periods) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TickerData_Periods.ProtoReflect.Descriptor instead.
 func (*TickerData_Periods) Descriptor() ([]byte, []int) {
-	return file_ticker_proto_rawDescGZIP(), []int{14, 0}
+	return file_ticker_proto_rawDescGZIP(), []int{16, 0}
 }
 
 func (x *TickerData_Periods) GetTotal() *durationpb.Duration {
@@ -1272,7 +1360,13 @@ var file_ticker_proto_rawDesc = []byte{
 	0x65, 0x2e, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x72, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x52,
 	0x06, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x22, 0x20, 0x0a, 0x0a, 0x50, 0x6c, 0x61, 0x79, 0x65,
 	0x72, 0x44, 0x61, 0x74, 0x61, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x69, 0x63, 0x6b, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x03, 0x52, 0x04, 0x74, 0x69, 0x63, 0x6b, 0x22, 0x79, 0x0a, 0x11, 0x53, 0x74, 0x6f,
+	0x01, 0x28, 0x03, 0x52, 0x04, 0x74, 0x69, 0x63, 0x6b, 0x22, 0x47, 0x0a, 0x12, 0x52, 0x65, 0x73,
+	0x65, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x31, 0x0a, 0x06, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x19, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e, 0x74, 0x69, 0x63,
+	0x6b, 0x65, 0x72, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x52, 0x06, 0x70, 0x6c, 0x61, 0x79,
+	0x65, 0x72, 0x22, 0x15, 0x0a, 0x13, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65,
+	0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x79, 0x0a, 0x11, 0x53, 0x74, 0x6f,
 	0x72, 0x65, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x31,
 	0x0a, 0x06, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19,
 	0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e, 0x74, 0x69, 0x63, 0x6b,
@@ -1370,7 +1464,7 @@ var file_ticker_proto_rawDesc = []byte{
 	0x50, 0x41, 0x55, 0x53, 0x45, 0x10, 0x01, 0x12, 0x0b, 0x0a, 0x07, 0x43, 0x4d, 0x44, 0x5f, 0x52,
 	0x55, 0x4e, 0x10, 0x02, 0x12, 0x0c, 0x0a, 0x08, 0x43, 0x4d, 0x44, 0x5f, 0x53, 0x54, 0x45, 0x50,
 	0x10, 0x03, 0x12, 0x10, 0x0a, 0x0c, 0x43, 0x4d, 0x44, 0x5f, 0x53, 0x54, 0x45, 0x50, 0x42, 0x41,
-	0x43, 0x4b, 0x10, 0x04, 0x32, 0xfa, 0x02, 0x0a, 0x07, 0x54, 0x69, 0x63, 0x6b, 0x65, 0x72, 0x73,
+	0x43, 0x4b, 0x10, 0x04, 0x32, 0xda, 0x03, 0x0a, 0x07, 0x54, 0x69, 0x63, 0x6b, 0x65, 0x72, 0x73,
 	0x12, 0x58, 0x0a, 0x09, 0x4e, 0x65, 0x77, 0x54, 0x69, 0x63, 0x6b, 0x65, 0x72, 0x12, 0x23, 0x2e,
 	0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e, 0x74, 0x69, 0x63, 0x6b, 0x65,
 	0x72, 0x2e, 0x4e, 0x65, 0x77, 0x54, 0x69, 0x63, 0x6b, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65,
@@ -1388,6 +1482,12 @@ var file_ticker_proto_rawDesc = []byte{
 	0x6c, 0x61, 0x79, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x24, 0x2e, 0x6d,
 	0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x72,
 	0x2e, 0x4e, 0x65, 0x77, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x00, 0x12, 0x5e, 0x0a, 0x0b, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x6c, 0x61,
+	0x79, 0x65, 0x72, 0x12, 0x25, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65,
+	0x2e, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x72, 0x2e, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x6c, 0x61,
+	0x79, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x26, 0x2e, 0x6d, 0x75, 0x6c,
+	0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x72, 0x2e, 0x52,
+	0x65, 0x73, 0x65, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
 	0x73, 0x65, 0x22, 0x00, 0x12, 0x5b, 0x0a, 0x0a, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x46, 0x72, 0x61,
 	0x6d, 0x65, 0x12, 0x24, 0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e,
 	0x74, 0x69, 0x63, 0x6b, 0x65, 0x72, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x46, 0x72, 0x61, 0x6d,
@@ -1412,7 +1512,7 @@ func file_ticker_proto_rawDescGZIP() []byte {
 }
 
 var file_ticker_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_ticker_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_ticker_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_ticker_proto_goTypes = []interface{}{
 	(Command)(0),                   // 0: multiscope.ticker.Command
 	(*SetPeriod)(nil),              // 1: multiscope.ticker.SetPeriod
@@ -1421,62 +1521,67 @@ var file_ticker_proto_goTypes = []interface{}{
 	(*NewPlayerRequest)(nil),       // 4: multiscope.ticker.NewPlayerRequest
 	(*NewPlayerResponse)(nil),      // 5: multiscope.ticker.NewPlayerResponse
 	(*PlayerData)(nil),             // 6: multiscope.ticker.PlayerData
-	(*StoreFrameRequest)(nil),      // 7: multiscope.ticker.StoreFrameRequest
-	(*StoreFrameResponse)(nil),     // 8: multiscope.ticker.StoreFrameResponse
-	(*TimeLine)(nil),               // 9: multiscope.ticker.TimeLine
-	(*PlayerInfo)(nil),             // 10: multiscope.ticker.PlayerInfo
-	(*PlayerAction)(nil),           // 11: multiscope.ticker.PlayerAction
-	(*Ticker)(nil),                 // 12: multiscope.ticker.Ticker
-	(*NewTickerRequest)(nil),       // 13: multiscope.ticker.NewTickerRequest
-	(*NewTickerResponse)(nil),      // 14: multiscope.ticker.NewTickerResponse
-	(*TickerData)(nil),             // 15: multiscope.ticker.TickerData
-	(*TickerAction)(nil),           // 16: multiscope.ticker.TickerAction
-	(*WriteTickerRequest)(nil),     // 17: multiscope.ticker.WriteTickerRequest
-	(*WriteTickerResponse)(nil),    // 18: multiscope.ticker.WriteTickerResponse
-	(*TickerData_Periods)(nil),     // 19: multiscope.ticker.TickerData.Periods
-	(*tree_go_proto.TreeID)(nil),   // 20: multiscope.TreeID
-	(*tree_go_proto.NodePath)(nil), // 21: multiscope.NodePath
-	(*durationpb.Duration)(nil),    // 22: google.protobuf.Duration
+	(*ResetPlayerRequest)(nil),     // 7: multiscope.ticker.ResetPlayerRequest
+	(*ResetPlayerResponse)(nil),    // 8: multiscope.ticker.ResetPlayerResponse
+	(*StoreFrameRequest)(nil),      // 9: multiscope.ticker.StoreFrameRequest
+	(*StoreFrameResponse)(nil),     // 10: multiscope.ticker.StoreFrameResponse
+	(*TimeLine)(nil),               // 11: multiscope.ticker.TimeLine
+	(*PlayerInfo)(nil),             // 12: multiscope.ticker.PlayerInfo
+	(*PlayerAction)(nil),           // 13: multiscope.ticker.PlayerAction
+	(*Ticker)(nil),                 // 14: multiscope.ticker.Ticker
+	(*NewTickerRequest)(nil),       // 15: multiscope.ticker.NewTickerRequest
+	(*NewTickerResponse)(nil),      // 16: multiscope.ticker.NewTickerResponse
+	(*TickerData)(nil),             // 17: multiscope.ticker.TickerData
+	(*TickerAction)(nil),           // 18: multiscope.ticker.TickerAction
+	(*WriteTickerRequest)(nil),     // 19: multiscope.ticker.WriteTickerRequest
+	(*WriteTickerResponse)(nil),    // 20: multiscope.ticker.WriteTickerResponse
+	(*TickerData_Periods)(nil),     // 21: multiscope.ticker.TickerData.Periods
+	(*tree_go_proto.TreeID)(nil),   // 22: multiscope.TreeID
+	(*tree_go_proto.NodePath)(nil), // 23: multiscope.NodePath
+	(*durationpb.Duration)(nil),    // 24: google.protobuf.Duration
 }
 var file_ticker_proto_depIdxs = []int32{
-	20, // 0: multiscope.ticker.Player.tree_id:type_name -> multiscope.TreeID
-	21, // 1: multiscope.ticker.Player.path:type_name -> multiscope.NodePath
-	20, // 2: multiscope.ticker.NewPlayerRequest.tree_id:type_name -> multiscope.TreeID
-	21, // 3: multiscope.ticker.NewPlayerRequest.path:type_name -> multiscope.NodePath
+	22, // 0: multiscope.ticker.Player.tree_id:type_name -> multiscope.TreeID
+	23, // 1: multiscope.ticker.Player.path:type_name -> multiscope.NodePath
+	22, // 2: multiscope.ticker.NewPlayerRequest.tree_id:type_name -> multiscope.TreeID
+	23, // 3: multiscope.ticker.NewPlayerRequest.path:type_name -> multiscope.NodePath
 	3,  // 4: multiscope.ticker.NewPlayerResponse.player:type_name -> multiscope.ticker.Player
-	3,  // 5: multiscope.ticker.StoreFrameRequest.player:type_name -> multiscope.ticker.Player
-	6,  // 6: multiscope.ticker.StoreFrameRequest.data:type_name -> multiscope.ticker.PlayerData
-	9,  // 7: multiscope.ticker.PlayerInfo.timeline:type_name -> multiscope.ticker.TimeLine
-	1,  // 8: multiscope.ticker.PlayerAction.setPeriod:type_name -> multiscope.ticker.SetPeriod
-	0,  // 9: multiscope.ticker.PlayerAction.command:type_name -> multiscope.ticker.Command
-	2,  // 10: multiscope.ticker.PlayerAction.tickView:type_name -> multiscope.ticker.SetTickView
-	20, // 11: multiscope.ticker.Ticker.tree_id:type_name -> multiscope.TreeID
-	21, // 12: multiscope.ticker.Ticker.path:type_name -> multiscope.NodePath
-	20, // 13: multiscope.ticker.NewTickerRequest.tree_id:type_name -> multiscope.TreeID
-	21, // 14: multiscope.ticker.NewTickerRequest.path:type_name -> multiscope.NodePath
-	12, // 15: multiscope.ticker.NewTickerResponse.ticker:type_name -> multiscope.ticker.Ticker
-	19, // 16: multiscope.ticker.TickerData.periods:type_name -> multiscope.ticker.TickerData.Periods
-	1,  // 17: multiscope.ticker.TickerAction.setPeriod:type_name -> multiscope.ticker.SetPeriod
-	0,  // 18: multiscope.ticker.TickerAction.command:type_name -> multiscope.ticker.Command
-	12, // 19: multiscope.ticker.WriteTickerRequest.ticker:type_name -> multiscope.ticker.Ticker
-	15, // 20: multiscope.ticker.WriteTickerRequest.data:type_name -> multiscope.ticker.TickerData
-	22, // 21: multiscope.ticker.TickerData.Periods.total:type_name -> google.protobuf.Duration
-	22, // 22: multiscope.ticker.TickerData.Periods.experiment:type_name -> google.protobuf.Duration
-	22, // 23: multiscope.ticker.TickerData.Periods.callbacks:type_name -> google.protobuf.Duration
-	22, // 24: multiscope.ticker.TickerData.Periods.idle:type_name -> google.protobuf.Duration
-	13, // 25: multiscope.ticker.Tickers.NewTicker:input_type -> multiscope.ticker.NewTickerRequest
-	17, // 26: multiscope.ticker.Tickers.WriteTicker:input_type -> multiscope.ticker.WriteTickerRequest
-	4,  // 27: multiscope.ticker.Tickers.NewPlayer:input_type -> multiscope.ticker.NewPlayerRequest
-	7,  // 28: multiscope.ticker.Tickers.StoreFrame:input_type -> multiscope.ticker.StoreFrameRequest
-	14, // 29: multiscope.ticker.Tickers.NewTicker:output_type -> multiscope.ticker.NewTickerResponse
-	18, // 30: multiscope.ticker.Tickers.WriteTicker:output_type -> multiscope.ticker.WriteTickerResponse
-	5,  // 31: multiscope.ticker.Tickers.NewPlayer:output_type -> multiscope.ticker.NewPlayerResponse
-	8,  // 32: multiscope.ticker.Tickers.StoreFrame:output_type -> multiscope.ticker.StoreFrameResponse
-	29, // [29:33] is the sub-list for method output_type
-	25, // [25:29] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	3,  // 5: multiscope.ticker.ResetPlayerRequest.player:type_name -> multiscope.ticker.Player
+	3,  // 6: multiscope.ticker.StoreFrameRequest.player:type_name -> multiscope.ticker.Player
+	6,  // 7: multiscope.ticker.StoreFrameRequest.data:type_name -> multiscope.ticker.PlayerData
+	11, // 8: multiscope.ticker.PlayerInfo.timeline:type_name -> multiscope.ticker.TimeLine
+	1,  // 9: multiscope.ticker.PlayerAction.setPeriod:type_name -> multiscope.ticker.SetPeriod
+	0,  // 10: multiscope.ticker.PlayerAction.command:type_name -> multiscope.ticker.Command
+	2,  // 11: multiscope.ticker.PlayerAction.tickView:type_name -> multiscope.ticker.SetTickView
+	22, // 12: multiscope.ticker.Ticker.tree_id:type_name -> multiscope.TreeID
+	23, // 13: multiscope.ticker.Ticker.path:type_name -> multiscope.NodePath
+	22, // 14: multiscope.ticker.NewTickerRequest.tree_id:type_name -> multiscope.TreeID
+	23, // 15: multiscope.ticker.NewTickerRequest.path:type_name -> multiscope.NodePath
+	14, // 16: multiscope.ticker.NewTickerResponse.ticker:type_name -> multiscope.ticker.Ticker
+	21, // 17: multiscope.ticker.TickerData.periods:type_name -> multiscope.ticker.TickerData.Periods
+	1,  // 18: multiscope.ticker.TickerAction.setPeriod:type_name -> multiscope.ticker.SetPeriod
+	0,  // 19: multiscope.ticker.TickerAction.command:type_name -> multiscope.ticker.Command
+	14, // 20: multiscope.ticker.WriteTickerRequest.ticker:type_name -> multiscope.ticker.Ticker
+	17, // 21: multiscope.ticker.WriteTickerRequest.data:type_name -> multiscope.ticker.TickerData
+	24, // 22: multiscope.ticker.TickerData.Periods.total:type_name -> google.protobuf.Duration
+	24, // 23: multiscope.ticker.TickerData.Periods.experiment:type_name -> google.protobuf.Duration
+	24, // 24: multiscope.ticker.TickerData.Periods.callbacks:type_name -> google.protobuf.Duration
+	24, // 25: multiscope.ticker.TickerData.Periods.idle:type_name -> google.protobuf.Duration
+	15, // 26: multiscope.ticker.Tickers.NewTicker:input_type -> multiscope.ticker.NewTickerRequest
+	19, // 27: multiscope.ticker.Tickers.WriteTicker:input_type -> multiscope.ticker.WriteTickerRequest
+	4,  // 28: multiscope.ticker.Tickers.NewPlayer:input_type -> multiscope.ticker.NewPlayerRequest
+	7,  // 29: multiscope.ticker.Tickers.ResetPlayer:input_type -> multiscope.ticker.ResetPlayerRequest
+	9,  // 30: multiscope.ticker.Tickers.StoreFrame:input_type -> multiscope.ticker.StoreFrameRequest
+	16, // 31: multiscope.ticker.Tickers.NewTicker:output_type -> multiscope.ticker.NewTickerResponse
+	20, // 32: multiscope.ticker.Tickers.WriteTicker:output_type -> multiscope.ticker.WriteTickerResponse
+	5,  // 33: multiscope.ticker.Tickers.NewPlayer:output_type -> multiscope.ticker.NewPlayerResponse
+	8,  // 34: multiscope.ticker.Tickers.ResetPlayer:output_type -> multiscope.ticker.ResetPlayerResponse
+	10, // 35: multiscope.ticker.Tickers.StoreFrame:output_type -> multiscope.ticker.StoreFrameResponse
+	31, // [31:36] is the sub-list for method output_type
+	26, // [26:31] is the sub-list for method input_type
+	26, // [26:26] is the sub-list for extension type_name
+	26, // [26:26] is the sub-list for extension extendee
+	0,  // [0:26] is the sub-list for field type_name
 }
 
 func init() { file_ticker_proto_init() }
@@ -1558,7 +1663,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StoreFrameRequest); i {
+			switch v := v.(*ResetPlayerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1570,7 +1675,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StoreFrameResponse); i {
+			switch v := v.(*ResetPlayerResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1582,7 +1687,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TimeLine); i {
+			switch v := v.(*StoreFrameRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1594,7 +1699,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PlayerInfo); i {
+			switch v := v.(*StoreFrameResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1606,7 +1711,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PlayerAction); i {
+			switch v := v.(*TimeLine); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1618,7 +1723,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Ticker); i {
+			switch v := v.(*PlayerInfo); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1630,7 +1735,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NewTickerRequest); i {
+			switch v := v.(*PlayerAction); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1642,7 +1747,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NewTickerResponse); i {
+			switch v := v.(*Ticker); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1654,7 +1759,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TickerData); i {
+			switch v := v.(*NewTickerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1666,7 +1771,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TickerAction); i {
+			switch v := v.(*NewTickerResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1678,7 +1783,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WriteTickerRequest); i {
+			switch v := v.(*TickerData); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1690,7 +1795,7 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WriteTickerResponse); i {
+			switch v := v.(*TickerAction); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1702,6 +1807,30 @@ func file_ticker_proto_init() {
 			}
 		}
 		file_ticker_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WriteTickerRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ticker_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WriteTickerResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ticker_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*TickerData_Periods); i {
 			case 0:
 				return &v.state
@@ -1718,12 +1847,12 @@ func file_ticker_proto_init() {
 		(*SetTickView_ToDisplay)(nil),
 		(*SetTickView_Offset)(nil),
 	}
-	file_ticker_proto_msgTypes[10].OneofWrappers = []interface{}{
+	file_ticker_proto_msgTypes[12].OneofWrappers = []interface{}{
 		(*PlayerAction_SetPeriod)(nil),
 		(*PlayerAction_Command)(nil),
 		(*PlayerAction_TickView)(nil),
 	}
-	file_ticker_proto_msgTypes[15].OneofWrappers = []interface{}{
+	file_ticker_proto_msgTypes[17].OneofWrappers = []interface{}{
 		(*TickerAction_SetPeriod)(nil),
 		(*TickerAction_Command)(nil),
 	}
@@ -1733,7 +1862,7 @@ func file_ticker_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_ticker_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   19,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

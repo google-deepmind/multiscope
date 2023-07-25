@@ -41,6 +41,15 @@ func NewRawWriter(mime string) *RawWriter {
 	}
 }
 
+// ResetNode resets the node.
+func (w *RawWriter) ResetNode() error {
+	buf := w.LockBuffer()
+	defer w.UnlockBuffer()
+
+	buf.Reset()
+	return nil
+}
+
 // Write sets the content of the leaf with p.
 func (w *RawWriter) Write(p []byte) error {
 	buf := w.LockBuffer()

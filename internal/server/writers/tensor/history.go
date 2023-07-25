@@ -44,7 +44,7 @@ func (u *historyUpdater) forwardActive(parent *core.Path) {
 }
 
 func (u *historyUpdater) reset() error {
-	u.w.Reset()
+	u.w.ResetNode()
 	return nil
 }
 

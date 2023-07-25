@@ -38,6 +38,7 @@ const (
 	Tickers_NewTicker_FullMethodName   = "/multiscope.ticker.Tickers/NewTicker"
 	Tickers_WriteTicker_FullMethodName = "/multiscope.ticker.Tickers/WriteTicker"
 	Tickers_NewPlayer_FullMethodName   = "/multiscope.ticker.Tickers/NewPlayer"
+	Tickers_ResetPlayer_FullMethodName = "/multiscope.ticker.Tickers/ResetPlayer"
 	Tickers_StoreFrame_FullMethodName  = "/multiscope.ticker.Tickers/StoreFrame"
 )
 
@@ -51,6 +52,8 @@ type TickersClient interface {
 	WriteTicker(ctx context.Context, in *WriteTickerRequest, opts ...grpc.CallOption) (*WriteTickerResponse, error)
 	// Create a new player node in Multiscope.
 	NewPlayer(ctx context.Context, in *NewPlayerRequest, opts ...grpc.CallOption) (*NewPlayerResponse, error)
+	// Write ticker data.
+	ResetPlayer(ctx context.Context, in *ResetPlayerRequest, opts ...grpc.CallOption) (*ResetPlayerResponse, error)
 	// Write ticker data.
 	StoreFrame(ctx context.Context, in *StoreFrameRequest, opts ...grpc.CallOption) (*StoreFrameResponse, error)
 }
@@ -90,6 +93,15 @@ func (c *tickersClient) NewPlayer(ctx context.Context, in *NewPlayerRequest, opt
 	return out, nil
 }
 
+func (c *tickersClient) ResetPlayer(ctx context.Context, in *ResetPlayerRequest, opts ...grpc.CallOption) (*ResetPlayerResponse, error) {
+	out := new(ResetPlayerResponse)
+	err := c.cc.Invoke(ctx, Tickers_ResetPlayer_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tickersClient) StoreFrame(ctx context.Context, in *StoreFrameRequest, opts ...grpc.CallOption) (*StoreFrameResponse, error) {
 	out := new(StoreFrameResponse)
 	err := c.cc.Invoke(ctx, Tickers_StoreFrame_FullMethodName, in, out, opts...)
@@ -110,6 +122,8 @@ type TickersServer interface {
 	// Create a new player node in Multiscope.
 	NewPlayer(context.Context, *NewPlayerRequest) (*NewPlayerResponse, error)
 	// Write ticker data.
+	ResetPlayer(context.Context, *ResetPlayerRequest) (*ResetPlayerResponse, error)
+	// Write ticker data.
 	StoreFrame(context.Context, *StoreFrameRequest) (*StoreFrameResponse, error)
 	mustEmbedUnimplementedTickersServer()
 }
@@ -126,6 +140,9 @@ func (UnimplementedTickersServer) WriteTicker(context.Context, *WriteTickerReque
 }
 func (UnimplementedTickersServer) NewPlayer(context.Context, *NewPlayerRequest) (*NewPlayerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewPlayer not implemented")
+}
+func (UnimplementedTickersServer) ResetPlayer(context.Context, *ResetPlayerRequest) (*ResetPlayerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResetPlayer not implemented")
 }
 func (UnimplementedTickersServer) StoreFrame(context.Context, *StoreFrameRequest) (*StoreFrameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StoreFrame not implemented")
@@ -197,6 +214,24 @@ func _Tickers_NewPlayer_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Tickers_ResetPlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetPlayerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TickersServer).ResetPlayer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Tickers_ResetPlayer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TickersServer).ResetPlayer(ctx, req.(*ResetPlayerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Tickers_StoreFrame_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StoreFrameRequest)
 	if err := dec(in); err != nil {
@@ -233,6 +268,10 @@ var Tickers_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "NewPlayer",
 			Handler:    _Tickers_NewPlayer_Handler,
+		},
+		{
+			MethodName: "ResetPlayer",
+			Handler:    _Tickers_ResetPlayer_Handler,
 		},
 		{
 			MethodName: "StoreFrame",

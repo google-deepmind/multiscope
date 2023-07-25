@@ -83,6 +83,15 @@ message PlayerData {
   int64 tick = 1;
 }
 
+// Reset data for a given player.
+message ResetPlayerRequest {
+  // Path to the player.
+  Player player = 1;
+}
+
+// Response after storing a frame.
+message ResetPlayerResponse {}
+
 // Request to store a frame in the player.
 // All the children of the player (supporting the functionality)
 // will store their data associated with the current frame number.
@@ -190,6 +199,9 @@ service Tickers {
 
   // Create a new player node in Multiscope.
   rpc NewPlayer(NewPlayerRequest) returns (NewPlayerResponse) {}
+
+  // Reset the data of a player.
+  rpc ResetPlayer(ResetPlayerRequest) returns (ResetPlayerResponse) {}
 
   // Write ticker data.
   rpc StoreFrame(StoreFrameRequest) returns (StoreFrameResponse) {}

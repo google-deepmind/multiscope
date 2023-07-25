@@ -69,6 +69,11 @@ def TextWriter(name: str, parent: Optional[group.ParentNode] = None):
       py_client=stream_client.GlobalClient(), name=name, parent=parent)
 
 
+def HTMLWriter(name: str, parent: Optional[group.ParentNode] = None):
+  return text.HTMLWriter(
+      py_client=stream_client.GlobalClient(), name=name, parent=parent)
+
+
 def Ticker(name: str, parent: Optional[group.ParentNode] = None):
   return ticker.Ticker(
       py_client=stream_client.GlobalClient(), name=name, parent=parent)

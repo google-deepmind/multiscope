@@ -42,15 +42,47 @@ class TextWriter(base.Writer):
     self._py_client.ActivePaths().register_callback(self.path,
                                                     self._set_should_write)
 
-    # TODO(b/251324180): re-enable once fixed.
-    # self._set_display()
-
   @control.method
   def write(self, data: str):
     request = text_pb2.WriteRequest(
         writer=self.writer,
-        # type-error suggest that we should pass `str` not `bytes` here,
-        # ignoring for now.
         text=data.encode("utf-8"),  # pytype: disable=wrong-arg-types
     )
     self._client.Write(request)
+
+
+class HTMLWriter(base.Writer):
+  """Writes HTML on the Multiscope page."""
+
+  @control.init
+  def __init__(
+      self,
+      py_client: stream_client.Client,
+      name: str,
+      parent: Optional[group.ParentNode] = None,
+  ):
+    self._py_client = py_client
+    self._client = text_pb2_grpc.TextStub(self._py_client.Channel())
+    path = group.join_path_pb(parent, name)
+    req = text_pb2.NewHTMLWriterRequest(
+        tree_id=self._py_client.TreeID(), path=path)
+    self.writer = self._client.NewHTMLWriter(req).writer
+    super().__init__(path=tuple(self.writer.path.path))
+    self._py_client.ActivePaths().register_callback(self.path,
+                                                    self._set_should_write)
+
+  @control.method
+  def write_css(self, data: str):
+    request = text_pb2.WriteCSSRequest(
+        writer=self.writer,
+        css=data.encode("utf-8"),  # pytype: disable=wrong-arg-types
+    )
+    self._client.WriteCSS(request)
+
+  @control.method
+  def write(self, data: str):
+    request = text_pb2.WriteHTMLRequest(
+        writer=self.writer,
+        html=data.encode("utf-8"),  # pytype: disable=wrong-arg-types
+    )
+    self._client.WriteHTML(request)
