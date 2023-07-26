@@ -48,8 +48,6 @@ class Player(group.ParentNode):
       parent: Optional[group.ParentNode] = None,
       stoppable: bool = True,
   ):
-    self._py_client = py_client
-
     self._tick_num: int = 0
 
     # Make the connection to the multiscope server.

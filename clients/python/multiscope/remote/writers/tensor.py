@@ -35,10 +35,10 @@ class TensorWriter(base.Writer):
       name: str,
       parent: Optional[group.ParentNode] = None,
   ):
-    self._client = tensor_pb2_grpc.TensorsStub(self._py_client.Channel())
+    self._client = tensor_pb2_grpc.TensorsStub(py_client.Channel())
     path = group.join_path_pb(parent, name)
     req = tensor_pb2.NewWriterRequest(
-        tree_id=self._py_client.TreeID(), path=path)
+        tree_id=py_client.TreeID(), path=path)
     self.writer = self._client.NewWriter(req).writer
     super().__init__(py_client=py_client, path=tuple(self.writer.path.path))
     self.register_activity_callback(self._set_should_write)

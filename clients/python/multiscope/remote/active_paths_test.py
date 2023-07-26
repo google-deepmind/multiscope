@@ -46,7 +46,7 @@ class ActivePathTest(absltest.TestCase):
     stream_client.GlobalClient().ActivePaths().register_callback(
         tuple(path_a), active_a)
     tree_id = stream_client.GlobalClient().TreeID()
-    stream_client.GetNodeData(
+    stream_client.GlobalClient().TreeClient().GetNodeData(
         pb.NodeDataRequest(
             tree_id=tree_id,
             reqs=[
@@ -57,7 +57,7 @@ class ActivePathTest(absltest.TestCase):
 
     is_active_a.clear()
     is_active_ab.clear()
-    stream_client.GetNodeData(
+    stream_client.GlobalClient().TreeClient().GetNodeData(
         pb.NodeDataRequest(
             tree_id=tree_id,
             reqs=[
