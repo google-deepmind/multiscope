@@ -63,7 +63,7 @@ class TickerTest(parameterized.TestCase):
     tckr.tick()
     self.assertEqual(1, tckr.current_tick)
     tckr.tick()
-    tckr.assertEqual(2, tckr.current_tick)
+    self.assertEqual(2, tckr.current_tick)
 
   @parameterized.parameters([0, 10, 100])
   def testSetPeriod(self, period_ms: int):

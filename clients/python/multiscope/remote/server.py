@@ -26,8 +26,8 @@ import termcolor
 from absl import flags
 
 from multiscope.protos import tree_pb2 as pb
-from multiscope.remote import control
 from multiscope.remote import stream_client
+from multiscope.remote.control import control
 
 _HTTP_PORT = flags.DEFINE_integer("http_port", 5972, "http port.")
 # TODO: grpc_port=0 picks one that works. Good default, but right now we don't
@@ -88,8 +88,8 @@ def start_server(
       )
       return _web_port
 
-    http_port = port or _HTTP_PORT.value
-    grpc_port = grpc_port or _GRPC_PORT.value
+    http_port = _HTTP_PORT.value if port is None else port
+    grpc_port = _GRPC_PORT.value if grpc_port is None else grpc_port
 
     _web_port, _grpc_url = _start_server_unsafe(
         http_port=http_port,
@@ -163,4 +163,5 @@ def reset():
   """Resets the multiscope server state by removing all nodes."""
   if control.disabled():
     return
-  stream_client.ResetState(pb.ResetStateRequest())
+  tree_id = stream_client.GlobalClient().TreeID()
+  stream_client.GlobalClient().ResetState(pb.ResetStateRequest(tree_id=tree_id))

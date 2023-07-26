@@ -16,7 +16,6 @@ from typing import Any, Mapping, Optional
 
 from multiscope.protos import scalar_pb2
 from multiscope.protos import scalar_pb2_grpc
-from multiscope.remote import active_paths
 from multiscope.remote.control import control
 from multiscope.remote.control import decorators
 from multiscope.remote import group
@@ -47,11 +46,10 @@ class ScalarWriter(base.Writer):
       name: str,
       parent: Optional[group.ParentNode] = None,
   ):
-    self._py_client = py_client
-    self._client = scalar_pb2_grpc.ScalarsStub(self._py_client.Channel())
+    self._client = scalar_pb2_grpc.ScalarsStub(py_client.Channel())
     path = group.join_path_pb(parent, name)
     req = scalar_pb2.NewWriterRequest(
-        tree_id=self._py_client.TreeID(), path=path)
+        tree_id=py_client.TreeID(), path=path)
     self.writer = self._client.NewWriter(req).writer
 
     super().__init__(py_client=py_client, path=tuple(self.writer.path.path))

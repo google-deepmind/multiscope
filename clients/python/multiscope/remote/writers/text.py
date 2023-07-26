@@ -34,9 +34,9 @@ class TextWriter(base.Writer):
       name: str,
       parent: Optional[group.ParentNode] = None,
   ):
-    self._client = text_pb2_grpc.TextStub(self._py_client.Channel())
+    self._client = text_pb2_grpc.TextStub(py_client.Channel())
     path = group.join_path_pb(parent, name)
-    req = text_pb2.NewWriterRequest(tree_id=self._py_client.TreeID(), path=path)
+    req = text_pb2.NewWriterRequest(tree_id=py_client.TreeID(), path=path)
     self.writer = self._client.NewWriter(req).writer
     super().__init__(py_client=py_client, path=tuple(self.writer.path.path))
     self._py_client.ActivePaths().register_callback(self.path,
@@ -54,7 +54,7 @@ class TextWriter(base.Writer):
 class HTMLWriter(base.Writer):
   """Writes HTML on the Multiscope page."""
 
-  @control.init
+  @decorators.init
   def __init__(
       self,
       py_client: stream_client.Client,
