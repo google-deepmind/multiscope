@@ -22,8 +22,9 @@ from google.protobuf import duration_pb2
 from multiscope.protos import ticker_pb2
 from multiscope.protos import ticker_pb2_grpc
 from multiscope.protos import tree_pb2 as pb
-from multiscope.remote import control
-from multiscope.remote import events
+from multiscope.remote.control import control
+from multiscope.remote.control import decorators
+from multiscope.remote.events import events
 from multiscope.remote import group
 from multiscope.remote import stream_client
 
@@ -39,7 +40,7 @@ class Player(group.ParentNode):
   The UI will provide controls to display frames back in time.
   """
 
-  @control.init
+  @decorators.init
   def __init__(
       self,
       py_client: stream_client.Client,
@@ -57,7 +58,7 @@ class Player(group.ParentNode):
     req = ticker_pb2.NewPlayerRequest(
         tree_id=self._py_client.TreeID(), path=path, ignorePause=not stoppable)
     self._player = self._client.NewPlayer(req).player
-    super().__init__(path=tuple(self._player.path.path))
+    super().__init__(py_client=py_client, path=tuple(self._player.path.path))
 
   def store_frame(self) -> None:
     """Store all children nodes in storage."""

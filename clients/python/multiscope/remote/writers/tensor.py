@@ -17,7 +17,8 @@ from typing import Any, Optional, Tuple, Type
 from multiscope.protos import tensor_pb2
 from multiscope.protos import tensor_pb2_grpc
 from multiscope.remote import active_paths
-from multiscope.remote import control
+from multiscope.remote.control import control
+from multiscope.remote.control import decorators
 from multiscope.remote import group
 from multiscope.remote import stream_client
 from multiscope.remote.writers import base
@@ -27,27 +28,22 @@ import numpy as np
 class TensorWriter(base.Writer):
   """TensorWriter displays a vega chart on the Multiscope page."""
 
-  @control.init
+  @decorators.init
   def __init__(
       self,
       py_client: stream_client.Client,
       name: str,
       parent: Optional[group.ParentNode] = None,
   ):
-    self._py_client = py_client
     self._client = tensor_pb2_grpc.TensorsStub(self._py_client.Channel())
     path = group.join_path_pb(parent, name)
     req = tensor_pb2.NewWriterRequest(
         tree_id=self._py_client.TreeID(), path=path)
     self.writer = self._client.NewWriter(req).writer
-    super().__init__(path=tuple(self.writer.path.path))
-    self._py_client.ActivePaths().register_callback(self.path,
-                                                    self._set_should_write)
+    super().__init__(py_client=py_client, path=tuple(self.writer.path.path))
+    self.register_activity_callback(self._set_should_write)
 
-    # TODO(b/251324180): re-enable once fixed.
-    # self._set_display()
-
-  @control.method
+  @decorators.method
   def write(self, tensor: np.ndarray):
     """Write a tensor."""
     req = tensor_pb2.WriteRequest(writer=self.writer)
@@ -57,7 +53,7 @@ class TensorWriter(base.Writer):
     req.tensor.content = tensor.tobytes()
     self._client.Write(req)
 
-  @control.method
+  @decorators.method
   def reset(self):
     req = tensor_pb2.ResetWriterRequest()
     req.writer.path.path.extend(self.path)

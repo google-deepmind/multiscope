@@ -21,7 +21,8 @@ import six
 from multiscope.protos import tree_pb2
 from multiscope.protos import base_pb2
 from multiscope.protos import base_pb2_grpc
-from multiscope.remote import control
+from multiscope.remote.control import control
+from multiscope.remote.control import decorators
 from multiscope.remote import stream_client
 from multiscope.remote.writers import base
 
@@ -43,11 +44,13 @@ def join_path_pb(parent: ParentNode, name: str) -> tree_pb2.NodePath:
 class Group(ParentNode):
   """Multiscope parent node."""
 
-  @control.init
-  def __init__(self, name: str, parent: Optional[ParentNode] = None):
+  @decorators.init
+  def __init__(self,
+               py_client: stream_client.Client,
+               name: str,
+               parent: Optional[ParentNode] = None):
     self._client = base_pb2_grpc.BaseWritersStub(stream_client.channel)
     node_path = join_path_pb(parent, name)
-    resp = self._client.NewGroup(base_pb2.NewGroupRequest(path=node_path))
-    # TODO: figure out whether we can remove this:
-    # self.name = name  # This gets overwritten in the superclass constructor.
-    super().__init__(path=tuple(resp.grp.path))
+    resp = py_client.Channel().NewGroup(
+        base_pb2.NewGroupRequest(path=node_path))
+    super().__init__(py_client=py_client, path=tuple(resp.grp.path))

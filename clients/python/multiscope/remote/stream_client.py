@@ -23,7 +23,6 @@ import grpc
 from multiscope.protos import tree_pb2 as pb
 from multiscope.protos import tree_pb2_grpc as pb_grpc
 from multiscope.remote import active_paths
-from multiscope.remote import control
 from multiscope.remote.events import events
 
 _channel: Optional[grpc.Channel] = None

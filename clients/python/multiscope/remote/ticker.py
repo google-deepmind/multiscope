@@ -22,8 +22,9 @@ from google.protobuf import duration_pb2
 from multiscope.protos import ticker_pb2
 from multiscope.protos import ticker_pb2_grpc
 from multiscope.protos import tree_pb2 as pb
-from multiscope.remote import control
-from multiscope.remote import events
+from multiscope.remote.control import control
+from multiscope.remote.control import decorators
+from multiscope.remote.events import events
 from multiscope.remote import group
 from multiscope.remote import stream_client
 
@@ -54,15 +55,13 @@ class Ticker(group.ParentNode):
   * step.
   """
 
-  @control.init
+  @decorators.init
   def __init__(
       self,
       py_client: stream_client.Client,
       name: str,
       parent: Optional[group.ParentNode] = None,
   ):
-    self._py_client = py_client
-
     self._tick_num: int = 0
     # Listeners are called on each tick.
     self._listeners: List[Callable[[], None]] = []
@@ -73,12 +72,11 @@ class Ticker(group.ParentNode):
     self._callback_timer = Timer(TIMER_AVERAGE_STEPSIZE)
 
     # Make the connection to the multiscope server.
-    self._client = ticker_pb2_grpc.TickersStub(self._py_client.Channel())
+    self._client = ticker_pb2_grpc.TickersStub(py_client.Channel())
     path = group.join_path_pb(parent, name)
-    req = ticker_pb2.NewTickerRequest(
-        tree_id=self._py_client.TreeID(), path=path)
+    req = ticker_pb2.NewTickerRequest(tree_id=py_client.TreeID(), path=path)
     self._ticker = self._client.NewTicker(req).ticker
-    super().__init__(path=tuple(self._ticker.path.path))
+    super().__init__(py_client=py_client, path=tuple(self._ticker.path.path))
 
     # Set up event management.
     self._py_client.Events().register_ticker_callback(
@@ -195,14 +193,14 @@ class Ticker(group.ParentNode):
       raise ValueError("Unexpected value of enum Command: {command}.")
 
   @property
-  @control.method
+  @decorators.method
   def period(self) -> datetime.timedelta:
     """Gets the period of the clock as a timedelta. Thread-safe."""
     with self._period_lock:
       return self._period
 
   @period.setter
-  @control.method
+  @decorators.method
   def period(self, p_nanos: int):
     """Sets the period in nano seconds. Thread-safe."""
     period = datetime.timedelta(milliseconds=p_nanos * 1e-6)
@@ -210,13 +208,13 @@ class Ticker(group.ParentNode):
       self._period = period
 
   @property
-  @control.method
+  @decorators.method
   def period_ms(self) -> float:
     """Gets the period of the clock in milliseconds. Thread-safe."""
     with self._period_lock:
       return self._period.total_seconds() * 1000
 
-  @control.method
+  @decorators.method
   def step(self):
     """Uses the ticker into step-by-step mode.
 
@@ -230,14 +228,14 @@ class Ticker(group.ParentNode):
       self._pause_next_step = True
     self._resume.set()
 
-  @control.method
+  @decorators.method
   def pause(self):
     """Pauses the clock on the next tick. Thread-safe."""
     logging.debug("CMD: pause.")
     with self._pause_lock:
       self._pause_next_step = True
 
-  @control.method
+  @decorators.method
   def run(self):
     """Runs the clock if paused, otherwise is a no-op. Thread-safe."""
     logging.debug("CMD: run.")

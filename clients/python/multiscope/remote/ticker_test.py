@@ -23,7 +23,7 @@ import multiscope
 from multiscope.protos import ticker_pb2
 from multiscope.protos import ticker_pb2_grpc
 from multiscope.protos import tree_pb2 as pb
-from multiscope.remote import clock
+from multiscope.remote import ticker
 from multiscope.remote import stream_client
 
 FLAGS = flags.FLAGS
@@ -43,13 +43,14 @@ def _to_event_pb(path, msg):
 
 def _send_event(event):
   """Sends the event."""
-  req = pb.SendEventsRequest()
+  tree_id = stream_client.GlobalClient().TreeID()
+  req = pb.SendEventsRequest(tree_id=tree_id)
   req.events.append(event)
-  stream_client.SendEvents(req)
+  stream_client.GlobalClient().TreeClient().SendEvents(req)
 
 
 def setUpModule():
-  multiscope.start_server()
+  multiscope.start_server(port=0)
 
 
 class TickerTest(parameterized.TestCase):
@@ -57,24 +58,24 @@ class TickerTest(parameterized.TestCase):
   def testCounter(self):
     """Asserts the tick number goes up."""
 
-    ticker = clock.Ticker("ticker")
-    self.assertEqual(0, ticker.current_tick)
-    ticker.tick()
-    self.assertEqual(1, ticker.current_tick)
-    ticker.tick()
-    self.assertEqual(2, ticker.current_tick)
+    tckr = multiscope.Ticker("ticker")
+    self.assertEqual(0, tckr.current_tick)
+    tckr.tick()
+    self.assertEqual(1, tckr.current_tick)
+    tckr.tick()
+    tckr.assertEqual(2, tckr.current_tick)
 
   @parameterized.parameters([0, 10, 100])
   def testSetPeriod(self, period_ms: int):
     """Tests that we can set the period from the server."""
-    ticker = clock.Ticker("ticker")
-    ticker._register_event_listener(
+    tckr = multiscope.Ticker("ticker")
+    tckr._register_event_listener(
         lambda a: self.assertAlmostEqual(period_ms,
-                                         ticker.period.total_seconds() * 1000))
+                                         tckr.period.total_seconds() * 1000))
 
     action = ticker_pb2.TickerAction()
     action.setPeriod.period_ms = period_ms
-    _send_event(_to_event_pb(ticker.path, action))
+    _send_event(_to_event_pb(tckr.path, action))
 
   @mock.patch.object(ticker_pb2_grpc, "TickersStub")
   def testWrite(self, mock_tickers_stub):
@@ -87,8 +88,8 @@ class TickerTest(parameterized.TestCase):
         ticker=pb_ticker)
     mock_tickers_stub.return_value.WriteTicker = mock_write
 
-    ticker = clock.Ticker("ticker")
-    ticker.tick()
+    tckr = multiscope.Ticker("ticker")
+    tckr.tick()
     mock_write.assert_called()
 
 
@@ -96,7 +97,7 @@ class TimerTest(parameterized.TestCase):
 
   def testDifference(self):
     limit = 0.1
-    timer = clock.Timer(ema_sample_weight=1.0)
+    timer = ticker.Timer(ema_sample_weight=1.0)
     timer.start()
     samples = [timer.sample().total_seconds() for i in range(20)]
     if any([s > limit for s in samples]):

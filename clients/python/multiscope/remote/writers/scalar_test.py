@@ -21,7 +21,7 @@ from multiscope.protos import scalar_pb2
 
 
 def setUpModule():
-  multiscope.start_server(connection_timeout_secs=2)
+  multiscope.start_server(port=0, connection_timeout_secs=2)
 
 
 class MockClient:

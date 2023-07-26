@@ -39,7 +39,7 @@ func writeDirContent(w *scope.HTMLWriter, dirname string) error {
 		return fmt.Errorf("cannot read directory %v: %w", dirname, err)
 	}
 	sort.Slice(files, func(i, j int) bool {
-		return files[i].Name() < files[i].Name()
+		return files[i].Name() < files[j].Name()
 	})
 	cnt := html.NewContent(w)
 	up := html.NewButton(cnt, html.HTML("..")).OnClick(func() error {

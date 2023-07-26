@@ -23,9 +23,6 @@ from multiscope.remote import ticker
 from multiscope.remote.control.control import disable
 from multiscope.remote.control.control import DISABLE_MULTISCOPE
 from multiscope.remote.control.control import undo_disable
-# Import like this, or explicitly import events from ....events? Right now
-# the list of entries is the same.
-import multiscope.remote.events
 from multiscope.remote.server import get_dashboard_url
 from multiscope.remote.server import reset
 from multiscope.remote.server import server_address
@@ -41,6 +38,12 @@ flags.DEFINE_bool(
     help=("Enable multiscope strict mode, which throws exceptions on"
           " multiscope-related errors."),
 )
+
+Writer = base.Writer
+
+
+def global_client():
+  return stream_client.GlobalClient()
 
 
 def Player(name: str,

@@ -118,6 +118,8 @@ func NewClient(conn grpc.ClientConnInterface, treeID *pb.TreeID) (*Client, error
 	var err error
 	if treeID == nil {
 		clt.treeID, err = newTreeID(clt)
+	} else {
+		clt.treeID = treeID
 	}
 	if err != nil {
 		return nil, err
