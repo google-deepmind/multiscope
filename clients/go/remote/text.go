@@ -16,7 +16,6 @@ package remote
 
 import (
 	"context"
-	"io"
 
 	pb "multiscope/protos/text_go_proto"
 	pbgrpc "multiscope/protos/text_go_proto"
@@ -24,18 +23,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-type (
-	textIO struct {
-		w *TextWriter
-	}
-
-	// TextWriter writes raw text to Multiscope.
-	TextWriter struct {
-		*ClientNode
-		clt    pbgrpc.TextClient
-		writer *pb.Writer
-	}
-)
+// TextWriter writes raw text to Multiscope.
+type TextWriter struct {
+	*ClientNode
+	clt    pbgrpc.TextClient
+	writer *pb.Writer
+}
 
 // NewTextWriter creates a new writer to write text to Multiscope.
 func NewTextWriter(clt *Client, name string, parent Path) (*TextWriter, error) {
@@ -78,13 +71,4 @@ func (w *TextWriter) Write(text string) error {
 		return errors.Errorf("cannot write text data: %v", err)
 	}
 	return nil
-}
-
-// IO adapts a TextWriter into a io.Writer.
-func (w *TextWriter) IO() io.Writer {
-	return textIO{w: w}
-}
-
-func (wio textIO) Write(data []byte) (int, error) {
-	return len(data), wio.w.Write(string(data))
 }

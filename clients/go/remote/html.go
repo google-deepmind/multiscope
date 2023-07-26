@@ -17,7 +17,6 @@ package remote
 import (
 	"context"
 	"fmt"
-	"io"
 
 	pb "multiscope/protos/text_go_proto"
 	pbgrpc "multiscope/protos/text_go_proto"
@@ -26,24 +25,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-type (
-	htmlIO struct {
-		w *HTMLWriter
-	}
+// HTMLWriter writes raw text to Multiscope.
+type HTMLWriter struct {
+	*ClientNode
+	clt    pbgrpc.TextClient
+	writer *pb.HTMLWriter
 
-	cssIO struct {
-		w *HTMLWriter
-	}
-
-	// HTMLWriter writes raw text to Multiscope.
-	HTMLWriter struct {
-		*ClientNode
-		clt    pbgrpc.TextClient
-		writer *pb.HTMLWriter
-
-		callback Callback
-	}
-)
+	callback Callback
+}
 
 // NewHTMLWriter creates a new writer to write html and css to Multiscope.
 func NewHTMLWriter(clt *Client, name string, parent Path) (*HTMLWriter, error) {
@@ -124,22 +113,4 @@ func (w *HTMLWriter) WriteCSS(css string) error {
 		return errors.Errorf("cannot write CSS data: %v", err)
 	}
 	return err
-}
-
-// HTMLIO adapts a HTMLWriter into a io.Writer to write the HTML.
-func (w *HTMLWriter) HTMLIO() io.Writer {
-	return htmlIO{w: w}
-}
-
-func (wio htmlIO) Write(data []byte) (int, error) {
-	return len(data), wio.w.Write(string(data))
-}
-
-// CSSIO adapts a HTMLWriter into a io.Writer to write the CSS.
-func (w *HTMLWriter) CSSIO() io.Writer {
-	return cssIO{w: w}
-}
-
-func (wio cssIO) Write(data []byte) (int, error) {
-	return len(data), wio.w.WriteCSS(string(data))
 }
