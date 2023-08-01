@@ -54,10 +54,13 @@ func (tl *Timeline) MarshalDisplay(db *timedb.TimeDB) *pb.TimeLine {
 	}
 	currentStorage := db.StorageSize()
 	maxStorage := storage.Global().Available()
-	storageCapacity := fmt.Sprintf("%.e/%.e (%d%%)",
-		float64(currentStorage),
-		float64(maxStorage),
-		int(float64(currentStorage)/float64(maxStorage)*100))
+	storageCapacity := "disabled"
+	if !db.CleanupDisabled() {
+		storageCapacity = fmt.Sprintf("%.e/%.e (%d%%)",
+			float64(currentStorage),
+			float64(maxStorage),
+			int(float64(currentStorage)/float64(maxStorage)*100))
+	}
 	return &pb.TimeLine{
 		DisplayTick:     tl.adjustDisplayTick(db, tl.displayTick),
 		OldestTick:      db.Oldest(),
