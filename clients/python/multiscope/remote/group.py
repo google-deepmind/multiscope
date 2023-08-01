@@ -49,7 +49,6 @@ class Group(ParentNode):
                py_client: stream_client.Client,
                name: str,
                parent: Optional[ParentNode] = None):
-    self._client = base_pb2_grpc.BaseWritersStub(stream_client.channel)
     node_path = join_path_pb(parent, name)
     resp = py_client.Channel().NewGroup(
         base_pb2.NewGroupRequest(path=node_path))
