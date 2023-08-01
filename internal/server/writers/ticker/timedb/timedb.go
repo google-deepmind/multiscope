@@ -23,6 +23,8 @@ import (
 	treepb "multiscope/protos/tree_go_proto"
 	"runtime"
 	"sync"
+
+	"go.uber.org/atomic"
 )
 
 const maxNumberOfSteps = 1e6
@@ -42,6 +44,8 @@ type (
 		storage      uint64
 		tickToRecord map[int64]storedRecord
 		oldestTick   int64
+
+		disableCleanup atomic.Bool
 	}
 )
 
@@ -118,7 +122,13 @@ func (db *TimeDB) Store(tick int64, rec timeline.Marshaler) {
 	db.storage += size
 
 	// Clean-up the db if necessary.
-	if db.storage < storage.Global().Available() && len(db.tickToRecord) < maxNumberOfSteps {
+	if len(db.tickToRecord) >= maxNumberOfSteps {
+		db.cleanup()
+	}
+	if db.disableCleanup.Load() {
+		return
+	}
+	if db.storage < storage.Global().Available() {
 		return
 	}
 	db.cleanup()
@@ -138,6 +148,16 @@ func (db *TimeDB) StorageSize() uint64 {
 	defer db.mut.RUnlock()
 
 	return db.storage
+}
+
+// DisableCleanup disables the cleanup done because of the lack of storage.
+func (db *TimeDB) DisableCleanup() {
+	db.disableCleanup.Store(true)
+}
+
+// CleanupDisabled returns true if cleanup has been disabled.
+func (db *TimeDB) CleanupDisabled() bool {
+	return db.disableCleanup.Load()
 }
 
 // Cleanup removes old records that do not fit in storage.

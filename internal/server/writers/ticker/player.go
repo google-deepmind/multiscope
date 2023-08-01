@@ -140,6 +140,8 @@ func (p *Player) MIME() string {
 
 // Timeline returns a marshaler to store the player as a timeline.
 func (p *Player) Timeline() coretimeline.Marshaler {
+	// We disable the cleanup because it will be done by a parent.
+	p.db.DisableCleanup()
 	return newTLPlayer(p)
 }
 
