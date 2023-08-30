@@ -6,7 +6,9 @@ colors
 GOFMT=`which gofmt`
 
 if [[ ! -x "$GOFMT" ]]; then
-  printf "\t\033[41mPlease install gofmt.\033[0m"
+  printf "$fg[red]"
+  printf "Please install gofmt"
+  printf "$fg[default]"
   exit 1
 fi
 
@@ -15,17 +17,30 @@ find . \( -name "*.go" ! -name "*.pb.go" \) -exec $GOFMT -w {} \;
 REVIVE=`which revive`
 
 if [[ ! -x "$REVIVE" ]]; then
-  printf "\t\033[41mPlease install revive (https://github.com/mgechev/revive).\033[0m"
+  printf "$fg[red]"
+  printf "Please install revive (https://github.com/mgechev/revive)"
+  printf "$fg[default]"
   exit 1
 fi
 
 PIPENV=`which pipenv`
 
 if [[ ! -x "$PIPENV" ]]; then
-  printf "\t\033[41mPlease install pipenv (https://pipenv.pypa.io/en/latest/install/).\033[0m"
+  printf "$fg[red]"
+  printf "Please install pipenv (https://pipenv.pypa.io/en/latest/install/)"
+  printf "$fg[default]"
   exit 1
 fi
 
+ADDLICENSE=`which addlicense`
+
+if [[ ! -x "$ADDLICENSE" ]]; then
+  printf "$fg[red]"
+  printf "Please install addlicence with:\n"
+  printf "go install github.com/google/addlicense@latest\n"
+  printf "$fg[default]"
+  exit 1
+fi
 
 FOLDERS=`find . -type f -name "*.go" -exec dirname "{}" \; | awk -F "/" '{print $2}' | awk 'NF' | sort -u`
 
@@ -102,6 +117,9 @@ else
   printf "\033[31mPython static analyzer.\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
   PASS=false
 fi
+
+# Add license to every file.
+addlicense -c "DeepMind Technologies Limited" .
 
 # Disable python test because python seems unreliable on MacOS.
 if [[ -z "$ENABLE_PYTHON_CHECKS" ]]; then

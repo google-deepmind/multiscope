@@ -28,6 +28,7 @@ from multiscope.remote.server import reset
 from multiscope.remote.server import server_address
 from multiscope.remote.server import start_server
 from multiscope.remote.writers import base
+from multiscope.remote.writers import image
 from multiscope.remote.writers import scalar
 from multiscope.remote.writers import tensor
 from multiscope.remote.writers import text
@@ -44,6 +45,11 @@ Writer = base.Writer
 
 def global_client():
   return stream_client.GlobalClient()
+
+
+def ImageWriter(name: str, parent: Optional[group.ParentNode] = None):
+  return image.ImageWriter(
+      py_client=stream_client.GlobalClient(), name=name, parent=parent)
 
 
 def Player(name: str,
