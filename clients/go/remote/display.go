@@ -65,3 +65,15 @@ func (d *Display) DisplayIfDefault(path Path) error {
 	}
 	return nil
 }
+
+// SetCapture enables or disables the capture button in the UI.
+func (d *Display) SetCapture(enable bool) error {
+	_, err := d.rootClient.SetCapture(
+		context.Background(),
+		&rootpb.SetCaptureRequest{
+			TreeId:  d.clt.treeID,
+			Capture: enable,
+		},
+	)
+	return err
+}

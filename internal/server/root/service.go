@@ -74,3 +74,16 @@ func (srv *Service) GetRootInfo(ctx context.Context, req *pb.GetRootInfoRequest)
 		Info: root.cloneInfo(),
 	}, nil
 }
+
+// SetCapture enables the capture button on the UI.
+func (srv *Service) SetCapture(ctx context.Context, req *pb.SetCaptureRequest) (*pb.SetCaptureResponse, error) {
+	state, err := srv.state.State(treeservice.TreeID(req)) // use state throughout this RPC lifetime.
+	if err != nil {
+		return nil, err
+	}
+	root := state.Root().(*Root)
+	if err := root.setCapture(req.Capture); err != nil {
+		return nil, err
+	}
+	return &pb.SetCaptureResponse{}, nil
+}

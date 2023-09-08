@@ -15,19 +15,27 @@
 package uimain
 
 import (
+	rootpb "multiscope/protos/root_go_proto"
 	"multiscope/wasm/ui"
 
 	"github.com/pkg/errors"
 	"honnef.co/go/js/dom/v2"
 )
 
+const (
+	enableCapture  = "Capture"
+	disableCapture = "Stop capture"
+)
+
 // Header is the page header.
 type Header struct {
 	ui  *UI
 	hdr dom.HTMLElement
+
+	captureElement *dom.HTMLAnchorElement
 }
 
-func newHeader(mui *UI) (*Header, error) {
+func newHeader(mui *UI, rootInfo *rootpb.RootInfo) (*Header, error) {
 	const headerTag = "header"
 	owner := mui.Owner()
 	elements := owner.Doc().GetElementsByTagName(headerTag)
@@ -50,9 +58,36 @@ func newHeader(mui *UI) (*Header, error) {
 	// Right side.
 	right := owner.CreateChild(left, "span").(*dom.HTMLSpanElement)
 	right.Style().SetProperty("float", "right", "")
+
+	// Capture which appears dynamically depending on the client.
+	h.captureElement = owner.NewTextButton(right, enableCapture, h.capture)
+	h.captureElement.Class().Add("bordered")
+	h.captureElement.Style().SetProperty("font-size", "60%", "")
+	h.displayCapture(rootInfo.EnableCapture)
+
+	// Refresh and close all panels buttons.
 	owner.NewIconButton(right, "refresh", h.reloadLayout)
 	owner.NewIconButton(right, "close", h.emptyLayout)
 	return h, nil
+}
+
+func (h *Header) displayCapture(enable bool) {
+	if enable {
+		h.captureElement.Style().SetProperty("display", "", "")
+	} else {
+		h.captureElement.Style().SetProperty("display", "none", "")
+	}
+}
+
+func (h *Header) capture(ui.UI, dom.Event) {
+	enabled := h.ui.capturer.Toggle()
+	if enabled {
+		// Capture is enabled. So, we set the label to disable capture.
+		h.captureElement.SetInnerHTML(disableCapture)
+	} else {
+		// Capture is disabled. So, we set the label to enable capture.
+		h.captureElement.SetInnerHTML(enableCapture)
+	}
 }
 
 func (h *Header) reloadLayout(ui.UI, dom.Event) {

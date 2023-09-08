@@ -25,6 +25,7 @@ import (
 	"multiscope/internal/server/scope"
 	"multiscope/internal/server/treeservice"
 	"multiscope/lib/tensor"
+	eventspb "multiscope/protos/events_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
 	"time"
 )
@@ -35,6 +36,12 @@ const DefaultPort = 5972
 type (
 	// Event is an alias to a generic stream.Event.
 	Event = treepb.Event
+
+	// KeyboardCallback is called when the UI stream keyboard events to the client.
+	KeyboardCallback = remote.KeyboardCallback
+
+	// EventKeyboard stores changes to the keyboard.
+	EventKeyboard = eventspb.Keyboard
 
 	// Ticker synchronizes data in the tree.
 	Ticker = remote.Ticker
@@ -172,6 +179,15 @@ func NewTensorWriter[T tensor.Supported](name string, parent remote.Path) (*remo
 // EventsManager returns the registry mapping path to callback of the main Multiscope remote.
 func EventsManager() *events.Registry {
 	return scopeClient.EventsManager()
+}
+
+// RegisterKeyboardCallback registers a callback to receive keyboard events.
+func RegisterKeyboardCallback(kc KeyboardCallback) error {
+	clt, err := Client()
+	if err != nil {
+		return err
+	}
+	return remote.RegisterKeyboardCallback(clt, kc)
 }
 
 // Client returns the Multiscope singleton remote.

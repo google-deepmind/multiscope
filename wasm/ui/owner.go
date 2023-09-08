@@ -18,21 +18,35 @@ import (
 	"honnef.co/go/js/dom/v2"
 )
 
-// Owner owns all the element of a HTML document.
-type Owner struct {
-	ui   UI
-	html dom.HTMLDocument
-}
+type (
+	// ChildOption is an option applied to a child before it is added to its parent.
+	ChildOption interface {
+		Apply(el dom.Node) dom.Node
+	}
+
+	// Owner owns all the element of a HTML document.
+	Owner struct {
+		ui   UI
+		html dom.HTMLDocument
+	}
+)
 
 // NewOwner returns the owner of the document.
 func NewOwner(ui UI, html dom.HTMLDocument) *Owner {
 	return &Owner{ui: ui, html: html}
 }
 
+func applyOptions(el dom.Node, options []ChildOption) dom.Node {
+	for _, opt := range options {
+		el = opt.Apply(el)
+	}
+	return el
+}
+
 // CreateChild creates a new element as a child of another element.
-func (o *Owner) CreateChild(parent dom.Node, name string) dom.Element {
+func (o *Owner) CreateChild(parent dom.Node, name string, options ...ChildOption) dom.Element {
 	el := o.html.CreateElement(name)
-	parent.AppendChild(el)
+	parent.AppendChild(applyOptions(el, options))
 	return el
 }
 
@@ -42,8 +56,8 @@ func (o *Owner) Doc() dom.HTMLDocument {
 }
 
 // NewTextButton creates a new button with an event listener associated with it.
-func (o *Owner) NewTextButton(parent dom.Element, text string, f func(ui UI, ev dom.Event)) *dom.HTMLAnchorElement {
-	el := o.CreateChild(parent, "a").(*dom.HTMLAnchorElement)
+func (o *Owner) NewTextButton(parent dom.Element, text string, f func(ui UI, ev dom.Event), options ...ChildOption) *dom.HTMLAnchorElement {
+	el := o.CreateChild(parent, "a", options...).(*dom.HTMLAnchorElement)
 	el.Class().Add("button")
 	el.SetTextContent(text)
 	el.AddEventListener("click", true, func(ev dom.Event) {
@@ -54,8 +68,8 @@ func (o *Owner) NewTextButton(parent dom.Element, text string, f func(ui UI, ev 
 
 // NewIconButton creates a new button with an event listener associated with it.
 // See https://fonts.google.com/icons for the list of available icons.
-func (o *Owner) NewIconButton(parent dom.Element, text string, f func(ui UI, ev dom.Event)) *dom.HTMLAnchorElement {
-	span := o.CreateChild(parent, "span").(*dom.HTMLSpanElement)
+func (o *Owner) NewIconButton(parent dom.Element, text string, f func(ui UI, ev dom.Event), options ...ChildOption) *dom.HTMLAnchorElement {
+	span := o.CreateChild(parent, "span", options...).(*dom.HTMLSpanElement)
 	span.Class().Add("material-icons")
 	el := o.CreateChild(span, "a").(*dom.HTMLAnchorElement)
 	el.Class().Add("icon")
@@ -68,8 +82,8 @@ func (o *Owner) NewIconButton(parent dom.Element, text string, f func(ui UI, ev 
 }
 
 // CreateTextNode returns a new text node.
-func (o *Owner) CreateTextNode(parent dom.Element, s string) *dom.Text {
+func (o *Owner) CreateTextNode(parent dom.Element, s string, options ...ChildOption) *dom.Text {
 	el := o.html.CreateTextNode(s)
-	parent.AppendChild(el)
+	parent.AppendChild(applyOptions(el, options))
 	return el
 }

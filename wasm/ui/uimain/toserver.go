@@ -16,6 +16,7 @@ package uimain
 
 import (
 	"context"
+	"fmt"
 	treepb "multiscope/protos/tree_go_proto"
 	"multiscope/wasm/ui"
 
@@ -26,19 +27,42 @@ import (
 // toServer sends events to the server.
 type toServer struct {
 	ui        ui.UI
-	toProcess chan *treepb.SendEventsRequest
+	toProcess chan *treepb.Event
 }
 
 func newToServer(ui ui.UI) *toServer {
-	to := &toServer{ui: ui, toProcess: make(chan *treepb.SendEventsRequest, 10)}
+	to := &toServer{ui: ui, toProcess: make(chan *treepb.Event, 100)}
 	go to.processEvents()
 	return to
 }
 
+func (to *toServer) pullEvents() []*treepb.Event {
+	events := []*treepb.Event{<-to.toProcess}
+	gotEvent := true
+	for gotEvent {
+		select {
+		case ev := <-to.toProcess:
+			events = append(events, ev)
+			gotEvent = true
+		default:
+			gotEvent = false
+		}
+		if len(events) > 100 {
+			return events
+		}
+	}
+	return events
+}
+
 func (to *toServer) processEvents() {
 	clt, _ := to.ui.TreeClient()
-	for req := range to.toProcess {
+	for {
 		ctx := context.Background()
+		_, treeID := to.ui.TreeClient()
+		req := &treepb.SendEventsRequest{
+			TreeId: treeID,
+			Events: to.pullEvents(),
+		}
 		if _, err := clt.SendEvents(ctx, req); err != nil {
 			to.ui.DisplayErr(err)
 		}
@@ -51,12 +75,12 @@ func (to *toServer) sendEvent(path *treepb.NodePath, msg proto.Message) {
 		to.ui.DisplayErr(err)
 		return
 	}
-	_, treeID := to.ui.TreeClient()
-	to.toProcess <- &treepb.SendEventsRequest{
-		TreeId: treeID,
-		Events: []*treepb.Event{{
-			Path:    path,
-			Payload: &event,
-		}},
+	select {
+	case to.toProcess <- &treepb.Event{
+		Path:    path,
+		Payload: &event,
+	}:
+	default:
+		fmt.Printf("Dropping event %T\n", msg)
 	}
 }

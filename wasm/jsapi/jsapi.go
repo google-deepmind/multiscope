@@ -17,7 +17,7 @@ package jsapi
 
 import (
 	pathlib "multiscope/lib/path"
-	widgetpb "multiscope/protos/widget_go_proto"
+	eventspb "multiscope/protos/events_go_proto"
 	"multiscope/wasm/ui/uimain"
 	"syscall/js"
 
@@ -28,7 +28,7 @@ type api struct {
 	ui *uimain.UI
 }
 
-func (api *api) sendEvent(this js.Value, args []js.Value) any {
+func (api *api) sendWidgetClickEvent(this js.Value, args []js.Value) any {
 	if len(args) < 2 {
 		api.ui.DisplayErr(errors.Errorf("sendEvents called with less than 2 arguments"))
 		return nil
@@ -47,7 +47,7 @@ func (api *api) sendEvent(this js.Value, args []js.Value) any {
 		return nil
 	}
 	widgetID := args[1].Int()
-	api.ui.SendToServer(nodePath, &widgetpb.Event{
+	api.ui.SendToServer(nodePath, &eventspb.Widget{
 		WidgetId: int64(widgetID),
 	})
 	return nil
@@ -59,5 +59,5 @@ func BuildAPI(ui *uimain.UI) {
 	jsAPI := glob.Get("Object").New()
 	glob.Set("multiscope", jsAPI)
 	api := api{ui: ui}
-	jsAPI.Set("sendEvent", js.FuncOf(api.sendEvent))
+	jsAPI.Set("sendEventWidgetClick", js.FuncOf(api.sendWidgetClickEvent))
 }

@@ -16,10 +16,10 @@ package html
 
 import (
 	"fmt"
-	widgetpb "multiscope/protos/widget_go_proto"
+	eventspb "multiscope/protos/events_go_proto"
 )
 
-const template = `<button onClick='multiscope.sendEvent("%s", %d)'>%s</button>`
+const template = `<button onClick='multiscope.sendEventWidgetClick("%s", %d)'>%s</button>`
 
 // Button is a HTML button.
 type Button struct {
@@ -39,7 +39,7 @@ func NewButton(cnt *Content, text Stringer) *Button {
 	return b
 }
 
-func (b *Button) processEvent(ev *widgetpb.Event) error {
+func (b *Button) processEvent(ev *eventspb.Widget) error {
 	if b.cb == nil {
 		return nil
 	}

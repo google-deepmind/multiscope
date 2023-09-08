@@ -37,6 +37,7 @@ body {
   top: 0;
   /* Fixed position - sit on top of the page */
   position: sticky;
+  vertical-align: middle;
 }
 
 .page-footer {

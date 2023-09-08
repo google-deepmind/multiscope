@@ -53,6 +53,7 @@ type UI struct {
 	puller     *puller
 	toServer   *toServer
 	layout     *Layout
+	capturer   *capturer
 
 	lastError string
 }
@@ -63,6 +64,7 @@ func NewUI(pullerWorker *worker.Worker, c *uipb.Connect) *UI {
 		addr:   c,
 		window: dom.GetWindow(),
 	}
+	gui.capturer = &capturer{ui: gui}
 	gui.owner = ui.NewOwner(gui, gui.window.Document().(dom.HTMLDocument))
 	conn := httpgrpc.Connect(gui.addr.Scheme, gui.addr.Host)
 	rootInfo, err := fetchRootInfo(conn, c.TreeId)

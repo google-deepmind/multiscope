@@ -15,12 +15,12 @@
 // Protocol buffer to stream text data.
 syntax = "proto3";
 
-package multiscope.widget;
+package multiscope.events;
 
-option go_package = "multiscope/protos/widget_go_proto";
+option go_package = "multiscope/protos/events_go_proto";
 
-// Event sent from the UI.
-message Event {
+// Event sent from Javascript.
+message Widget {
   int64 widget_id = 1;
 
   enum Type {
@@ -29,4 +29,29 @@ message Event {
   }
 
   Type type = 2;
+}
+
+message Keyboard {
+  // Key code identifying the key.
+  int32 key = 1;
+
+  // Type of the event.
+  enum Type {
+    UNDEFINED = 0;
+    UP = 1;
+    DOWN = 2;
+  }
+  Type type = 2;
+
+  // Whether an Alt key was down when this event occurred.
+  bool alt = 3;
+
+  // Whether a Ctrl key was down when this event occurred.
+  bool ctrl = 4;
+
+  // Whether a Shift key was down when this event occurred.
+  bool shift = 5;
+
+  // Whether a Meta key was down when this event occurred.
+  bool meta = 6;
 }

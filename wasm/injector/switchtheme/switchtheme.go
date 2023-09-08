@@ -45,9 +45,9 @@ func switchtheme(ui injector.UI) {
 			break
 		}
 	}
-	ui.Owner().Doc().AddEventListener("keypress", false, func(ev dom.Event) {
+	ui.Owner().Doc().AddEventListener("keydown", false, func(ev dom.Event) {
 		kev := ev.(*dom.KeyboardEvent)
-		char := string([]byte{byte(kev.CharCode())})
+		char := string([]byte{byte(kev.KeyCode())})
 		if char == "t" {
 			current = (current + 1) % len(names)
 			ui.Style().SetTheme(names[current])

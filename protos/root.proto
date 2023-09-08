@@ -25,6 +25,10 @@ option go_package = "multiscope/protos/root_go_proto";
 message RootInfo {
   string key_settings = 1;
   Layout layout = 2;
+
+  // Display the capture so that keyboard and mouse events can be captured
+  // and send back to the client.
+  bool enable_capture = 3;
 }
 
 message LayoutList {
@@ -37,7 +41,9 @@ message LayoutList {
 
 // Message to store layout data such as node path to display.
 message Layout {
-  oneof layout { LayoutList list = 1; }
+  oneof layout {
+    LayoutList list = 1;
+  }
 }
 
 // Sets the key for the UI settings.
@@ -51,19 +57,29 @@ message SetKeySettingsRequest {
 message SetKeySettingsResponse {}
 
 // Sets the layout to display.
-message SetLayoutRequest { 
+message SetLayoutRequest {
   multiscope.TreeID tree_id = 1;
   Layout layout = 2;
 }
 
 message SetLayoutResponse {}
 
+// Sets if the capture button should be displayed or not.
+message SetCaptureRequest {
+  multiscope.TreeID tree_id = 1;
+  bool capture = 2;
+}
+
+message SetCaptureResponse {}
+
 // Get root info.
 message GetRootInfoRequest {
   multiscope.TreeID tree_id = 1;
 }
 
-message GetRootInfoResponse { RootInfo info = 1; }
+message GetRootInfoResponse {
+  RootInfo info = 1;
+}
 
 service Root {
   // Return info at the root node.
@@ -72,4 +88,6 @@ service Root {
   rpc SetKeySettings(SetKeySettingsRequest) returns (SetKeySettingsResponse) {}
   // Set the layout of the UI.
   rpc SetLayout(SetLayoutRequest) returns (SetLayoutResponse) {}
+  // Set if the capture button should be displayed or not.
+  rpc SetCapture(SetCaptureRequest) returns (SetCaptureResponse) {}
 }

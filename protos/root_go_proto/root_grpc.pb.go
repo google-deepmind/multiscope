@@ -38,6 +38,7 @@ const (
 	Root_GetRootInfo_FullMethodName    = "/multiscope.root.Root/GetRootInfo"
 	Root_SetKeySettings_FullMethodName = "/multiscope.root.Root/SetKeySettings"
 	Root_SetLayout_FullMethodName      = "/multiscope.root.Root/SetLayout"
+	Root_SetCapture_FullMethodName     = "/multiscope.root.Root/SetCapture"
 )
 
 // RootClient is the client API for Root service.
@@ -50,6 +51,8 @@ type RootClient interface {
 	SetKeySettings(ctx context.Context, in *SetKeySettingsRequest, opts ...grpc.CallOption) (*SetKeySettingsResponse, error)
 	// Set the layout of the UI.
 	SetLayout(ctx context.Context, in *SetLayoutRequest, opts ...grpc.CallOption) (*SetLayoutResponse, error)
+	// Set if the capture button should be displayed or not.
+	SetCapture(ctx context.Context, in *SetCaptureRequest, opts ...grpc.CallOption) (*SetCaptureResponse, error)
 }
 
 type rootClient struct {
@@ -87,6 +90,15 @@ func (c *rootClient) SetLayout(ctx context.Context, in *SetLayoutRequest, opts .
 	return out, nil
 }
 
+func (c *rootClient) SetCapture(ctx context.Context, in *SetCaptureRequest, opts ...grpc.CallOption) (*SetCaptureResponse, error) {
+	out := new(SetCaptureResponse)
+	err := c.cc.Invoke(ctx, Root_SetCapture_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RootServer is the server API for Root service.
 // All implementations must embed UnimplementedRootServer
 // for forward compatibility
@@ -97,6 +109,8 @@ type RootServer interface {
 	SetKeySettings(context.Context, *SetKeySettingsRequest) (*SetKeySettingsResponse, error)
 	// Set the layout of the UI.
 	SetLayout(context.Context, *SetLayoutRequest) (*SetLayoutResponse, error)
+	// Set if the capture button should be displayed or not.
+	SetCapture(context.Context, *SetCaptureRequest) (*SetCaptureResponse, error)
 	mustEmbedUnimplementedRootServer()
 }
 
@@ -112,6 +126,9 @@ func (UnimplementedRootServer) SetKeySettings(context.Context, *SetKeySettingsRe
 }
 func (UnimplementedRootServer) SetLayout(context.Context, *SetLayoutRequest) (*SetLayoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetLayout not implemented")
+}
+func (UnimplementedRootServer) SetCapture(context.Context, *SetCaptureRequest) (*SetCaptureResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetCapture not implemented")
 }
 func (UnimplementedRootServer) mustEmbedUnimplementedRootServer() {}
 
@@ -180,6 +197,24 @@ func _Root_SetLayout_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Root_SetCapture_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetCaptureRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RootServer).SetCapture(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Root_SetCapture_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RootServer).SetCapture(ctx, req.(*SetCaptureRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Root_ServiceDesc is the grpc.ServiceDesc for Root service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -198,6 +233,10 @@ var Root_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetLayout",
 			Handler:    _Root_SetLayout_Handler,
+		},
+		{
+			MethodName: "SetCapture",
+			Handler:    _Root_SetCapture_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

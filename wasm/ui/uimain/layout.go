@@ -26,7 +26,7 @@ type Layout struct {
 func newLayout(ui *UI, rootInfo *rootpb.RootInfo) (*Layout, error) {
 	l := &Layout{}
 	var err error
-	if l.header, err = newHeader(ui); err != nil {
+	if l.header, err = newHeader(ui, rootInfo); err != nil {
 		return nil, err
 	}
 	if l.dbd, err = newDashboard(ui, rootInfo); err != nil {

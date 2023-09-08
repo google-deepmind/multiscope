@@ -17,8 +17,8 @@ package html
 import (
 	"fmt"
 	"multiscope/clients/go/remote"
+	eventspb "multiscope/protos/events_go_proto"
 	treepb "multiscope/protos/tree_go_proto"
-	widgetpb "multiscope/protos/widget_go_proto"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -31,7 +31,7 @@ type (
 	CallbackID int64
 
 	// Callback to process events.
-	Callback func(*widgetpb.Event) error
+	Callback func(*eventspb.Widget) error
 
 	// Stringer is implemented by any value that has a String method,
 	// which returns HTML code.
@@ -77,7 +77,7 @@ func (c *Content) processEvent(ev *treepb.Event) (err error) {
 			err = fmt.Errorf("cannot process widget event: %w", err)
 		}
 	}()
-	var widgetEvent widgetpb.Event
+	var widgetEvent eventspb.Widget
 	if err := anypb.UnmarshalTo(ev.Payload, &widgetEvent, proto.UnmarshalOptions{}); err != nil {
 		return errors.Errorf("cannot unmarshal event: %v", err)
 	}

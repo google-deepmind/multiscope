@@ -73,6 +73,13 @@ func (r *Root) setKeySettings(name string) error {
 	return r.writer.Write(r.info)
 }
 
+func (r *Root) setCapture(capture bool) error {
+	r.mut.Lock()
+	defer r.mut.Unlock()
+	r.info.EnableCapture = capture
+	return r.writer.Write(r.info)
+}
+
 func (r *Root) cloneInfo() *rootpb.RootInfo {
 	r.mut.Lock()
 	defer r.mut.Unlock()
