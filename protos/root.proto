@@ -41,9 +41,11 @@ message Layout {
 }
 
 // Sets the key for the UI settings.
-message SetKeySettingsRequest { 
+message SetKeySettingsRequest {
   multiscope.TreeID tree_id = 1;
-  string key_settings = 2; 
+  // Key string identifies identifies the binary being run to fetch the
+  // corresponding settings.
+  string key_settings = 2;
 }
 
 message SetKeySettingsResponse {}

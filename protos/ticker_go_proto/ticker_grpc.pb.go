@@ -52,7 +52,7 @@ type TickersClient interface {
 	WriteTicker(ctx context.Context, in *WriteTickerRequest, opts ...grpc.CallOption) (*WriteTickerResponse, error)
 	// Create a new player node in Multiscope.
 	NewPlayer(ctx context.Context, in *NewPlayerRequest, opts ...grpc.CallOption) (*NewPlayerResponse, error)
-	// Write ticker data.
+	// Reset the data of a player.
 	ResetPlayer(ctx context.Context, in *ResetPlayerRequest, opts ...grpc.CallOption) (*ResetPlayerResponse, error)
 	// Write ticker data.
 	StoreFrame(ctx context.Context, in *StoreFrameRequest, opts ...grpc.CallOption) (*StoreFrameResponse, error)
@@ -121,7 +121,7 @@ type TickersServer interface {
 	WriteTicker(context.Context, *WriteTickerRequest) (*WriteTickerResponse, error)
 	// Create a new player node in Multiscope.
 	NewPlayer(context.Context, *NewPlayerRequest) (*NewPlayerResponse, error)
-	// Write ticker data.
+	// Reset the data of a player.
 	ResetPlayer(context.Context, *ResetPlayerRequest) (*ResetPlayerResponse, error)
 	// Write ticker data.
 	StoreFrame(context.Context, *StoreFrameRequest) (*StoreFrameResponse, error)

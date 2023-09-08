@@ -224,8 +224,10 @@ type SetKeySettingsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TreeId      *tree_go_proto.TreeID `protobuf:"bytes,1,opt,name=tree_id,json=treeId,proto3" json:"tree_id,omitempty"`
-	KeySettings string                `protobuf:"bytes,2,opt,name=key_settings,json=keySettings,proto3" json:"key_settings,omitempty"`
+	TreeId *tree_go_proto.TreeID `protobuf:"bytes,1,opt,name=tree_id,json=treeId,proto3" json:"tree_id,omitempty"`
+	// Key string identifies identifies the binary being run to fetch the
+	// corresponding settings.
+	KeySettings string `protobuf:"bytes,2,opt,name=key_settings,json=keySettings,proto3" json:"key_settings,omitempty"`
 }
 
 func (x *SetKeySettingsRequest) Reset() {
