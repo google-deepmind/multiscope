@@ -63,6 +63,9 @@ func (el *Element) refresh(src any) error {
 	if err := el.root.expand(); err != nil {
 		return err
 	}
+	if el.root.childrenList == nil {
+		return nil
+	}
 	el.p.AppendChild(el.root.childrenList)
 	return nil
 }
