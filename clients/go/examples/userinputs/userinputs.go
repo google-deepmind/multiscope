@@ -24,11 +24,14 @@ func htmlWrite(title, text string) error {
 }
 
 func keyboardHandler(event *scope.EventKeyboard) error {
-	if event.Shift {
-		return nil
-	}
 	eventBytes, _ := prototext.MarshalOptions{Multiline: true}.Marshal(event)
 	err := htmlWrite("keyboardHandler", string(eventBytes))
+	return err
+}
+
+func mouseHandler(event *scope.EventMouse) error {
+	eventBytes, _ := prototext.MarshalOptions{Multiline: true}.Marshal(event)
+	err := htmlWrite("mouseHandler", string(eventBytes))
 	return err
 }
 
@@ -45,6 +48,9 @@ func main() {
 		log.Fatal(err)
 	}
 	if err := scope.RegisterKeyboardCallback(keyboardHandler); err != nil {
+		log.Fatal(err)
+	}
+	if err := scope.RegisterMouseCallback(mouseHandler); err != nil {
 		log.Fatal(err)
 	}
 

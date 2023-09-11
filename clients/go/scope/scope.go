@@ -43,6 +43,12 @@ type (
 	// EventKeyboard stores changes to the keyboard.
 	EventKeyboard = eventspb.Keyboard
 
+	// NouseCallback is called when the UI stream mouse events to the client.
+	MouseCallback = remote.MouseCallback
+
+	// EventMouse stores changes to the mouse.
+	EventMouse = eventspb.Mouse
+
 	// Ticker synchronizes data in the tree.
 	Ticker = remote.Ticker
 
@@ -188,6 +194,15 @@ func RegisterKeyboardCallback(kc KeyboardCallback) error {
 		return err
 	}
 	return remote.RegisterKeyboardCallback(clt, kc)
+}
+
+// RegisterMouseCallback registers a callback to receive keyboard events.
+func RegisterMouseCallback(mc MouseCallback) error {
+	clt, err := Client()
+	if err != nil {
+		return err
+	}
+	return remote.RegisterMouseCallback(clt, mc)
 }
 
 // Client returns the Multiscope singleton remote.

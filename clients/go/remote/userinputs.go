@@ -25,3 +25,21 @@ func RegisterKeyboardCallback(clt *Client, kc KeyboardCallback) error {
 	clt.EventsManager().NewQueue(cb)
 	return clt.Display().SetCapture(true)
 }
+
+// MouseCallback defines the function type to receive mouse events from the frontend.
+type MouseCallback func(ke *eventspb.Mouse) error
+
+var mouseProtoURL = proto.MessageName(&eventspb.Mouse{})
+
+// RegisterMouseCallback registers a callback for a given path. If the path is nil, the callback will be called for all paths.
+func RegisterMouseCallback(clt *Client, mc MouseCallback) error {
+	cb := events.Callback(func(ev *treepb.Event) error {
+		me := &eventspb.Mouse{}
+		if err := ev.GetPayload().UnmarshalTo(me); err != nil {
+			return err
+		}
+		return mc(me)
+	}).FilterProto(mouseProtoURL)
+	clt.EventsManager().NewQueue(cb)
+	return clt.Display().SetCapture(true)
+}

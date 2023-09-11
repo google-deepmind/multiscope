@@ -132,6 +132,65 @@ func (Keyboard_Type) EnumDescriptor() ([]byte, []int) {
 	return file_events_proto_rawDescGZIP(), []int{1, 0}
 }
 
+// Type of event.
+type Mouse_Type int32
+
+const (
+	Mouse_UNDEFINED Mouse_Type = 0
+	Mouse_UP        Mouse_Type = 1
+	Mouse_DOWN      Mouse_Type = 2
+	Mouse_ENTER     Mouse_Type = 3
+	Mouse_LEAVE     Mouse_Type = 4
+	Mouse_MOVE      Mouse_Type = 5
+)
+
+// Enum value maps for Mouse_Type.
+var (
+	Mouse_Type_name = map[int32]string{
+		0: "UNDEFINED",
+		1: "UP",
+		2: "DOWN",
+		3: "ENTER",
+		4: "LEAVE",
+		5: "MOVE",
+	}
+	Mouse_Type_value = map[string]int32{
+		"UNDEFINED": 0,
+		"UP":        1,
+		"DOWN":      2,
+		"ENTER":     3,
+		"LEAVE":     4,
+		"MOVE":      5,
+	}
+)
+
+func (x Mouse_Type) Enum() *Mouse_Type {
+	p := new(Mouse_Type)
+	*p = x
+	return p
+}
+
+func (x Mouse_Type) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Mouse_Type) Descriptor() protoreflect.EnumDescriptor {
+	return file_events_proto_enumTypes[2].Descriptor()
+}
+
+func (Mouse_Type) Type() protoreflect.EnumType {
+	return &file_events_proto_enumTypes[2]
+}
+
+func (x Mouse_Type) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Mouse_Type.Descriptor instead.
+func (Mouse_Type) EnumDescriptor() ([]byte, []int) {
+	return file_events_proto_rawDescGZIP(), []int{2, 0}
+}
+
 // Event sent from Javascript.
 type Widget struct {
 	state         protoimpl.MessageState
@@ -280,6 +339,99 @@ func (x *Keyboard) GetMeta() bool {
 	return false
 }
 
+type Mouse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Index of the mouse key that was pressed (0 - left, 1 - middle, 2 - right).
+	Key int32 `protobuf:"varint,1,opt,name=key,proto3" json:"key,omitempty"`
+	// Mouse horizontal position, in screen space coordinates.
+	PositionX int32 `protobuf:"varint,2,opt,name=position_x,json=positionX,proto3" json:"position_x,omitempty"`
+	// Mouse vertical position, in screen space coordinates.
+	PositionY int32 `protobuf:"varint,3,opt,name=position_y,json=positionY,proto3" json:"position_y,omitempty"`
+	// Change of mouse's horizontal position since the last MouseMoveEvent
+	// message.
+	TranslationX int32 `protobuf:"varint,4,opt,name=translation_x,json=translationX,proto3" json:"translation_x,omitempty"`
+	// Change of mouse's vertical position since the last MouseMoveEvent message.
+	TranslationY int32      `protobuf:"varint,5,opt,name=translation_y,json=translationY,proto3" json:"translation_y,omitempty"`
+	Type         Mouse_Type `protobuf:"varint,6,opt,name=type,proto3,enum=multiscope.events.Mouse_Type" json:"type,omitempty"`
+}
+
+func (x *Mouse) Reset() {
+	*x = Mouse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_events_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Mouse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Mouse) ProtoMessage() {}
+
+func (x *Mouse) ProtoReflect() protoreflect.Message {
+	mi := &file_events_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Mouse.ProtoReflect.Descriptor instead.
+func (*Mouse) Descriptor() ([]byte, []int) {
+	return file_events_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Mouse) GetKey() int32 {
+	if x != nil {
+		return x.Key
+	}
+	return 0
+}
+
+func (x *Mouse) GetPositionX() int32 {
+	if x != nil {
+		return x.PositionX
+	}
+	return 0
+}
+
+func (x *Mouse) GetPositionY() int32 {
+	if x != nil {
+		return x.PositionY
+	}
+	return 0
+}
+
+func (x *Mouse) GetTranslationX() int32 {
+	if x != nil {
+		return x.TranslationX
+	}
+	return 0
+}
+
+func (x *Mouse) GetTranslationY() int32 {
+	if x != nil {
+		return x.TranslationY
+	}
+	return 0
+}
+
+func (x *Mouse) GetType() Mouse_Type {
+	if x != nil {
+		return x.Type
+	}
+	return Mouse_UNDEFINED
+}
+
 var File_events_proto protoreflect.FileDescriptor
 
 var file_events_proto_rawDesc = []byte{
@@ -305,7 +457,25 @@ var file_events_proto_rawDesc = []byte{
 	0x12, 0x0a, 0x04, 0x6d, 0x65, 0x74, 0x61, 0x18, 0x06, 0x20, 0x01, 0x28, 0x08, 0x52, 0x04, 0x6d,
 	0x65, 0x74, 0x61, 0x22, 0x27, 0x0a, 0x04, 0x54, 0x79, 0x70, 0x65, 0x12, 0x0d, 0x0a, 0x09, 0x55,
 	0x4e, 0x44, 0x45, 0x46, 0x49, 0x4e, 0x45, 0x44, 0x10, 0x00, 0x12, 0x06, 0x0a, 0x02, 0x55, 0x50,
-	0x10, 0x01, 0x12, 0x08, 0x0a, 0x04, 0x44, 0x4f, 0x57, 0x4e, 0x10, 0x02, 0x42, 0x23, 0x5a, 0x21,
+	0x10, 0x01, 0x12, 0x08, 0x0a, 0x04, 0x44, 0x4f, 0x57, 0x4e, 0x10, 0x02, 0x22, 0x9d, 0x02, 0x0a,
+	0x05, 0x4d, 0x6f, 0x75, 0x73, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x6f, 0x73, 0x69,
+	0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x78, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x70, 0x6f,
+	0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x58, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x6f, 0x73, 0x69, 0x74,
+	0x69, 0x6f, 0x6e, 0x5f, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x70, 0x6f, 0x73,
+	0x69, 0x74, 0x69, 0x6f, 0x6e, 0x59, 0x12, 0x23, 0x0a, 0x0d, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x6c,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x78, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0c, 0x74,
+	0x72, 0x61, 0x6e, 0x73, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x58, 0x12, 0x23, 0x0a, 0x0d, 0x74,
+	0x72, 0x61, 0x6e, 0x73, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x79, 0x18, 0x05, 0x20, 0x01,
+	0x28, 0x05, 0x52, 0x0c, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x59,
+	0x12, 0x31, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x1d,
+	0x2e, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2e, 0x65, 0x76, 0x65, 0x6e,
+	0x74, 0x73, 0x2e, 0x4d, 0x6f, 0x75, 0x73, 0x65, 0x2e, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74,
+	0x79, 0x70, 0x65, 0x22, 0x47, 0x0a, 0x04, 0x54, 0x79, 0x70, 0x65, 0x12, 0x0d, 0x0a, 0x09, 0x55,
+	0x4e, 0x44, 0x45, 0x46, 0x49, 0x4e, 0x45, 0x44, 0x10, 0x00, 0x12, 0x06, 0x0a, 0x02, 0x55, 0x50,
+	0x10, 0x01, 0x12, 0x08, 0x0a, 0x04, 0x44, 0x4f, 0x57, 0x4e, 0x10, 0x02, 0x12, 0x09, 0x0a, 0x05,
+	0x45, 0x4e, 0x54, 0x45, 0x52, 0x10, 0x03, 0x12, 0x09, 0x0a, 0x05, 0x4c, 0x45, 0x41, 0x56, 0x45,
+	0x10, 0x04, 0x12, 0x08, 0x0a, 0x04, 0x4d, 0x4f, 0x56, 0x45, 0x10, 0x05, 0x42, 0x23, 0x5a, 0x21,
 	0x6d, 0x75, 0x6c, 0x74, 0x69, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x73, 0x2f, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x73, 0x5f, 0x67, 0x6f, 0x5f, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
@@ -323,22 +493,25 @@ func file_events_proto_rawDescGZIP() []byte {
 	return file_events_proto_rawDescData
 }
 
-var file_events_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_events_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_events_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_events_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_events_proto_goTypes = []interface{}{
 	(Widget_Type)(0),   // 0: multiscope.events.Widget.Type
 	(Keyboard_Type)(0), // 1: multiscope.events.Keyboard.Type
-	(*Widget)(nil),     // 2: multiscope.events.Widget
-	(*Keyboard)(nil),   // 3: multiscope.events.Keyboard
+	(Mouse_Type)(0),    // 2: multiscope.events.Mouse.Type
+	(*Widget)(nil),     // 3: multiscope.events.Widget
+	(*Keyboard)(nil),   // 4: multiscope.events.Keyboard
+	(*Mouse)(nil),      // 5: multiscope.events.Mouse
 }
 var file_events_proto_depIdxs = []int32{
 	0, // 0: multiscope.events.Widget.type:type_name -> multiscope.events.Widget.Type
 	1, // 1: multiscope.events.Keyboard.type:type_name -> multiscope.events.Keyboard.Type
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	2, // 2: multiscope.events.Mouse.type:type_name -> multiscope.events.Mouse.Type
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_events_proto_init() }
@@ -371,14 +544,26 @@ func file_events_proto_init() {
 				return nil
 			}
 		}
+		file_events_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Mouse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_events_proto_rawDesc,
-			NumEnums:      2,
-			NumMessages:   2,
+			NumEnums:      3,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

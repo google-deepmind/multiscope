@@ -55,3 +55,32 @@ message Keyboard {
   // Whether a Meta key was down when this event occurred.
   bool meta = 6;
 }
+
+message Mouse {
+  // Index of the mouse key that was pressed (0 - left, 1 - middle, 2 - right).
+  int32 key = 1;
+
+  // Mouse horizontal position, in screen space coordinates.
+  int32 position_x = 2;
+
+  // Mouse vertical position, in screen space coordinates.
+  int32 position_y = 3;
+
+  // Change of mouse's horizontal position since the last MouseMoveEvent
+  // message.
+  int32 translation_x = 4;
+
+  // Change of mouse's vertical position since the last MouseMoveEvent message.
+  int32 translation_y = 5;
+
+  // Type of event.
+  enum Type {
+    UNDEFINED = 0;
+    UP = 1;
+    DOWN = 2;
+    ENTER = 3;
+    LEAVE = 4;
+    MOVE = 5;
+  }
+  Type type = 6;
+}
