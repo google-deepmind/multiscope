@@ -39,8 +39,7 @@ class TextWriter(base.Writer):
     req = text_pb2.NewWriterRequest(tree_id=py_client.TreeID(), path=path)
     self.writer = self._client.NewWriter(req).writer
     super().__init__(py_client=py_client, path=tuple(self.writer.path.path))
-    self._py_client.ActivePaths().register_callback(self.path,
-                                                    self._set_should_write)
+    self.register_activity_callback(self._set_should_write)
 
   @decorators.method
   def write(self, data: str):
@@ -64,11 +63,10 @@ class HTMLWriter(base.Writer):
     self._client = text_pb2_grpc.TextStub(py_client.Channel())
     path = group.join_path_pb(parent, name)
     req = text_pb2.NewHTMLWriterRequest(
-        tree_id=self._py_client.TreeID(), path=path)
+        tree_id=py_client.TreeID(), path=path)
     self.writer = self._client.NewHTMLWriter(req).writer
     super().__init__(py_client=py_client, path=tuple(self.writer.path.path))
-    self._py_client.ActivePaths().register_callback(self.path,
-                                                    self._set_should_write)
+    self.register_activity_callback(self._set_should_write)
 
   @decorators.method
   def write_css(self, data: str):
