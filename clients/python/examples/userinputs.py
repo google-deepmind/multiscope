@@ -19,7 +19,6 @@ from absl import app
 from examples import common
 import multiscope
 
-
 text_writer = None
 keyboard_writer = None
 mouse_writer = None

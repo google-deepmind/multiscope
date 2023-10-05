@@ -55,10 +55,7 @@ class EventProcessor:
 
   def run(self):
     self.__event_stream = self._py_client.TreeClient().StreamEvents(
-        pb.StreamEventsRequest(
-            tree_id=self._py_client.TreeID(),
-        )
-    )
+        pb.StreamEventsRequest(tree_id=self._py_client.TreeID(),))
     ack_event = next(self.__event_stream)
     if ack_event.payload.type_url:
       raise ValueError("the server sent an incorrect acknowledgement event")
@@ -81,9 +78,8 @@ class EventProcessor:
       for cb in callbacks:
         cb(event)
 
-  def register_callback(
-      self, path: Sequence[str], cb: Callable[[pb.Event], None]
-  ) -> None:
+  def register_callback(self, path: Sequence[str], cb: Callable[[pb.Event],
+                                                                None]) -> None:
     """Calls the provided cb with every element of gen in a separate thread."""
     key = tuple(path)
     with self.__mutex:
@@ -106,9 +102,8 @@ class EventProcessor:
     self.register_callback(path, process)
 
 
-def filter_proto(
-    url: str, cb: Callable[[pb.Event], None]
-) -> Callable[[pb.Event], None]:
+def filter_proto(url: str, cb: Callable[[pb.Event],
+                                        None]) -> Callable[[pb.Event], None]:
   """Filter events given a protocol buffer type."""
 
   def process(event: pb.Event):

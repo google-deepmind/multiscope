@@ -38,10 +38,8 @@ from multiscope.remote.writers import text
 flags.DEFINE_bool(
     "multiscope_strict_mode",
     default=True,
-    help=(
-        "Enable multiscope strict mode, which throws exceptions on"
-        " multiscope-related errors."
-    ),
+    help=("Enable multiscope strict mode, which throws exceptions on"
+          " multiscope-related errors."),
 )
 
 Writer = base.Writer
@@ -56,13 +54,12 @@ def global_client():
 
 def ImageWriter(name: str, parent: Optional[group.ParentNode] = None):
   return image.ImageWriter(
-      py_client=stream_client.GlobalClient(), name=name, parent=parent
-  )
+      py_client=stream_client.GlobalClient(), name=name, parent=parent)
 
 
-def Player(
-    name: str, parent: Optional[group.ParentNode] = None, stoppable: bool = True
-):
+def Player(name: str,
+           parent: Optional[group.ParentNode] = None,
+           stoppable: bool = True):
   return player.Player(
       py_client=stream_client.GlobalClient(),
       name=name,
@@ -73,41 +70,34 @@ def Player(
 
 def ScalarWriter(name: str, parent: Optional[group.ParentNode] = None):
   return scalar.ScalarWriter(
-      py_client=stream_client.GlobalClient(), name=name, parent=parent
-  )
+      py_client=stream_client.GlobalClient(), name=name, parent=parent)
 
 
 def TensorWriter(name: str, parent: Optional[group.ParentNode] = None):
   return tensor.TensorWriter(
-      py_client=stream_client.GlobalClient(), name=name, parent=parent
-  )
+      py_client=stream_client.GlobalClient(), name=name, parent=parent)
 
 
 def TextWriter(name: str, parent: Optional[group.ParentNode] = None):
   return text.TextWriter(
-      py_client=stream_client.GlobalClient(), name=name, parent=parent
-  )
+      py_client=stream_client.GlobalClient(), name=name, parent=parent)
 
 
 def HTMLWriter(name: str, parent: Optional[group.ParentNode] = None):
   return text.HTMLWriter(
-      py_client=stream_client.GlobalClient(), name=name, parent=parent
-  )
+      py_client=stream_client.GlobalClient(), name=name, parent=parent)
 
 
 def Ticker(name: str, parent: Optional[group.ParentNode] = None):
   return ticker.Ticker(
-      py_client=stream_client.GlobalClient(), name=name, parent=parent
-  )
+      py_client=stream_client.GlobalClient(), name=name, parent=parent)
 
 
 def register_keyboard_callback(cb: Callable[[events_pb2.Mouse], None]):
   return userinputs.register_keyboard_callback(
-      py_client=stream_client.GlobalClient(), cb=cb
-  )
+      py_client=stream_client.GlobalClient(), cb=cb)
 
 
 def register_mouse_callback(cb: Callable[[events_pb2.Keyboard], None]):
   return userinputs.register_mouse_callback(
-      py_client=stream_client.GlobalClient(), cb=cb
-  )
+      py_client=stream_client.GlobalClient(), cb=cb)
