@@ -8,31 +8,32 @@ Instructions to install Multiscope from git-on-borg and gerrit.
 
 Open a terminal on the desktop and navigate to the directory where the
 multiscope directory should be created. Clone the git repository:
+
 ```
 git clone https://github.com/deepmind/multiscope.git && (cd multiscope && hookdir=`git rev-parse --git-dir`/hooks ;  mkdir -p  $hookdir ; ln -s ../../.pre-commit.git $hookdir/pre-commit && chmod +x $hookdir/pre-commit)
 ```
 
-
 ### Getting the Tools for Building and Running
 
 Ensure you have a Go compiler whose version is >= 1.19.
+
 ```
 go version
 ```
 
-If you need to install a new version, it might not be consistent with your default operating system install.  It may be installed in a separate location.  Modify your environment variables to point to this toolchain as necessary in your shell startup configurations.
+If you need to install a new version, it might not be consistent with your default operating system install. It may be installed in a separate location. Modify your environment variables to point to this toolchain as necessary in your shell startup configurations.
 e.g.
-
-
 
 Install the protobuf compiler.
 
 Linux:
+
 ```
 sudo apt install -y protobuf-compiler
 ```
 
 Mac OS:
+
 ```
 brew install protobuf
 ```
@@ -82,49 +83,33 @@ language specific details.
 
 You will need to install the following executables for the pre-commit hook to
 work:
+
 ```
 go install golang.org/x/tools/cmd/goimports@latest
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.46.2
 ```
+
 You can test the pre-commit hook by running:
+
 ```
 zsh .pre-commit.git
 ```
+
 from multiscope top folder.
 
-
 To push commits to the main repository:
+
 ```
 git push origin HEAD:refs/for/main
 ```
+
 ### Generating the protocol buffer in Go
 
 Run the following command from the top:
+
 ```
 go generate protos/generate.go
 ```
-
-### To modify a commit in the history
-
-From [How do I modify a specific
-commit?](https://stackoverflow.com/questions/1186535/how-do-i-modify-a-specific-commit)
-on stackoverflow.
-
-1. Rewrite the history with:
-```
-$ git rebase --interactive 'bbc643cd^'
-```
-(with `^` at the end)
-3. Modify `pick` to `edit` for the `bbc643cd` line. Save and exit the editor.
-4. Modify the code, then amend the commit with:
-```
-git commit --all --amend --no-edit
-```
-5. Return back to HEAD with:
-```
-$ git rebase --continue
-```
-6. Push commits to the main repository (see above).
 
 ### Troubleshooting
 
@@ -134,6 +119,4 @@ Encountered problems and their solutions:
 
 ### Disclaimer
 
-Multiscope is still work in progress and is not an official Google or DeepMind
-product (experimental or otherwise), it is just code that happens to be owned by
-Google DeepMind.
+This is not an official Google Deepmind product (experimental or otherwise), it is just code that happens to be owned by Google Deepmind. Multiscope is experimental and is work in progress for the foreseeable future. It is only maintained on a best effort basis. You are welcome to send PR or to report bugs but there is no guarantee that you will get a response.
