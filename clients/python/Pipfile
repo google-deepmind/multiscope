@@ -15,7 +15,7 @@ six = "1.16.0"
 termcolor = "2.3.0"
 pytype = "2023.6.2"
 typing-extensions = "4.6.3"
-pillow = "10.0.0"
+pillow = "10.2.0"
 
 [dev-packages]
 yapf = "0.40.1"
