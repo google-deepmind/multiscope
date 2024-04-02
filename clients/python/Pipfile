@@ -8,7 +8,7 @@ multiscope-client = {editable = true, path = "."}
 protobuf = "4.23.2"
 absl-py = "1.4.0"
 grpcio-tools = "1.54.2"
-grpcio = "1.54.2"
+grpcio = "1.54.3"
 numpy = "1.24.3"
 portpicker = "1.5.2"
 six = "1.16.0"
