@@ -13,7 +13,7 @@ require (
 	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
 	gonum.org/v1/plot v0.14.0
 	google.golang.org/grpc v1.64.0
-	google.golang.org/protobuf v1.34.1
+	google.golang.org/protobuf v1.34.2
 	honnef.co/go/js/dom/v2 v2.0.0-20210725211120-f030747120f2
 )
 
