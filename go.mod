@@ -8,7 +8,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/tdegris/base16-go v1.0.2
-	go.uber.org/atomic v1.7.0
+	go.uber.org/atomic v1.11.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/exp v0.0.0-20221126150942-6ab00d035af9
 	gonum.org/v1/plot v0.11.0
