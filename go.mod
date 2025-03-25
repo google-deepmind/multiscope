@@ -1,6 +1,7 @@
 module multiscope
 
 go 1.19
+toolchain go1.24.1
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0
@@ -13,7 +14,7 @@ require (
 	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
 	gonum.org/v1/plot v0.14.0
 	google.golang.org/grpc v1.65.0
-	google.golang.org/protobuf v1.34.2
+	google.golang.org/protobuf v1.36.6
 	honnef.co/go/js/dom/v2 v2.0.0-20210725211120-f030747120f2
 )
 
