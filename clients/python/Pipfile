@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 multiscope-client = {editable = true, path = "."}
-protobuf = "4.23.2"
+protobuf = "4.25.8"
 absl-py = "1.4.0"
 grpcio-tools = "1.54.2"
 grpcio = "1.54.3"
