@@ -1,6 +1,8 @@
 module multiscope
 
-go 1.19
+go 1.21
+
+toolchain go1.24.1
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0
