@@ -16,12 +16,14 @@ package html
 
 import (
 	"fmt"
+	"html/template"
+
 	eventspb "multiscope/protos/events_go_proto"
 )
 
-const template = `<button onClick='multiscope.sendEventWidgetClick("%s", %d)'>%s</button>`
+const buttonTemplate = `<button onClick='multiscope.sendEventWidgetClick("%s", %d)'>%s</button>`
 
-// Button is a HTML button.
+// Button represents an HTML button widget with click event handling.
 type Button struct {
 	cb   func() error
 	cnt  *Content
@@ -29,8 +31,16 @@ type Button struct {
 	id   CallbackID
 }
 
-// NewButton returns a new button.
+// NewButton creates and returns a new Button instance.
+// It automatically registers the button for event handling.
 func NewButton(cnt *Content, text Stringer) *Button {
+	if cnt == nil {
+		panic("Content cannot be nil")
+	}
+	if text == nil {
+		panic("text cannot be nil")
+	}
+
 	b := &Button{
 		cnt:  cnt,
 		text: text,
@@ -39,6 +49,8 @@ func NewButton(cnt *Content, text Stringer) *Button {
 	return b
 }
 
+// processEvent handles widget events for the button.
+// It executes the registered callback function if one exists.
 func (b *Button) processEvent(ev *eventspb.Widget) error {
 	if b.cb == nil {
 		return nil
@@ -46,13 +58,17 @@ func (b *Button) processEvent(ev *eventspb.Widget) error {
 	return b.cb()
 }
 
-// OnClick sets a listener for when the button is clicked.
+// OnClick registers a callback function to be executed when the button is clicked.
+// Returns the button instance for method chaining.
 func (b *Button) OnClick(cb func() error) *Button {
 	b.cb = cb
 	return b
 }
 
-// String returns the HTML representation of a button.
+// String returns the HTML representation of the button.
+// The HTML includes JavaScript for event handling.
 func (b *Button) String() string {
-	return fmt.Sprintf(template, b.cnt.Writer().NodeID(), b.id, b.text.String())
+	// Escape the text content to prevent XSS attacks
+	escapedText := template.HTMLEscapeString(b.text.String())
+	return fmt.Sprintf(buttonTemplate, b.cnt.Writer().NodeID(), b.id, escapedText)
 }
