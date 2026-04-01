@@ -14,4 +14,6 @@ const Version = "$VERSION"
 EOF
 )
 
-echo $CONTENT > ../internal/version/version.go
+echo "gRPC version: $VERSION"
+ROOT=$(git rev-parse --show-toplevel)
+echo $CONTENT > $ROOT/internal/version/version.go
