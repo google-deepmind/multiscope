@@ -11,8 +11,8 @@ require (
 	go.uber.org/atomic v1.11.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
+	google.golang.org/grpc v1.81.1
 	gonum.org/v1/plot v0.17.0
-	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
 	honnef.co/go/js/dom/v2 v2.0.0-20210725211120-f030747120f2
 )
@@ -26,8 +26,8 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	golang.org/x/image v0.38.0 // indirect
-	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 )
