@@ -12,7 +12,7 @@ require (
 	go.uber.org/multierr v1.11.0
 	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
 	gonum.org/v1/plot v0.17.0
-	google.golang.org/grpc v1.82.0
+	google.golang.org/grpc v1.82.1
 	google.golang.org/protobuf v1.36.11
 	honnef.co/go/js/dom/v2 v2.0.0-20210725211120-f030747120f2
 )
