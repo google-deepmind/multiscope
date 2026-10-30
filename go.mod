@@ -1,6 +1,6 @@
 module multiscope
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/go-chi/chi/v5 v5.3.2
@@ -12,7 +12,7 @@ require (
 	go.uber.org/multierr v1.11.0
 	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
 	gonum.org/v1/plot v0.17.0
-	google.golang.org/grpc v1.84.0
+	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 	honnef.co/go/js/dom/v2 v2.0.0-20210725211120-f030747120f2
 )
@@ -26,8 +26,8 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	golang.org/x/image v0.41.0 // indirect
-	golang.org/x/net v0.57.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.40.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 )
