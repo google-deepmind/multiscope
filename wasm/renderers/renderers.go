@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build js
+
 // Package renderers provides data processor to compute the rendering in a webworker.
 package renderers
 

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build js
+
 // Package worker provides an API to use web workers.
 package worker
 

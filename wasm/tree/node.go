@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build js
+
 // Package tree builds the tree on the left of the UI.
 package tree
 

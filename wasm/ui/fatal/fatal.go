@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build js
+
 // Package fatal displays a fatal error on the web page.
 // A fatal error requires the user to reload the page.
 package fatal

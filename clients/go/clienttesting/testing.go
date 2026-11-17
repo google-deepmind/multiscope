@@ -87,7 +87,7 @@ func checkPathToNodesResponse(nodes []*pb.Node) error {
 	for _, node := range nodes {
 		errS := node.GetError()
 		if len(errS) > 0 {
-			err = multierr.Append(err, errors.Errorf(errS))
+			err = multierr.Append(err, errors.New(errS))
 		}
 	}
 	return err

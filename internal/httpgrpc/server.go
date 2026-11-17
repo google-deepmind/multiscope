@@ -157,6 +157,6 @@ func (s *Server) post(w http.ResponseWriter, r *http.Request) error {
 // It needs to be registered on a http handler.
 func (s *Server) Post(w http.ResponseWriter, r *http.Request) {
 	if err := s.post(w, r); err != nil {
-		wErrf(w, err.Error())
+		wErrf(w, "%v", err)
 	}
 }
